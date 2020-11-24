@@ -25,8 +25,8 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
-import org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata;
+import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 
@@ -35,42 +35,37 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.NAME_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.REFERENCE_NAME;
 
 /**
- * Default implementation of {@link DiscussionContextStoreService}.
+ * Default implementation of {@link DiscussionStoreService}.
  *
  * @version $Id$
- * @since 1.0s
+ * @since 1.0
  */
 @Component
 @Singleton
-public class DefaultDiscussionContextStoreService implements DiscussionContextStoreService
+public class DefaultDiscussionStoreService implements DiscussionStoreService
 {
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
+    private DiscussionMetadata discussionMetadata;
 
     @Override
-    public String createDiscussionContext(String name, String description, String referenceType,
-        String entityReference)
+    public String createDiscussion(String title, String description)
     {
         String reference = null;
         try {
-            XWikiDocument document = generateUniqueDiscussionContextPage(name);
+            XWikiDocument document = generateUniqueDiscussionPage(title);
             BaseObject object = new BaseObject();
-            object.setXClassReference(this.discussionContextMetadata.getDiscussionContextXClass());
+            object.setXClassReference(this.discussionMetadata.getDiscussionXClass());
             XWikiContext context = this.getContext();
-            object.set(NAME_NAME, name, context);
+            object.set(TITLE_NAME, title, context);
             object.set(DESCRIPTION_NAME, description, context);
-            object.set(ENTITY_REFERENCE_TYPE_NAME, referenceType, context);
-            object.set(ENTITY_REFERENCE_NAME, entityReference, context);
             reference = document.getDocumentReference().getName();
             object.set(REFERENCE_NAME, reference, context);
             document.addXObject(object);
@@ -83,15 +78,15 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         return reference;
     }
 
-    private XWikiDocument generateUniqueDiscussionContextPage(String name) throws XWikiException
+    private XWikiDocument generateUniqueDiscussionPage(String title) throws XWikiException
     {
         // TODO: Check if how regarding concurrency.
         XWikiDocument document;
         synchronized (this) {
-            document = generateDiscussionContextPage(name);
+            document = generateDiscussionPage(title);
 
             while (!document.isNew()) {
-                document = generateDiscussionContextPage(name);
+                document = generateDiscussionPage(title);
             }
             XWikiContext context = getContext();
             context.getWiki().saveDocument(document, context);
@@ -104,17 +99,17 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         return this.xcontextProvider.get();
     }
 
-    private XWikiDocument generateDiscussionContextPage(String name) throws XWikiException
+    private XWikiDocument generateDiscussionPage(String title) throws XWikiException
     {
         int length = 6;
         boolean useLetters = true;
         boolean useNumbers = true;
         String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
-        
-        SpaceReference discussionContextSpace = this.discussionContextMetadata.getDiscussionContextSpace();
+
+        SpaceReference discussionContextSpace = this.discussionMetadata.getDiscussionSpace();
         DocumentReference documentReference =
-            new DocumentReference(String.format("%s-%s", name, generatedString), discussionContextSpace);
-        
+            new DocumentReference(String.format("%s-%s", title, generatedString), discussionContextSpace);
+
         XWikiContext context = getContext();
         return context.getWiki().getDocument(documentReference, context);
     }

@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
 
 import com.xpn.xwiki.XWikiContext;
@@ -32,7 +33,7 @@ import com.xpn.xwiki.XWikiContext;
 import static java.util.Arrays.asList;
 
 /**
- * Provides the structural information about the discussion contexts.
+ * Provides the structural information about the discussions.
  * <ul>
  *     <li>Class location</li>
  *     <li>Property names</li>
@@ -42,9 +43,9 @@ import static java.util.Arrays.asList;
  * @version $Id$
  * @since 1.0
  */
-@Component(roles = { DiscussionContextMetadata.class })
+@Component(roles = { DiscussionMetadata.class })
 @Singleton
-public class DiscussionContextMetadata
+public class DiscussionMetadata
 {
     /**
      * Reference property name.
@@ -57,34 +58,14 @@ public class DiscussionContextMetadata
     public static final String REFERENCE_PRETTY_NAME = "Reference";
 
     /**
-     * Entity reference type property name.
+     * Title property name.
      */
-    public static final String ENTITY_REFERENCE_TYPE_NAME = "entityReferenceType";
+    public static final String TITLE_NAME = "title";
 
     /**
-     * Entity reference type property pretty name.
+     * Title property pretty name.
      */
-    public static final String ENTITY_REFERENCE_TYPE_PRETTY_NAME = "Entity Reference Type";
-
-    /**
-     * Entity reference property name.
-     */
-    public static final String ENTITY_REFERENCE_NAME = "entityReference";
-
-    /**
-     * Entity reference property pretty name.
-     */
-    public static final String ENTITY_REFERENCE_PRETTY_NAME = "Entity reference";
-
-    /**
-     * Name property name.
-     */
-    public static final String NAME_NAME = "name";
-
-    /**
-     * Name property pretty name.
-     */
-    public static final String NAME_PRETTY_NAME = "Name";
+    public static final String TITLE_PRETTY_NAME = "Title";
 
     /**
      * Description property name.
@@ -137,38 +118,34 @@ public class DiscussionContextMetadata
     public static final String PINED_PRETTY_NAME = "Pined";
 
     /**
-     * Discussions property name.
+     * Discussion contexts property name.
      */
-    public static final String DISCUSSIONS_NAME = "discussions";
-
-    /*
-     * Constant to avoid string duplication.
-     */
-    private static final String DISCUSSIONS_STR = "Discussions";
+    public static final String DISCUSSION_CONTEXTS_NAME = "discussionContexts";
 
     /**
-     * Discussions property pretty name.
+     * Discussion contexts property pretty name.
      */
-    public static final String DISCUSSIONS_PRETTY_NAME = DISCUSSIONS_STR;
+    public static final String DISCUSSION_CONTEXTS_PRETTY_NAME = "Discussion Contexts";
+
+    private static final String DISCUSSIONS_SPACE = "Discussions";
 
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
     /**
-     * @return the {@link DocumentReference} of the document holding the discussion context XClass.
+     * @return the {@link DocumentReference} of the document holding the discussion XClass.
      */
-    public DocumentReference getDiscussionContextXClass()
+    public EntityReference getDiscussionXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_STR, "Code"),
-            "DiscussionContextClass");
+        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Code"),
+            "DiscussionClass");
     }
 
     /**
-     * @return the discussion context storage space.
+     * @return the discussion storage space.
      */
-    public SpaceReference getDiscussionContextSpace()
+    public SpaceReference getDiscussionSpace()
     {
-        return new SpaceReference(this.xcontextProvider.get().getMainXWiki(),
-            asList(DISCUSSIONS_STR, "DiscussionContext"));
+        return new SpaceReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Discussion"));
     }
 }

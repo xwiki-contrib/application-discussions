@@ -19,49 +19,20 @@
  */
 package org.xwiki.contrib.discussions;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
-import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
 /**
- * Discussions script service.
+ * This service provides the operation to manipulate discussion objects.
  *
  * @version $Id$
  * @since 1.0
  */
 @Unstable
-@Named("discussions")
-@Component
-@Singleton
-public class DiscussionsScriptService implements ScriptService
+@Role
+public interface DiscussionService
 {
-    @Inject
-    private DiscussionContextService discussionContextService;
-
-    @Inject
-    private DiscussionService discussionService;
-
-    /**
-     * Creates a discussion context.
-     *
-     * @param name the name
-     * @param description the description
-     * @param referenceType the entity reference type
-     * @param entityReference the entity reference
-     * @return the created discussion context
-     */
-    public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
-        String entityReference)
-    {
-        return this.discussionContextService.createDiscussionContext(name, description, referenceType, entityReference);
-    }
-
     /**
      * Creates a discussion.
      *
@@ -69,8 +40,5 @@ public class DiscussionsScriptService implements ScriptService
      * @param description the discussion description
      * @return the created discussion
      */
-    public Discussion createDiscussion(String title, String description)
-    {
-        return this.discussionService.createDiscussion(title, description);
-    }
+    Discussion createDiscussion(String title, String description);
 }

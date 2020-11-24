@@ -1,0 +1,93 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+package org.xwiki.contrib.discussions.store.internal.initializer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata;
+import org.xwiki.model.reference.EntityReference;
+
+import com.xpn.xwiki.doc.MandatoryDocumentInitializer;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.classes.BaseClass;
+
+import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
+import static com.xpn.xwiki.objects.classes.ListClass.FREE_TEXT_ALLOWED;
+import static com.xpn.xwiki.objects.classes.TextAreaClass.EditorType.WYSIWYG;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.CREATION_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.CREATION_DATE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DESCRIPTION_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.PINED_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.PINED_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.REFERENCE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.STATES_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.STATES_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.TITLE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.UPDATE_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.UPDATE_DATE_PRETTY_NAME;
+
+/**
+ * Initializes the document holding the discussion XClass.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
+@Component
+@Singleton
+@Named("Discussions.Code.DiscussionClass")
+public class DiscussionXClassInitializer implements MandatoryDocumentInitializer
+{
+    private static final String STATIC_LISTS_SEPARATOR = ",";
+
+    @Inject
+    private DiscussionMetadata discussionMetadata;
+
+    @Override
+    public EntityReference getDocumentReference()
+    {
+        return this.discussionMetadata.getDiscussionXClass();
+    }
+
+    @Override
+    public boolean updateDocument(XWikiDocument document)
+    {
+        BaseClass xClass = document.getXClass();
+        int textSize = Integer.MAX_VALUE;
+        xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
+        xClass.addTextField(TITLE_NAME, TITLE_PRETTY_NAME, textSize);
+        xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
+        xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
+        xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
+        xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+        xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
+        xClass.addStaticListField(DISCUSSION_CONTEXTS_NAME, DISCUSSION_CONTEXTS_PRETTY_NAME, 1, true, true, "",
+            DISPLAYTYPE_INPUT, STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+        return true;
+    }
+}

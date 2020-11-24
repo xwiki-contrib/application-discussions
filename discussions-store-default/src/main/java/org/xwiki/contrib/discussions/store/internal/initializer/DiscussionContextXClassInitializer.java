@@ -31,6 +31,8 @@ import com.xpn.xwiki.doc.MandatoryDocumentInitializer;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
 
+import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
+import static com.xpn.xwiki.objects.classes.ListClass.FREE_TEXT_ALLOWED;
 import static com.xpn.xwiki.objects.classes.TextAreaClass.EditorType.WYSIWYG;
 import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.CREATION_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata.CREATION_DATE_PRETTY_NAME;
@@ -62,7 +64,7 @@ import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionContex
 @Component
 @Singleton
 @Named("Discussions.Code.DiscussionContextClass")
-public class DocumentContextXClassInitializer implements MandatoryDocumentInitializer
+public class DiscussionContextXClassInitializer implements MandatoryDocumentInitializer
 {
     private static final String STATIC_LISTS_SEPARATOR = ",";
 
@@ -87,12 +89,11 @@ public class DocumentContextXClassInitializer implements MandatoryDocumentInitia
         xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
         xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
         xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
-        xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", "", STATIC_LISTS_SEPARATOR, "",
-            "", false);
+        xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
         xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
-        xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", "",
-            STATIC_LISTS_SEPARATOR, "", "", false);
-
+        xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
         return true;
     }
 }
