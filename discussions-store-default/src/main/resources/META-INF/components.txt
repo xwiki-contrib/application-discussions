@@ -1,0 +1,3 @@
+org.xwiki.contrib.discussions.store.internal.DefaultDiscussionContextStoreService
+org.xwiki.contrib.discussions.store.internal.initializer.DocumentContextXClassInitializer
+org.xwiki.contrib.discussions.store.internal.meta.DiscussionContextMetadata
