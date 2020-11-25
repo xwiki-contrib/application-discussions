@@ -17,30 +17,31 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.store;
+package org.xwiki.contrib.discussions;
+
+import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.stability.Unstable;
 
 /**
- * Low-level storage service for the discussion context objects.
+ * This service provides the operation to manipulate message objects.
  *
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Role
-public interface DiscussionContextStoreService
+@Unstable
+public interface MessageService
 {
     /**
-     * Creates a discussion context object.
+     * Creates a message for the current user.
      *
-     * @param name the name of the discussion context
-     * @param description the description of the discussion context
-     * @param referenceType the type of the entity referenced by the discussion context
-     * @param entityReference the reference of the entity referenced by the discussion context
-     * @return the unique reference to the created discussion context
+     * @param content the message content
+     * @param discussion the discussion
+     * @return the created message
      */
-    String create(String name, String description, String referenceType,
-        String entityReference);
+    Optional<Message> create(String content, Discussion discussion);
 }

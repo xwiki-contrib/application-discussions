@@ -1,2 +1,3 @@
 org.xwiki.contrib.discussions.internal.DefaultDiscussionContextService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionService
+org.xwiki.contrib.discussions.internal.DefaultMessageService

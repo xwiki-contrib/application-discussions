@@ -19,28 +19,29 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.Optional;
+
 import org.xwiki.component.annotation.Role;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.stability.Unstable;
 
 /**
- * Low-level storage service for the discussion context objects.
+ * Low-level storage service for the message objects.
  *
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Role
-public interface DiscussionContextStoreService
+@Unstable
+public interface MessageStoreService
 {
     /**
-     * Creates a discussion context object.
+     * Creates a message object.
      *
-     * @param name the name of the discussion context
-     * @param description the description of the discussion context
-     * @param referenceType the type of the entity referenced by the discussion context
-     * @param entityReference the reference of the entity referenced by the discussion context
-     * @return the unique reference to the created discussion context
+     * @param content the message content
+     * @param author the message author
+     * @param discussionReference the discussion reference
+     * @return the unique reference of the created message
      */
-    String create(String name, String description, String referenceType,
-        String entityReference);
+    Optional<String> create(String content, DocumentReference author, String discussionReference);
 }

@@ -42,6 +42,6 @@ public interface DiscussionContextService
      * @param entityReference the reference of the entity referenced by the discussion context
      * @return the initialized discussion context
      */
-    DiscussionContext createDiscussionContext(String name, String description, String referenceType,
+    DiscussionContext create(String name, String description, String referenceType,
         String entityReference);
 }

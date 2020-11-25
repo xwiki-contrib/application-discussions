@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
@@ -47,6 +48,9 @@ public class DiscussionsScriptService implements ScriptService
     @Inject
     private DiscussionService discussionService;
 
+    @Inject
+    private MessageService messageService;
+
     /**
      * Creates a discussion context.
      *
@@ -59,7 +63,7 @@ public class DiscussionsScriptService implements ScriptService
     public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
         String entityReference)
     {
-        return this.discussionContextService.createDiscussionContext(name, description, referenceType, entityReference);
+        return this.discussionContextService.create(name, description, referenceType, entityReference);
     }
 
     /**
@@ -71,6 +75,18 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion createDiscussion(String title, String description)
     {
-        return this.discussionService.createDiscussion(title, description);
+        return this.discussionService.create(title, description);
+    }
+
+    /**
+     * Create a message in a discussion for the current user.
+     *
+     * @param content the content
+     * @param discussion the discussion
+     * @return the created message
+     */
+    public Message createMessage(String content, Discussion discussion)
+    {
+        return this.messageService.create(content, discussion).orElse(null);
     }
 }

@@ -19,26 +19,37 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.Optional;
+
 import org.xwiki.component.annotation.Role;
 import org.xwiki.stability.Unstable;
 
+import com.xpn.xwiki.objects.BaseObject;
+
 /**
  * Low-level storage service for the discussion context objects.
- * 
- * @since 1.0
+ *
  * @version $Id$
+ * @since 1.0
  */
 @Unstable
 @Role
 public interface DiscussionStoreService
 {
     /**
-     * Create a discussion object.
+     * Creates a discussion object.
      *
      * @param title the title
      * @param description the description
      * @return the unique reference to the created discussion
      */
-    String createDiscussion(String title, String description);
-    
+    String create(String title, String description);
+
+    /**
+     * Resolve a discussion by its reference.
+     *
+     * @param reference the discussion reference
+     * @return the discussion attributes
+     */
+    Optional<BaseObject> get(String reference);
 }

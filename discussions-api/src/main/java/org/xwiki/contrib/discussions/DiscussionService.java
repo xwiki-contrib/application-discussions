@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions;
 
+import java.util.Optional;
+
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.stability.Unstable;
@@ -40,5 +42,13 @@ public interface DiscussionService
      * @param description the discussion description
      * @return the created discussion
      */
-    Discussion createDiscussion(String title, String description);
+    Discussion create(String title, String description);
+
+    /**
+     * Search and retrieve a discussion by its reference.
+     *
+     * @param reference the discussion reference
+     * @return the discussion
+     */
+    Optional<Discussion> get(String reference);
 }

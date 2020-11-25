@@ -47,6 +47,11 @@
       <artifactId>xwiki-commons-component-api</artifactId>
       <version>${commons.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-model-api</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

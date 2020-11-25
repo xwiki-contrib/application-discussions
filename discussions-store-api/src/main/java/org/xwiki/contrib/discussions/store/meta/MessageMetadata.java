@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.store.internal.meta;
+package org.xwiki.contrib.discussions.store.meta;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -26,14 +26,14 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.XWikiContext;
 
 import static java.util.Arrays.asList;
 
 /**
- * Provides the structural information about the discussions.
+ * Provides the structural information about the message.
  * <ul>
  *     <li>Class location</li>
  *     <li>Property names</li>
@@ -43,89 +43,100 @@ import static java.util.Arrays.asList;
  * @version $Id$
  * @since 1.0
  */
-@Component(roles = { DiscussionMetadata.class })
+@Component(roles = { MessageMetadata.class })
 @Singleton
-public class DiscussionMetadata
+@Unstable
+public class MessageMetadata
 {
     /**
-     * Reference property name.
+     * Reference field name.
      */
     public static final String REFERENCE_NAME = "reference";
 
     /**
-     * Reference property pretty name.
+     * Reference field pretty name.
      */
     public static final String REFERENCE_PRETTY_NAME = "Reference";
 
     /**
-     * Title property name.
+     * Content field name.
      */
-    public static final String TITLE_NAME = "title";
+    public static final String CONTENT_NAME = "content";
 
     /**
-     * Title property pretty name.
+     * Content field pretty name.
      */
-    public static final String TITLE_PRETTY_NAME = "Title";
+    public static final String CONTENT_PRETTY_NAME = "Content";
 
     /**
-     * Description property name.
+     * Discussion reference field name.
      */
-    public static final String DESCRIPTION_NAME = "description";
+    public static final String DISCUSSION_REFERENCE_NAME = "discussionReference";
 
     /**
-     * Description property pretty name.
+     * Discussion reference field pretty name.
      */
-    public static final String DESCRIPTION_PRETTY_NAME = "Description";
+    public static final String DISCUSSION_REFERENCE_PRETTY_NAME = "Discussion Reference";
 
     /**
-     * Creation date property name.
+     * Author field name.
      */
-    public static final String CREATION_DATE_NAME = "creationDate";
+    public static final String AUTHOR_NAME = "author";
 
     /**
-     * Creation date property pretty name.
+     * Author field pretty name.
      */
-    public static final String CREATION_DATE_PRETTY_NAME = "Creation Date";
+    public static final String AUTHOR_PRETTY_NAME = "Author";
 
     /**
-     * Update date property name.
+     * Update date field name.
      */
     public static final String UPDATE_DATE_NAME = "updateDate";
 
     /**
-     * Update date property pretty name.
+     * Update date field pretty name.
      */
     public static final String UPDATE_DATE_PRETTY_NAME = "Update Date";
 
     /**
-     * States property name.
+     * Create date field name.
+     */
+    public static final String CREATE_DATE_NAME = "createDate";
+
+    /**
+     * Create date field pretty name.
+     */
+    public static final String CREATE_DATE_PRETTY_NAME = "Create Date";
+
+    /**
+     * States field name.
      */
     public static final String STATES_NAME = "states";
 
     /**
-     * States property pretty name.
+     * States field pretty name.
      */
     public static final String STATES_PRETTY_NAME = "States";
 
     /**
-     * Pined property name.
+     * Reply to field name.
+     */
+    public static final String REPLY_TO_NAME = "replyTo";
+
+    /**
+     * Reply to field pretty name.
+     */
+    public static final String REPLY_TO_PRETTY_NAME = "Reply To";
+
+    /**
+     * Pined field name.
      */
     public static final String PINED_NAME = "pined";
 
     /**
-     * Pined property pretty name.
+     * Pined field pretty name.
      */
     public static final String PINED_PRETTY_NAME = "Pined";
-
-    /**
-     * Discussion contexts property name.
-     */
-    public static final String DISCUSSION_CONTEXTS_NAME = "discussionContexts";
-
-    /**
-     * Discussion contexts property pretty name.
-     */
-    public static final String DISCUSSION_CONTEXTS_PRETTY_NAME = "Discussion Contexts";
 
     private static final String DISCUSSIONS_SPACE = "Discussions";
 
@@ -133,19 +144,11 @@ public class DiscussionMetadata
     private Provider<XWikiContext> xcontextProvider;
 
     /**
-     * @return the {@link DocumentReference} of the document holding the discussion XClass.
+     * @return the {@link DocumentReference} of the document holding the message XClass.
      */
-    public EntityReference getDiscussionXClass()
+    public EntityReference getMessageXClass()
     {
         return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Code"),
-            "DiscussionClass");
-    }
-
-    /**
-     * @return the discussion storage space.
-     */
-    public SpaceReference getDiscussionSpace()
-    {
-        return new SpaceReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Discussion"));
+            "MessageClass");
     }
 }

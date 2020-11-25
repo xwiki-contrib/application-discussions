@@ -24,7 +24,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata;
+import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.doc.MandatoryDocumentInitializer;
@@ -34,22 +34,22 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
 import static com.xpn.xwiki.objects.classes.ListClass.FREE_TEXT_ALLOWED;
 import static com.xpn.xwiki.objects.classes.TextAreaClass.EditorType.WYSIWYG;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.CREATION_DATE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.CREATION_DATE_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DESCRIPTION_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DESCRIPTION_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.PINED_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.PINED_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.REFERENCE_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.STATES_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.STATES_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.TITLE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.TITLE_PRETTY_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.UPDATE_DATE_NAME;
-import static org.xwiki.contrib.discussions.store.internal.meta.DiscussionMetadata.UPDATE_DATE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.CREATION_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.CREATION_DATE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.PINED_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.PINED_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.STATES_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.STATES_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_PRETTY_NAME;
 
 /**
  * Initializes the document holding the discussion XClass.

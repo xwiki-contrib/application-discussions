@@ -41,12 +41,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     private DiscussionContextStoreService discussionContextStoreService;
 
     @Override
-    public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
+    public DiscussionContext create(String name, String description, String referenceType,
         String entityReference)
     {
         // TODO: check current user rights.
         String reference = this.discussionContextStoreService
-            .createDiscussionContext(name, description, referenceType, entityReference);
+            .create(name, description, referenceType, entityReference);
 
         return new DiscussionContext(reference, name, description, referenceType, entityReference);
     }

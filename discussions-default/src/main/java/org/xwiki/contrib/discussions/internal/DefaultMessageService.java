@@ -22,46 +22,46 @@ package org.xwiki.contrib.discussions.internal;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
-import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.store.MessageStoreService;
+import org.xwiki.model.reference.DocumentReference;
 
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
+import com.xpn.xwiki.XWikiContext;
 
 /**
- * Default implementation of {@link DefaultDiscussionService}.
+ * Default implementation of {@link MessageService}.
  *
  * @version $Id$
  * @since 1.0
  */
 @Component
 @Singleton
-public class DefaultDiscussionService implements DiscussionService
+public class DefaultMessageService implements MessageService
 {
     @Inject
-    private DiscussionStoreService discussionStoreService;
+    private MessageStoreService messageStoreService;
+
+    @Inject
+    private DiscussionService discussionService;
+
+    @Inject
+    private Provider<XWikiContext> xcontextProvider;
 
     @Override
-    public Discussion create(String title, String description)
+    public Optional<Message> create(String content, Discussion discussion)
     {
-        // TODO: checks the user rights
-        String reference = this.discussionStoreService.create(title, description);
-        return new Discussion(reference, title, description);
-    }
-
-    @Override
-    public Optional<Discussion> get(String reference)
-    {
-        return this.discussionStoreService.get(reference).map(
-            baseObject -> new Discussion(
-                baseObject.getStringValue(REFERENCE_NAME),
-                baseObject.getStringValue(TITLE_NAME),
-                baseObject.getStringValue(DESCRIPTION_NAME)
-            ));
+        DocumentReference author = this.xcontextProvider.get().getUserReference();
+        // TODO check rights before creating
+        // TODO checks discussion exists before creating
+        return this.discussionService.get(discussion.getReference())
+            .flatMap(d -> this.messageStoreService.create(content, author, d.getReference())
+                .map(messageReference -> new Message(messageReference, content, author, d)));
     }
 }
