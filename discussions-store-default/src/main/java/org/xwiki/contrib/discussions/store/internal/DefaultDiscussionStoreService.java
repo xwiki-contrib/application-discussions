@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
@@ -65,6 +64,9 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     @Inject
     private QueryManager queryManager;
 
+    @Inject
+    private RandomGeneratorService randomGeneratorService;
+
     @Override
     public String create(String title, String description)
     {
@@ -92,10 +94,13 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     public Optional<BaseObject> get(String reference)
     {
         try {
-            // TODO: derive from meta
-            String s = "Discussions.Code.DiscussionClass";
+            String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
             List<String> execute =
-                this.queryManager.createQuery("FROM doc.object(" + s + ") obj where obj.reference = :reference", XWQL)
+                this.queryManager
+                    .createQuery(
+                        String.format("FROM doc.object(%s) obj where obj.%s = :reference", discussionClass,
+                            REFERENCE_NAME),
+                        XWQL)
                     .bindValue("reference", reference)
                     .execute();
             if (execute == null || execute.isEmpty()) {
@@ -139,10 +144,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
 
     private XWikiDocument generatePage(String title) throws XWikiException
     {
-        int length = 6;
-        boolean useLetters = true;
-        boolean useNumbers = true;
-        String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
+        String generatedString = this.randomGeneratorService.randomString();
 
         SpaceReference discussionContextSpace = this.discussionMetadata.getDiscussionSpace();
         DocumentReference documentReference =

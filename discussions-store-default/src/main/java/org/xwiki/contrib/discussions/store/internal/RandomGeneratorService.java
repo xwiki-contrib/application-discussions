@@ -17,42 +17,32 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
+package org.xwiki.contrib.discussions.store.internal;
 
-import java.util.List;
-import java.util.Optional;
+import javax.inject.Singleton;
 
-import org.xwiki.component.annotation.Role;
-import org.xwiki.contrib.discussions.domain.Discussion;
-import org.xwiki.contrib.discussions.domain.Message;
-import org.xwiki.stability.Unstable;
+import org.xwiki.component.annotation.Component;
+
+import static org.apache.commons.lang3.RandomStringUtils.random;
 
 /**
- * This service provides the operation to manipulate message objects.
+ * Provides operations to get random values.
  *
  * @version $Id$
  * @since 1.0
  */
-@Role
-@Unstable
-public interface MessageService
+@Component(roles = { RandomGeneratorService.class })
+@Singleton
+public class RandomGeneratorService
 {
     /**
-     * Creates a message for the current user.
-     *
-     * @param content the message content
-     * @param discussion the discussion
-     * @return the created message
+     * @return a randomly generated string of 6 characters
      */
-    Optional<Message> create(String content, Discussion discussion);
-
-    /**
-     * Returns the paginated list of messages of the discussion.
-     *
-     * @param discussion the discussion
-     * @param offset the offset
-     * @param limit the limit
-     * @return the list of messages
-     */
-    List<Message> getByDiscussion(Discussion discussion, int offset, int limit);
+    public String randomString()
+    {
+        int length = 6;
+        boolean useLetters = true;
+        boolean useNumbers = true;
+        return random(length, useLetters, useNumbers);
+    }
 }

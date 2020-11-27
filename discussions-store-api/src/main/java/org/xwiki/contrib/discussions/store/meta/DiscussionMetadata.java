@@ -19,10 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store.meta;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -131,6 +134,10 @@ public class DiscussionMetadata
 
     private static final String DISCUSSIONS_SPACE = "Discussions";
 
+    private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_SPACE, "Code");
+
+    private static final String XCLASS_NAME = "DiscussionClass";
+
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
@@ -139,8 +146,8 @@ public class DiscussionMetadata
      */
     public EntityReference getDiscussionXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Code"),
-            "DiscussionClass");
+        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
+            XCLASS_NAME);
     }
 
     /**
@@ -149,5 +156,13 @@ public class DiscussionMetadata
     public SpaceReference getDiscussionSpace()
     {
         return new SpaceReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Discussion"));
+    }
+
+    /**
+     * @return the full name of the discussion XClass.
+     */
+    public String getDiscussionXClassFullName()
+    {
+        return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
     }
 }

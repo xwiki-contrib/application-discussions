@@ -19,7 +19,9 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -32,8 +34,15 @@ import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.objects.BaseObject;
+
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
 
 /**
  * Default implementation of {@link MessageService}.
@@ -45,6 +54,8 @@ import com.xpn.xwiki.XWikiContext;
 @Singleton
 public class DefaultMessageService implements MessageService
 {
+    private static final String DEFAULT_ACTOR_TYPE = "user";
+
     @Inject
     private MessageStoreService messageStoreService;
 
@@ -54,14 +65,38 @@ public class DefaultMessageService implements MessageService
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
+    @Inject
+    private EntityReferenceSerializer<String> entityReferenceSerializer;
+
     @Override
     public Optional<Message> create(String content, Discussion discussion)
     {
         DocumentReference author = this.xcontextProvider.get().getUserReference();
+        String authorReference = this.entityReferenceSerializer.serialize(author);
+
         // TODO check rights before creating
         // TODO checks discussion exists before creating
         return this.discussionService.get(discussion.getReference())
-            .flatMap(d -> this.messageStoreService.create(content, author, d.getReference())
-                .map(messageReference -> new Message(messageReference, content, author, d)));
+            .flatMap(
+                d -> this.messageStoreService.create(content, DEFAULT_ACTOR_TYPE, authorReference, d.getReference())
+                    .map(messageReference -> new Message(messageReference, content, DEFAULT_ACTOR_TYPE, authorReference,
+                        d)));
+    }
+
+    @Override
+    public List<Message> getByDiscussion(Discussion discussion, int offset, int limit)
+    {
+        // TODO rights...
+        List<BaseObject> messages = this.messageStoreService.getByDiscussion(discussion.getReference(), offset, limit);
+        return messages
+            .stream()
+            .map(bo -> new Message(
+                    bo.getStringValue(REFERENCE_NAME),
+                    bo.getLargeStringValue(CONTENT_NAME),
+                    bo.getStringValue(AUTHOR_TYPE_NAME),
+                    bo.getStringValue(AUTHOR_REFERENCE_NAME),
+                    discussion
+                )
+            ).collect(Collectors.toList());
     }
 }

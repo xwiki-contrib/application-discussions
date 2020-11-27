@@ -19,10 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store.meta;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -81,12 +84,22 @@ public class MessageMetadata
     /**
      * Author field name.
      */
-    public static final String AUTHOR_NAME = "author";
+    public static final String AUTHOR_TYPE_NAME = "authorType";
 
     /**
      * Author field pretty name.
      */
-    public static final String AUTHOR_PRETTY_NAME = "Author";
+    public static final String AUTHOR_TYPE_PRETTY_NAME = "Author Type";
+
+    /**
+     * Author field name.
+     */
+    public static final String AUTHOR_REFERENCE_NAME = "authorReference";
+
+    /**
+     * Author field pretty name.
+     */
+    public static final String AUTHOR_REFERENCE_PRETTY_NAME = "Author Reference";
 
     /**
      * Update date field name.
@@ -140,6 +153,10 @@ public class MessageMetadata
 
     private static final String DISCUSSIONS_SPACE = "Discussions";
 
+    private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_SPACE, "Code");
+
+    private static final String XCLASS_NAME = "MessageClass";
+
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
@@ -148,7 +165,15 @@ public class MessageMetadata
      */
     public EntityReference getMessageXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Code"),
-            "MessageClass");
+        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
+            XCLASS_NAME);
+    }
+
+    /**
+     * @return the full name of the message XClass
+     */
+    public String getMessageXClassFullName()
+    {
+        return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
     }
 }

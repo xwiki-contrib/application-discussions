@@ -19,8 +19,10 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
-import org.xwiki.model.reference.DocumentReference;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.stability.Unstable;
+import org.xwiki.text.XWikiToStringBuilder;
 
 /**
  * Definition of the message class.
@@ -35,23 +37,27 @@ public class Message
 
     private final String content;
 
-    private final DocumentReference author;
+    private final String actorReference;
 
-    private Discussion discussion;
+    private final String actorType;
+
+    private final Discussion discussion;
 
     /**
      * Default constructor.
      *
      * @param reference the reference
      * @param content the content
-     * @param author the author
+     * @param actorType the actor type
+     * @param actorReference the actor reference
      * @param discussion the discussion of the message
      */
-    public Message(String reference, String content, DocumentReference author, Discussion discussion)
+    public Message(String reference, String content, String actorType, String actorReference, Discussion discussion)
     {
         this.reference = reference;
         this.content = content;
-        this.author = author;
+        this.actorType = actorType;
+        this.actorReference = actorReference;
         this.discussion = discussion;
     }
 
@@ -72,11 +78,19 @@ public class Message
     }
 
     /**
-     * @return the author
+     * @return this actor reference
      */
-    public DocumentReference getAuthor()
+    public String getActorReference()
     {
-        return this.author;
+        return actorReference;
+    }
+
+    /**
+     * @return the actor type
+     */
+    public String getActorType()
+    {
+        return actorType;
     }
 
     /**
@@ -85,6 +99,52 @@ public class Message
     public Discussion getDiscussion()
     {
         return this.discussion;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Message message = (Message) o;
+
+        return new EqualsBuilder()
+            .append(reference, message.reference)
+            .append(content, message.content)
+            .append(actorReference, message.actorReference)
+            .append(actorType, message.actorType)
+            .append(discussion, message.discussion)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37)
+            .append(reference)
+            .append(content)
+            .append(actorReference)
+            .append(actorType)
+            .append(discussion)
+            .toHashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return new XWikiToStringBuilder(this)
+            .append("reference", this.getReference())
+            .append("content", this.getContent())
+            .append("actorType", this.getActorType())
+            .append("actorReference", this.getActorReference())
+            .append("discussion", this.getDiscussion())
+            .build();
     }
 }
 

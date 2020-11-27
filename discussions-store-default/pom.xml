@@ -36,6 +36,7 @@
   <properties>
     <xwiki.extension.name>${description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
+    <xwiki.jacoco.instructionRatio>0.04</xwiki.jacoco.instructionRatio>
   </properties>
   <dependencies>
     <dependency>
@@ -47,6 +48,17 @@
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
+      <version>${commons.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -19,7 +19,10 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.stability.Unstable;
+import org.xwiki.text.XWikiToStringBuilder;
 
 /**
  * Definition of the discussion context class.
@@ -98,5 +101,51 @@ public class DiscussionContext
     public String getEntityReference()
     {
         return this.entityReference;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DiscussionContext that = (DiscussionContext) o;
+
+        return new EqualsBuilder()
+            .append(reference, that.reference)
+            .append(name, that.name)
+            .append(description, that.description)
+            .append(referenceType, that.referenceType)
+            .append(entityReference, that.entityReference)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37)
+            .append(reference)
+            .append(name)
+            .append(description)
+            .append(referenceType)
+            .append(entityReference)
+            .toHashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return new XWikiToStringBuilder(this)
+            .append("reference", this.getReference())
+            .append("name", this.getName())
+            .append("description", this.getDescription())
+            .append("referenceType", this.getReferenceType())
+            .append("entityReference", this.getEntityReference())
+            .build();
     }
 }

@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -79,6 +81,17 @@ public class DiscussionsScriptService implements ScriptService
     }
 
     /**
+     * Retrieve a discussion by its reference.
+     *
+     * @param reference the discussion reference
+     * @return the discussion, {@code null} if not found
+     */
+    public Discussion getDiscussion(String reference)
+    {
+        return this.discussionService.get(reference).orElse(null);
+    }
+
+    /**
      * Create a message in a discussion for the current user.
      *
      * @param content the content
@@ -88,5 +101,18 @@ public class DiscussionsScriptService implements ScriptService
     public Message createMessage(String content, Discussion discussion)
     {
         return this.messageService.create(content, discussion).orElse(null);
+    }
+
+    /**
+     * Return a paginated list of messages of a discussion.
+     *
+     * @param discussion the discussion
+     * @param offset the offset
+     * @param limit the limit
+     * @return the messages of the discussion
+     */
+    public List<Message> getMessagesByDiscussion(Discussion discussion, int offset, int limit)
+    {
+        return this.messageService.getByDiscussion(discussion, offset, limit);
     }
 }

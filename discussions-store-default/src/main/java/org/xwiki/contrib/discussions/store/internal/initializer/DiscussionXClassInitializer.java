@@ -76,6 +76,7 @@ public class DiscussionXClassInitializer implements MandatoryDocumentInitializer
     @Override
     public boolean updateDocument(XWikiDocument document)
     {
+        document.setHidden(true);
         BaseClass xClass = document.getXClass();
         int textSize = Integer.MAX_VALUE;
         xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);

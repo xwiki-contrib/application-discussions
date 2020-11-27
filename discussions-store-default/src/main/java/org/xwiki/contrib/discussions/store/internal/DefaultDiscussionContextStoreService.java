@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
@@ -56,6 +55,9 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
     @Inject
     private DiscussionContextMetadata discussionContextMetadata;
+    
+    @Inject
+    private RandomGeneratorService randomGeneratorService;
 
     @Override
     public String create(String name, String description, String referenceType,
@@ -106,10 +108,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
     private XWikiDocument generatePage(String name) throws XWikiException
     {
-        int length = 6;
-        boolean useLetters = true;
-        boolean useNumbers = true;
-        String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
+        String generatedString = this.randomGeneratorService.randomString();
         
         SpaceReference discussionContextSpace = this.discussionContextMetadata.getDiscussionContextSpace();
         DocumentReference documentReference =

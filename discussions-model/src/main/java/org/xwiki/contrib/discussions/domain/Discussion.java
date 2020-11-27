@@ -19,7 +19,10 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.stability.Unstable;
+import org.xwiki.text.XWikiToStringBuilder;
 
 /**
  * Definition of the discussion class.
@@ -73,5 +76,45 @@ public class Discussion
     public String getDescription()
     {
         return this.description;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Discussion that = (Discussion) o;
+
+        return new EqualsBuilder()
+            .append(reference, that.reference)
+            .append(title, that.title)
+            .append(description, that.description)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder(17, 37)
+            .append(reference)
+            .append(title)
+            .append(description)
+            .toHashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return new XWikiToStringBuilder(this)
+            .append("reference", this.getReference())
+            .append("title", this.getTitle())
+            .append("description", this.getDescription())
+            .build();
     }
 }

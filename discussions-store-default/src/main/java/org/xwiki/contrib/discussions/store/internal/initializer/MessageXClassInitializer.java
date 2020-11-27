@@ -30,11 +30,14 @@ import org.xwiki.model.reference.EntityReference;
 import com.xpn.xwiki.doc.MandatoryDocumentInitializer;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.TextAreaClass;
 
 import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
 import static com.xpn.xwiki.objects.classes.ListClass.FREE_TEXT_ALLOWED;
-import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_NAME;
-import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
@@ -77,12 +80,14 @@ public class MessageXClassInitializer implements MandatoryDocumentInitializer
     @Override
     public boolean updateDocument(XWikiDocument document)
     {
+        document.setHidden(true);
         BaseClass xClass = document.getXClass();
         int textSize = Integer.MAX_VALUE;
         xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
-        xClass.addTextField(CONTENT_NAME, CONTENT_PRETTY_NAME, textSize);
+        xClass.addTextAreaField(CONTENT_NAME, CONTENT_PRETTY_NAME, 10, 10, TextAreaClass.EditorType.WYSIWYG);
         xClass.addTextField(DISCUSSION_REFERENCE_NAME, DISCUSSION_REFERENCE_PRETTY_NAME, textSize);
-        xClass.addUsersField(AUTHOR_NAME, AUTHOR_PRETTY_NAME, 1, false);
+        xClass.addTextField(AUTHOR_TYPE_NAME, AUTHOR_TYPE_PRETTY_NAME, textSize);
+        xClass.addTextField(AUTHOR_REFERENCE_NAME, AUTHOR_REFERENCE_PRETTY_NAME, textSize);
         xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
         xClass.addDateField(CREATE_DATE_NAME, CREATE_DATE_PRETTY_NAME);
         xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,

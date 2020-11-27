@@ -19,11 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
-import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.stability.Unstable;
+
+import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Low-level storage service for the message objects.
@@ -39,9 +41,20 @@ public interface MessageStoreService
      * Creates a message object.
      *
      * @param content the message content
-     * @param author the message author
+     * @param authorType the author type
+     * @param authorReference the author reference
      * @param discussionReference the discussion reference
      * @return the unique reference of the created message
      */
-    Optional<String> create(String content, DocumentReference author, String discussionReference);
+    Optional<String> create(String content, String authorType, String authorReference, String discussionReference);
+
+    /**
+     * Returns a paginate list of messages of a discussion.
+     *
+     * @param discussionReference the discussion reference
+     * @param offset the offset
+     * @param limit the limit
+     * @return the list of messages
+     */
+    List<BaseObject> getByDiscussion(String discussionReference, int offset, int limit);
 }

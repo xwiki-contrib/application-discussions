@@ -4,3 +4,4 @@ org.xwiki.contrib.discussions.store.internal.DefaultMessageStoreService
 org.xwiki.contrib.discussions.store.internal.initializer.DiscussionContextXClassInitializer
 org.xwiki.contrib.discussions.store.internal.initializer.DiscussionXClassInitializer
 org.xwiki.contrib.discussions.store.internal.initializer.MessageXClassInitializer
+org.xwiki.contrib.discussions.store.internal.RandomGeneratorService
