@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.internal;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -42,7 +43,9 @@ import com.xpn.xwiki.objects.BaseObject;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
  * Default implementation of {@link MessageService}.
@@ -79,8 +82,15 @@ public class DefaultMessageService implements MessageService
         return this.discussionService.get(discussion.getReference())
             .flatMap(
                 d -> this.messageStoreService.create(content, DEFAULT_ACTOR_TYPE, authorReference, d.getReference())
-                    .map(messageReference -> new Message(messageReference, content, DEFAULT_ACTOR_TYPE, authorReference,
-                        d)));
+                    .flatMap(reference -> getByReference(reference, d.getReference())));
+    }
+
+    @Override
+    public Optional<Message> getByReference(String reference, String discussionReference)
+    {
+        return this.messageStoreService.getByReference(reference, discussionReference)
+            .flatMap(messageObject -> this.discussionService.get(discussionReference)
+                .map(discussion -> convertToMessage(discussion).apply(messageObject)));
     }
 
     @Override
@@ -90,13 +100,26 @@ public class DefaultMessageService implements MessageService
         List<BaseObject> messages = this.messageStoreService.getByDiscussion(discussion.getReference(), offset, limit);
         return messages
             .stream()
-            .map(bo -> new Message(
-                    bo.getStringValue(REFERENCE_NAME),
-                    bo.getLargeStringValue(CONTENT_NAME),
-                    bo.getStringValue(AUTHOR_TYPE_NAME),
-                    bo.getStringValue(AUTHOR_REFERENCE_NAME),
-                    discussion
-                )
-            ).collect(Collectors.toList());
+            .map(convertToMessage(discussion))
+            .collect(Collectors.toList());
+    }
+
+    private Function<BaseObject, Message> convertToMessage(Discussion discussion)
+    {
+        return bo -> new Message(
+            bo.getStringValue(REFERENCE_NAME),
+            bo.getLargeStringValue(CONTENT_NAME),
+            bo.getStringValue(AUTHOR_TYPE_NAME),
+            bo.getStringValue(AUTHOR_REFERENCE_NAME),
+            bo.getDateValue(CREATE_DATE_NAME),
+            bo.getDateValue(UPDATE_DATE_NAME),
+            discussion
+        );
+    }
+
+    @Override
+    public long countByDiscussion(Discussion discussion)
+    {
+        return this.messageStoreService.countByDiscussion(discussion.getReference());
     }
 }

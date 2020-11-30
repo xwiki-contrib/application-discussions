@@ -57,4 +57,21 @@ public interface MessageStoreService
      * @return the list of messages
      */
     List<BaseObject> getByDiscussion(String discussionReference, int offset, int limit);
+
+    /**
+     * Returns the number of messages of a discussion.
+     *
+     * @param discussionReference the discussion reference
+     * @return the count of messages of a discussion
+     */
+    long countByDiscussion(String discussionReference);
+
+    /**
+     * Get a message by its unique reference.
+     *
+     * @param reference the reference
+     * @param discussionReference
+     * @return the object of the message
+     */
+    Optional<BaseObject> getByReference(String reference, String discussionReference);
 }

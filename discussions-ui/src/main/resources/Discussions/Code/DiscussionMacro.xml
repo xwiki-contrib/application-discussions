@@ -125,12 +125,11 @@
     </property>
     <property>
       <code>require(['jquery', 'xwiki-events-bridge'], function ($) {
-  console.log('yolo', $,   $(".message-submit-button"));
   $(".message-submit-button").click(function() {
     document.fire('xwiki:actions:beforeSave');
     $(this).parent('form').submit();
   }) 
-})</code>
+});</code>
     </property>
     <property>
       <name/>
@@ -337,8 +336,16 @@
     <property>
       <code>{{velocity}}
 #set ($reference = $wikimacro.parameters.reference)
+#set ($pageSize = $wikimacro.parameters.pageSize)
+#set ($namespace = $wikimacro.parameters.namespace)
 #set ($discussion = $services.discussions.getDiscussion($reference))
-#set ($messages = $services.discussions.getMessagesByDiscussion($discussion, 0, 1000))
+#set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
+
+#if (!$offset)
+  #set ($offset = 0)
+#end
+#set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
+
 
 == $discussion.title ==
 
@@ -349,9 +356,51 @@ $discussion.description
 #foreach ($message in $messages)
 {{box}}
 $message.content
+
+$message.createDate
 {{/box}}
 
 #end
+
+{{html}}
+
+&lt;div class="paginationFilter"&gt;
+
+#set ($count = $services.discussions.countMessagesByDiscussion($discussion))
+#set ($pageRangeStart = $offset*$pageSize+1)
+#set ($pageRangeEnd = ($offset+1)*$pageSize)
+#set ($pageRangeEnd = $mathtool.min($pageRangeEnd, $count))
+#set ($totalNumberPages = $mathtool.ceil($numbertool.toNumber($count).doubleValue()/$numbertool.toNumber($pageSize).doubleValue()))
+
+  &lt;span class="resultsNo"&gt;$services.localization.render("xe.pagination.results") &lt;span class="currentResultsNo"&gt;${pageRangeStart}-${pageRangeEnd}&lt;/span&gt; $services.localization.render("xe.pagination.results.of") &lt;span class="totalResultsNo"&gt;$count&lt;/span&gt;&lt;/span&gt;
+
+  &lt;span class="controlPagination"&gt;
+#if ($offset &gt; 0)
+  #set ($new_offset = $offset - 1)
+  #set($pagination = {
+    "${namespace}_offset": [$new_offset]
+  })
+     &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" title="$services.localization.render('xe.pagination.page.prev.title')" class="prevPagination"&gt;&lt;/a&gt;
+#end
+#if ($offset &lt; $totalNumberPages)
+#set ($new_offset = $offset + 1)
+     #set($pagination = {
+       "${namespace}_offset": [$new_offset]
+     })
+     &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" title="$services.localization.render('xe.pagination.page.next.title')" class="nextPagination"&gt;&lt;/a&gt;
+#end
+  &lt;/span&gt;
+  &lt;span class="pagination"&gt;$services.localization.render("xe.pagination.page")
+#foreach($page_number in [1..$totalNumberPages])
+#set ($new_offset = $page_number - 1)
+#set($pagination = {
+       "${namespace}_offset": [$new_offset]
+     })
+    &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" class="#if($page_number == $offset)currentPagination#end" title="$services.localization.render('xe.pagination.page.title',[$page_number])"&gt;$page_number&lt;/a&gt; 
+#end
+  &lt;/span&gt;
+&lt;/div&gt;
+{{/html}}
 
 === New Message ===
 
@@ -360,6 +409,7 @@ $message.content
 #set ($messageClass = $docMessageClass.getxWikiClass())
 #set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
 #set ($contentField = $messageClass.get('content'))
+
 {{html}}
 &lt;form method="post" action="$createMessageDoc.getURL('view')" class="message-form"&gt;
 &lt;div class="form-group"&gt;
@@ -479,6 +529,162 @@ $doc.displayEdit($contentField, '', $messageObj)
     </property>
     <property>
       <name>reference</name>
+    </property>
+    <property>
+      <type>java.lang.String</type>
+    </property>
+  </object>
+  <object>
+    <name>Discussions.Code.DiscussionMacro</name>
+    <number>1</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>7b77fcf5-5e9d-49c8-bfdc-522bc99eeb2a</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <type>
+        <disabled>0</disabled>
+        <name>type</name>
+        <number>5</number>
+        <prettyName>Parameter type</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </type>
+    </class>
+    <property>
+      <defaultValue>10</defaultValue>
+    </property>
+    <property>
+      <description>The number of messages displayed per page</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>pageSize</name>
+    </property>
+    <property>
+      <type>java.lang.Integer</type>
+    </property>
+  </object>
+  <object>
+    <name>Discussions.Code.DiscussionMacro</name>
+    <number>2</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>42d824ca-d9ab-4a55-ac36-5c0ad290123c</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <type>
+        <disabled>0</disabled>
+        <name>type</name>
+        <number>5</number>
+        <prettyName>Parameter type</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </type>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>A namespace used as prefix of the macro request parameters</description>
+    </property>
+    <property>
+      <mandatory>1</mandatory>
+    </property>
+    <property>
+      <name>namespace</name>
     </property>
     <property>
       <type>java.lang.String</type>

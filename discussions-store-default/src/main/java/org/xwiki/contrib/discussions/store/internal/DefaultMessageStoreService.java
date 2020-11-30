@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,12 +47,15 @@ import com.xpn.xwiki.objects.BaseElement;
 import com.xpn.xwiki.objects.BaseObject;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
  * Default implementation of {@link MessageStoreService}.
@@ -111,7 +116,9 @@ public class DefaultMessageStoreService implements MessageStoreService
                     messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference, context);
                     messageBaseObject.set(CONTENT_NAME, content, context);
                     messageBaseObject.set(DISCUSSION_REFERENCE_NAME, discussionReference, context);
-                    // TODO data
+                    Date now = new Date();
+                    messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
+                    messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
                     // TODO replyTo
                     context.getWiki().saveDocument(document, context);
                     ret = Optional.of(messageReference);
@@ -131,8 +138,85 @@ public class DefaultMessageStoreService implements MessageStoreService
     {
         try {
             String messageClass = this.messageMetadata.getMessageXClassFullName();
-            List<String> discussionReference1 = this.queryManager.createQuery(String.format(
-                " select obj_discussionReference2.value "
+            List<String> messageReferences = this.queryManager.createQuery(String.format(
+                " select obj_reference.value "
+                    + "from XWikiDocument as doc , "
+                    + "BaseObject as obj , "
+                    + "com.xpn.xwiki.objects.StringProperty as obj_discussionReference , "
+                    + "com.xpn.xwiki.objects.StringProperty as obj_reference, "
+                    + "com.xpn.xwiki.objects.DateProperty as obj_updateDate "
+                    + "where obj_discussionReference.value = :discussionReference "
+                    + "and doc.fullName=obj.name and obj.className='%s' "
+                    + "and obj_discussionReference.id.id=obj.id "
+                    + "and obj_reference.id.id=obj.id "
+                    + "and obj_updateDate.id.id=obj.id "
+                    + "and obj_discussionReference.id.name='%s' "
+                    + "and obj_reference.id.name='%s' "
+                    + "and obj_updateDate.id.name='%s' "
+                    + "order by obj_updateDate.value",
+                messageClass, DISCUSSION_REFERENCE_NAME, REFERENCE_NAME, UPDATE_DATE_NAME), Query.HQL)
+                .setOffset(offset)
+                .setLimit(limit)
+                .bindValue("discussionReference", discussionReference)
+                .execute();
+
+            return getBaseObjects(discussionReference, messageReferences);
+        } catch (QueryException | XWikiException e) {
+            this.logger.warn(
+                "Failed to get the list Message for discussionReference=[{}], offset=[{}], limit=[{}]. Cause: [{}].",
+                discussionReference, offset, limit, getRootCauseMessage(e));
+            return emptyList();
+        }
+    }
+
+    private List<BaseObject> getBaseObjects(String discussionReference, List<String> messageReferences)
+        throws XWikiException
+    {
+        DocumentReference documentReference =
+            this.discussionStoreService.get(discussionReference).get().getDocumentReference();
+        XWikiContext context = this.xcontextProvider.get();
+        XWikiDocument document = context.getWiki().getDocument(documentReference, context);
+
+        return document.getXObjects(this.messageMetadata.getMessageXClass()).stream()
+            .filter(Objects::nonNull)
+            .filter(it -> messageReferences.contains(it.getStringValue(REFERENCE_NAME)))
+            .sorted(Comparator.comparing(o -> o.getDateValue(UPDATE_DATE_NAME)))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<BaseObject> getByReference(String reference, String discussionReference)
+    {
+        Optional<BaseObject> baseObject;
+
+        try {
+            List<BaseObject> baseObjects = getBaseObjects(discussionReference, singletonList(reference));
+            if (baseObjects.isEmpty()) {
+                baseObject = Optional.empty();
+            } else {
+
+                if (baseObjects.size() > 1) {
+                    // TODO warn
+                }
+
+                baseObject = Optional.of(baseObjects.get(0));
+            }
+        } catch (XWikiException e) {
+            e.printStackTrace();
+            // TODO log
+            baseObject = Optional.empty();
+        }
+        return baseObject;
+    }
+
+    @Override
+    public long countByDiscussion(String discussionReference)
+    {
+        String messageClass = this.messageMetadata.getMessageXClassFullName();
+        long count;
+        try {
+            count = this.queryManager.createQuery(String.format(
+                " select count(*) "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
                     + "com.xpn.xwiki.objects.StringProperty as obj_discussionReference1 , "
@@ -144,26 +228,14 @@ public class DefaultMessageStoreService implements MessageStoreService
                     + "and obj_discussionReference1.id.name='%s' "
                     + "and obj_discussionReference2.id.name='%s'",
                 messageClass, DISCUSSION_REFERENCE_NAME, REFERENCE_NAME), Query.HQL)
-                .setOffset(offset)
-                .setLimit(limit)
                 .bindValue("discussionReference", discussionReference)
-                .execute();
-
-            DocumentReference documentReference =
-                this.discussionStoreService.get(discussionReference).get().getDocumentReference();
-            XWikiContext context = this.xcontextProvider.get();
-            XWikiDocument document = context.getWiki().getDocument(documentReference, context);
-
-            return document.getXObjects(this.messageMetadata.getMessageXClass()).stream()
-                .filter(Objects::nonNull)
-                .filter(it -> discussionReference1.contains(it.getStringValue(REFERENCE_NAME)))
-                .collect(Collectors.toList());
-        } catch (QueryException | XWikiException e) {
-            this.logger.warn(
-                "Failed to get the list Message for discussionReference=[{}], offset=[{}], limit=[{}]. Cause: [{}].",
-                discussionReference, offset, limit, getRootCauseMessage(e));
-            return emptyList();
+                .<Long>execute()
+                .get(0);
+        } catch (QueryException e) {
+            e.printStackTrace();
+            count = 0;
         }
+        return count;
     }
 
     private String generateUniqueReference(String discussionReference, XWikiDocument document)

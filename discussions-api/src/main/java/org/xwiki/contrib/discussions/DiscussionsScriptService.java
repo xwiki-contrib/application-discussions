@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,6 +30,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.internal.QueryStringService;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
@@ -52,6 +54,9 @@ public class DiscussionsScriptService implements ScriptService
 
     @Inject
     private MessageService messageService;
+    
+    @Inject
+    private QueryStringService queryStringService;
 
     /**
      * Creates a discussion context.
@@ -113,6 +118,29 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Message> getMessagesByDiscussion(Discussion discussion, int offset, int limit)
     {
-        return this.messageService.getByDiscussion(discussion, offset, limit);
+        return this.messageService.getByDiscussion(discussion, offset * limit, limit);
+    }
+
+    /**
+     * Return the number of messages in a discussion.
+     *
+     * @param discussion the discussion
+     * @return the messages count of the discussion
+     */
+    public long countMessagesByDiscussion(Discussion discussion)
+    {
+        return this.messageService.countByDiscussion(discussion);
+    }
+
+    /**
+     * Update a param with newParameterMap values and returns a string representation.
+     *
+     * @param parameterMap the query string
+     * @param newParameterMap the new parameters to overload or add
+     * @return the string representation
+     */
+    public String updateQueryString(Map<String, Object> parameterMap, Map<String, Object> newParameterMap)
+    {
+        return this.queryStringService.getString(parameterMap, newParameterMap);
     }
 }

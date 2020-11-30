@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.stability.Unstable;
@@ -41,6 +43,10 @@ public class Message
 
     private final String actorType;
 
+    private final Date createDate;
+
+    private final Date updateDate;
+
     private final Discussion discussion;
 
     /**
@@ -50,14 +56,19 @@ public class Message
      * @param content the content
      * @param actorType the actor type
      * @param actorReference the actor reference
+     * @param createDate date of creation of the message
+     * @param updateDate date of the last update of the message
      * @param discussion the discussion of the message
      */
-    public Message(String reference, String content, String actorType, String actorReference, Discussion discussion)
+    public Message(String reference, String content, String actorType, String actorReference, Date createDate,
+        Date updateDate, Discussion discussion)
     {
         this.reference = reference;
         this.content = content;
         this.actorType = actorType;
         this.actorReference = actorReference;
+        this.createDate = createDate;
+        this.updateDate = updateDate;
         this.discussion = discussion;
     }
 
@@ -82,7 +93,7 @@ public class Message
      */
     public String getActorReference()
     {
-        return actorReference;
+        return this.actorReference;
     }
 
     /**
@@ -90,7 +101,23 @@ public class Message
      */
     public String getActorType()
     {
-        return actorType;
+        return this.actorType;
+    }
+
+    /**
+     * @return the date of creation of the message
+     */
+    public Date getCreateDate()
+    {
+        return this.createDate;
+    }
+
+    /**
+     * @return the date of update of the message
+     */
+    public Date getUpdateDate()
+    {
+        return this.updateDate;
     }
 
     /**
@@ -115,11 +142,13 @@ public class Message
         Message message = (Message) o;
 
         return new EqualsBuilder()
-            .append(reference, message.reference)
-            .append(content, message.content)
-            .append(actorReference, message.actorReference)
-            .append(actorType, message.actorType)
-            .append(discussion, message.discussion)
+            .append(this.reference, message.reference)
+            .append(this.content, message.content)
+            .append(this.actorReference, message.actorReference)
+            .append(this.actorType, message.actorType)
+            .append(this.createDate, message.createDate)
+            .append(this.updateDate, message.updateDate)
+            .append(this.discussion, message.discussion)
             .isEquals();
     }
 
@@ -127,11 +156,13 @@ public class Message
     public int hashCode()
     {
         return new HashCodeBuilder(17, 37)
-            .append(reference)
-            .append(content)
-            .append(actorReference)
-            .append(actorType)
-            .append(discussion)
+            .append(this.reference)
+            .append(this.content)
+            .append(this.actorReference)
+            .append(this.actorType)
+            .append(this.createDate)
+            .append(this.updateDate)
+            .append(this.discussion)
             .toHashCode();
     }
 
@@ -143,6 +174,8 @@ public class Message
             .append("content", this.getContent())
             .append("actorType", this.getActorType())
             .append("actorReference", this.getActorReference())
+            .append("createDate", this.getCreateDate())
+            .append("updateDate", this.getUpdateDate())
             .append("discussion", this.getDiscussion())
             .build();
     }

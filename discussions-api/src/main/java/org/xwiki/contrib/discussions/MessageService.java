@@ -47,6 +47,15 @@ public interface MessageService
     Optional<Message> create(String content, Discussion discussion);
 
     /**
+     * Get a message by its unique reference.
+     *
+     * @param reference the reference
+     * @param discussionReference
+     * @return the message
+     */
+    Optional<Message> getByReference(String reference, String discussionReference);
+
+    /**
      * Returns the paginated list of messages of the discussion.
      *
      * @param discussion the discussion
@@ -55,4 +64,12 @@ public interface MessageService
      * @return the list of messages
      */
     List<Message> getByDiscussion(Discussion discussion, int offset, int limit);
+
+    /**
+     * Returns the count of messages of a discussion.
+     *
+     * @param discussion the discussion
+     * @return the count of messages
+     */
+    long countByDiscussion(Discussion discussion);
 }

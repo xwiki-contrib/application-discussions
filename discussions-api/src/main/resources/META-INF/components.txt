@@ -1,1 +1,2 @@
 org.xwiki.contrib.discussions.DiscussionsScriptService
+org.xwiki.contrib.discussions.internal.QueryStringService
