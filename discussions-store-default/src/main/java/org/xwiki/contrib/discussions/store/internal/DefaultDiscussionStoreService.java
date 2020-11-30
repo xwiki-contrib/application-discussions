@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
@@ -40,6 +41,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
@@ -56,6 +58,9 @@ import static org.xwiki.query.Query.XWQL;
 public class DefaultDiscussionStoreService implements DiscussionStoreService
 {
     @Inject
+    private Logger logger;
+
+    @Inject
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
@@ -68,23 +73,24 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     private RandomGeneratorService randomGeneratorService;
 
     @Override
-    public String create(String title, String description)
+    public Optional<String> create(String title, String description)
     {
-        String reference = null;
+        Optional<String> reference;
         try {
             XWikiDocument document = generateUniquePage(title);
-            BaseObject object = new BaseObject();
-            object.setXClassReference(this.discussionMetadata.getDiscussionXClass());
             XWikiContext context = this.getContext();
+            BaseObject object = document.newXObject(this.discussionMetadata.getDiscussionXClass(), context);
             object.set(TITLE_NAME, title, context);
             object.set(DESCRIPTION_NAME, description, context);
-            reference = document.getDocumentReference().getName();
-            object.set(REFERENCE_NAME, reference, context);
-            document.addXObject(object);
+            String pageName = document.getDocumentReference().getName();
+            object.set(REFERENCE_NAME, pageName, context);
             context.getWiki().saveDocument(document, context);
+            reference = Optional.of(pageName);
         } catch (XWikiException e) {
-            e.printStackTrace();
-            // TODO: log, wrap and rethrow
+            this.logger.warn("Failed to create a Discussion with title=[{}], description=[{}]. Cause: [{}]", title,
+                description,
+                getRootCauseMessage(e));
+            reference = Optional.empty();
         }
 
         return reference;
@@ -107,7 +113,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 return Optional.empty();
             }
             if (execute.size() > 1) {
-                // TODO: log incoherent data
+                this.logger.debug("More than one discussion found for reference=[{}]", reference);
             }
             String result = execute.get(0);
 
@@ -115,8 +121,8 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
             return Optional.of(document.getXObject(this.discussionMetadata.getDiscussionXClass()));
         } catch (QueryException | XWikiException e) {
-            e.printStackTrace();
-            // TODO log
+            this.logger.warn("Failed to get the Discussion with reference=[{}]. Cause: [{}]", reference,
+                getRootCauseMessage(e));
             return Optional.empty();
         }
     }

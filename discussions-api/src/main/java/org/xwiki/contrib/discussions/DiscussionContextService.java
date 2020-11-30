@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions;
 
+import java.util.Optional;
+
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.stability.Unstable;
@@ -42,6 +44,6 @@ public interface DiscussionContextService
      * @param entityReference the reference of the entity referenced by the discussion context
      * @return the initialized discussion context
      */
-    DiscussionContext create(String name, String description, String referenceType,
+    Optional<DiscussionContext> create(String name, String description, String referenceType,
         String entityReference);
 }

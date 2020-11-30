@@ -43,7 +43,7 @@ public interface DiscussionStoreService
      * @param description the description
      * @return the unique reference to the created discussion
      */
-    String create(String title, String description);
+    Optional<String> create(String title, String description);
 
     /**
      * Resolve a discussion by its reference.

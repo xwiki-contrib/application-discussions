@@ -47,11 +47,11 @@ public class DefaultDiscussionService implements DiscussionService
     private DiscussionStoreService discussionStoreService;
 
     @Override
-    public Discussion create(String title, String description)
+    public Optional<Discussion> create(String title, String description)
     {
         // TODO: checks the user rights
-        String reference = this.discussionStoreService.create(title, description);
-        return new Discussion(reference, title, description);
+        return this.discussionStoreService.create(title, description)
+            .map(reference -> new Discussion(reference, title, description));
     }
 
     @Override

@@ -42,7 +42,7 @@ public interface DiscussionService
      * @param description the discussion description
      * @return the created discussion
      */
-    Discussion create(String title, String description);
+    Optional<Discussion> create(String title, String description);
 
     /**
      * Search and retrieve a discussion by its reference.

@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -41,13 +43,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     private DiscussionContextStoreService discussionContextStoreService;
 
     @Override
-    public DiscussionContext create(String name, String description, String referenceType,
+    public Optional<DiscussionContext> create(String name, String description, String referenceType,
         String entityReference)
     {
         // TODO: check current user rights.
-        String reference = this.discussionContextStoreService
-            .create(name, description, referenceType, entityReference);
-
-        return new DiscussionContext(reference, name, description, referenceType, entityReference);
+        return this.discussionContextStoreService
+            .create(name, description, referenceType, entityReference)
+            .map(reference -> new DiscussionContext(reference, name, description, referenceType, entityReference));
     }
 }

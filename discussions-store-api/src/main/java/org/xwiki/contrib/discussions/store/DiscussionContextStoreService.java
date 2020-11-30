@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.Optional;
+
 import org.xwiki.component.annotation.Role;
 import org.xwiki.stability.Unstable;
 
@@ -41,6 +43,6 @@ public interface DiscussionContextStoreService
      * @param entityReference the reference of the entity referenced by the discussion context
      * @return the unique reference to the created discussion context
      */
-    String create(String name, String description, String referenceType,
+    Optional<String> create(String name, String description, String referenceType,
         String entityReference);
 }

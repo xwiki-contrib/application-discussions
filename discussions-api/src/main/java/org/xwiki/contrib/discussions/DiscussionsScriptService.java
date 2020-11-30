@@ -65,7 +65,7 @@ public class DiscussionsScriptService implements ScriptService
     public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
         String entityReference)
     {
-        return this.discussionContextService.create(name, description, referenceType, entityReference);
+        return this.discussionContextService.create(name, description, referenceType, entityReference).orElse(null);
     }
 
     /**
@@ -77,7 +77,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion createDiscussion(String title, String description)
     {
-        return this.discussionService.create(title, description);
+        return this.discussionService.create(title, description).orElse(null);
     }
 
     /**
