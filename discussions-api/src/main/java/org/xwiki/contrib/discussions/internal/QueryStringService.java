@@ -77,7 +77,7 @@ public class QueryStringService
 
                     if (it.getValue() instanceof List) {
                         return (Stream<String>) urlEncodeStream(key, ((List) it.getValue()).stream());
-                    } else if (it.getClass().isArray()) {
+                    } else if (it.getValue().getClass().isArray()) {
                         return urlEncodeStream(key, Arrays.stream((Object[]) it.getValue()));
                     } else {
                         return Stream.of(key + QUERY_STRING_EQ + URLEncoder.encode(String.valueOf(it.getValue()), enc));

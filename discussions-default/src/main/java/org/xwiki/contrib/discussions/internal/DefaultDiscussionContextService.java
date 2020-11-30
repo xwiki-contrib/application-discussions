@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 
@@ -42,13 +43,19 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Inject
     private DiscussionContextStoreService discussionContextStoreService;
 
+    @Inject
+    private DiscussionsRightService discussionsRightService;
+
     @Override
     public Optional<DiscussionContext> create(String name, String description, String referenceType,
         String entityReference)
     {
-        // TODO: check current user rights.
-        return this.discussionContextStoreService
-            .create(name, description, referenceType, entityReference)
-            .map(reference -> new DiscussionContext(reference, name, description, referenceType, entityReference));
+        if (this.discussionsRightService.canCreateDiscussionContext()) {
+            return this.discussionContextStoreService
+                .create(name, description, referenceType, entityReference)
+                .map(reference -> new DiscussionContext(reference, name, description, referenceType, entityReference));
+        } else {
+            return Optional.empty();
+        }
     }
 }

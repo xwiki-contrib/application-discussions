@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 
@@ -46,22 +47,48 @@ public class DefaultDiscussionService implements DiscussionService
     @Inject
     private DiscussionStoreService discussionStoreService;
 
+    @Inject
+    private DiscussionsRightService discussionsRightService;
+
     @Override
     public Optional<Discussion> create(String title, String description)
     {
-        // TODO: checks the user rights
-        return this.discussionStoreService.create(title, description)
-            .map(reference -> new Discussion(reference, title, description));
+        if (this.discussionsRightService.canCreateDiscussion()) {
+            return this.discussionStoreService.create(title, description)
+                .map(reference -> new Discussion(reference, title, description));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<Discussion> get(String reference)
     {
-        return this.discussionStoreService.get(reference).map(
-            baseObject -> new Discussion(
-                baseObject.getStringValue(REFERENCE_NAME),
-                baseObject.getStringValue(TITLE_NAME),
-                baseObject.getStringValue(DESCRIPTION_NAME)
-            ));
+        return this.discussionStoreService.get(reference).flatMap(
+            baseObject -> {
+                if (this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference())) {
+                    return Optional.of(new Discussion(
+                        baseObject.getStringValue(REFERENCE_NAME),
+                        baseObject.getStringValue(TITLE_NAME),
+                        baseObject.getStringValue(DESCRIPTION_NAME)
+                    ));
+                } else {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    @Override
+    public boolean canRead(String reference)
+    {
+        return this.discussionStoreService.get(reference)
+            .map(d -> this.discussionsRightService.canReadDiscussion(d.getDocumentReference())).orElse(false);
+    }
+
+    @Override
+    public boolean canWrite(String reference)
+    {
+        return this.discussionStoreService.get(reference)
+            .map(d -> this.discussionsRightService.canWriteDiscussion(d.getDocumentReference())).orElse(false);
     }
 }

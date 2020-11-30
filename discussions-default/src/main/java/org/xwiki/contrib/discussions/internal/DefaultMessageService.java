@@ -30,9 +30,11 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -40,6 +42,7 @@ import org.xwiki.model.reference.EntityReferenceSerializer;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.objects.BaseObject;
 
+import static java.util.Collections.emptyList;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
@@ -66,10 +69,16 @@ public class DefaultMessageService implements MessageService
     private DiscussionService discussionService;
 
     @Inject
+    private DiscussionStoreService discussionStoreService;
+
+    @Inject
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
     private EntityReferenceSerializer<String> entityReferenceSerializer;
+
+    @Inject
+    private DiscussionsRightService discussionsRightService;
 
     @Override
     public Optional<Message> create(String content, Discussion discussion)
@@ -77,31 +86,55 @@ public class DefaultMessageService implements MessageService
         DocumentReference author = this.xcontextProvider.get().getUserReference();
         String authorReference = this.entityReferenceSerializer.serialize(author);
 
-        // TODO check rights before creating
-        // TODO checks discussion exists before creating
         return this.discussionService.get(discussion.getReference())
             .flatMap(
-                d -> this.messageStoreService.create(content, DEFAULT_ACTOR_TYPE, authorReference, d.getReference())
-                    .flatMap(reference -> getByReference(reference, d.getReference())));
+                d -> {
+                    boolean canWriteDiscussion = this.discussionStoreService.get(discussion.getReference())
+                        .map(z -> this.discussionsRightService.canWriteDiscussion(z.getDocumentReference()))
+                        .orElse(false);
+                    if (canWriteDiscussion) {
+                        return this.messageStoreService
+                            .create(content, DEFAULT_ACTOR_TYPE, authorReference, d.getReference())
+                            .flatMap(reference -> getByReference(reference, d.getReference()));
+                    } else {
+                        return Optional.empty();
+                    }
+                });
     }
 
     @Override
     public Optional<Message> getByReference(String reference, String discussionReference)
     {
-        return this.messageStoreService.getByReference(reference, discussionReference)
-            .flatMap(messageObject -> this.discussionService.get(discussionReference)
-                .map(discussion -> convertToMessage(discussion).apply(messageObject)));
+        boolean canReadDiscussion = this.discussionStoreService.get(discussionReference)
+            .map(z -> this.discussionsRightService.canReadDiscussion(z.getDocumentReference())).orElse(false);
+        if (canReadDiscussion) {
+            return this.messageStoreService.getByReference(reference, discussionReference)
+                .flatMap(messageObject -> this.discussionService.get(discussionReference)
+                    .map(discussion -> convertToMessage(discussion).apply(messageObject)));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<Message> getByDiscussion(Discussion discussion, int offset, int limit)
     {
-        // TODO rights...
-        List<BaseObject> messages = this.messageStoreService.getByDiscussion(discussion.getReference(), offset, limit);
-        return messages
-            .stream()
-            .map(convertToMessage(discussion))
-            .collect(Collectors.toList());
+        if (discussion == null) 
+        {
+            return emptyList();
+        }
+        boolean canReadDiscussion = this.discussionStoreService.get(discussion.getReference())
+            .map(z -> this.discussionsRightService.canReadDiscussion(z.getDocumentReference())).orElse(false);
+        if (canReadDiscussion) {
+            List<BaseObject> messages =
+                this.messageStoreService.getByDiscussion(discussion.getReference(), offset, limit);
+            return messages
+                .stream()
+                .map(convertToMessage(discussion))
+                .collect(Collectors.toList());
+        } else {
+            return emptyList();
+        }
     }
 
     private Function<BaseObject, Message> convertToMessage(Discussion discussion)

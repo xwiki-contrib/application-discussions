@@ -1,2 +1,3 @@
+org.xwiki.contrib.discussions.DiscussionRightsScriptService
 org.xwiki.contrib.discussions.DiscussionsScriptService
 org.xwiki.contrib.discussions.internal.QueryStringService

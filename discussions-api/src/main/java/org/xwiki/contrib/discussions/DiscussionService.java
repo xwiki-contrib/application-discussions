@@ -51,4 +51,16 @@ public interface DiscussionService
      * @return the discussion
      */
     Optional<Discussion> get(String reference);
+
+    /**
+     * @param reference a discussion reference
+     * @return {@code true} if the current user has the right to view the discussion, {@code false} otherwise
+     */
+    boolean canRead(String reference);
+
+    /**
+     * @param reference a discussion reference
+     * @return {@code true} if the current user has the rights to write in the discussion, {@code false} otherwise
+     */
+    boolean canWrite(String reference);
 }

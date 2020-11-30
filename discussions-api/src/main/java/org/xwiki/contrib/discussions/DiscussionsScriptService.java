@@ -54,9 +54,20 @@ public class DiscussionsScriptService implements ScriptService
 
     @Inject
     private MessageService messageService;
-    
+
     @Inject
     private QueryStringService queryStringService;
+
+    @Inject
+    private DiscussionRightsScriptService discussionRightsScriptService;
+
+    /**
+     * @return the discussions rights script service
+     */
+    public DiscussionRightsScriptService getRights()
+    {
+        return this.discussionRightsScriptService;
+    }
 
     /**
      * Creates a discussion context.

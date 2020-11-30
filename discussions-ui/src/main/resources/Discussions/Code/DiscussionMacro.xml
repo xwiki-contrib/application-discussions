@@ -338,6 +338,7 @@
 #set ($reference = $wikimacro.parameters.reference)
 #set ($pageSize = $wikimacro.parameters.pageSize)
 #set ($namespace = $wikimacro.parameters.namespace)
+#if ($services.discussions.rights.canReadDiscussion($reference))
 #set ($discussion = $services.discussions.getDiscussion($reference))
 #set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
 
@@ -363,10 +364,9 @@ $message.createDate
 #end
 
 {{html}}
-
-&lt;div class="paginationFilter"&gt;
-
 #set ($count = $services.discussions.countMessagesByDiscussion($discussion))
+#if ($count &gt; 0)
+&lt;div class="paginationFilter"&gt;
 #set ($pageRangeStart = $offset*$pageSize+1)
 #set ($pageRangeEnd = ($offset+1)*$pageSize)
 #set ($pageRangeEnd = $mathtool.min($pageRangeEnd, $count))
@@ -382,7 +382,8 @@ $message.createDate
   })
      &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" title="$services.localization.render('xe.pagination.page.prev.title')" class="prevPagination"&gt;&lt;/a&gt;
 #end
-#if ($offset &lt; $totalNumberPages)
+#set ($totalNumberOffsets = $totalNumberPages - 1)
+#if ($offset &lt; $totalNumberOffsets)
 #set ($new_offset = $offset + 1)
      #set($pagination = {
        "${namespace}_offset": [$new_offset]
@@ -400,8 +401,11 @@ $message.createDate
 #end
   &lt;/span&gt;
 &lt;/div&gt;
+#end
 {{/html}}
 
+
+#if ($services.discussions.rights.canWriteDiscussion($reference))
 === New Message ===
 
 #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
@@ -426,6 +430,10 @@ $doc.displayEdit($contentField, '', $messageObj)
 &lt;/form&gt;
 #set ($discard = $xwiki.jsx.use('Discussions.Code.DiscussionMacro'))
 {{/html}}
+#end
+#else
+You are not allowed to view this discussion.
+#end
 {{/velocity}}</code>
     </property>
     <property>
