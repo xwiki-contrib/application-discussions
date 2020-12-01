@@ -355,11 +355,25 @@ $discussion.description
 === Messages ===
 
 #foreach ($message in $messages)
-{{box}}
-$message.content
+(% class='box' %)(((
+  (% class='row' %)(((
+    (% class='col-xs-1' %)(((
+      #if ($message.actorType == 'user')
+        {{html}}#mediumUserAvatar($message.actorReference){{/html}}
+      #end
+    )))
+    (% class='col-xs-11' %)(((
+      (% class='pull-right text-muted' %)(((
+        {{html}}
+          &lt;small &gt;$escapetool.xml($services.date.displayTimeAgo($message.updateDate))&lt;/small&gt;
+        {{/html}}
+      )))
+      **$message.actorReference**
 
-$message.createDate
-{{/box}}
+      $message.content
+    )))
+  )))
+)))
 
 #end
 
