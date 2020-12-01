@@ -6,7 +6,7 @@ This application provides a framework to integrates contextual discussions in XW
 * [Issue Tracker](https://jira.xwiki.org/projects/DISCUSSION) 
 * Minimal XWiki version supported: XWiki 12.10
 * License: LGPL 2.1
-* Continuous Integration Status: [![Build Status](https://ci.xwiki.org/job/XWiki%20Contrib/job/application-discussions/job/master/badge/icon)](https://ci.xwiki.org/job/XWiki%20Contrib/job/application-discussions/job/master/)
+* Continuous Integration Status: [![Build Status](https://ci.xwiki.org/job/XWiki%20Contrib/job/application-discussions/job/main/badge/icon)](https://ci.xwiki.org/job/XWiki%20Contrib/job/application-discussions/job/main/)
 <!-- * Translations:
   * [ActivityPub UI](https://l10n.xwiki.org/projects/xwiki-contrib/activitypub-ui/)
   * [ActivityPub Notifications](https://l10n.xwiki.org/projects/xwiki-contrib/activitypub-notifications/)
