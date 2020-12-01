@@ -38,6 +38,12 @@
 
   <developers>
     <developer>
+      <id>surli</id>
+      <name>Simon Urli</name>
+      <organization>XWiki SAS</organization>
+      <organizationUrl>http://www.xwiki.com</organizationUrl>
+    </developer>
+    <developer>
       <id>mleduc</id>
       <name>Manuel Leduc</name>
       <organization>XWiki SAS</organization>
@@ -51,6 +57,16 @@
       <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
+  <scm>
+    <connection>scm:git:git://github.com/xwiki-contrib/application-discussions.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki-contrib/application-discussions.git</developerConnection>
+    <url>https://github.com/xwiki-contrib/application-discussions/tree/master</url>
+    <tag>HEAD</tag>
+  </scm>
+  <properties>
+    <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
+    <xwiki.issueManagement.jira.id>DISCUSSION</xwiki.issueManagement.jira.id>
+  </properties>
 
   <modules>
     <module>discussions-api</module>
