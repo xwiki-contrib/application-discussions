@@ -51,17 +51,9 @@
     <!-- Runtime dependencies -->
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
-      <artifactId>discussions-default</artifactId>
+      <artifactId>discussions-server</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.xwiki.contrib</groupId>
-      <artifactId>discussions-store-default</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-
   </dependencies>
-
 </project>

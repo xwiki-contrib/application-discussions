@@ -119,8 +119,7 @@ public class DefaultMessageService implements MessageService
     @Override
     public List<Message> getByDiscussion(Discussion discussion, int offset, int limit)
     {
-        if (discussion == null) 
-        {
+        if (discussion == null) {
             return emptyList();
         }
         boolean canReadDiscussion = this.discussionStoreService.get(discussion.getReference())
@@ -154,5 +153,25 @@ public class DefaultMessageService implements MessageService
     public long countByDiscussion(Discussion discussion)
     {
         return this.messageStoreService.countByDiscussion(discussion.getReference());
+    }
+
+    @Override
+    public boolean canDelete(Message message)
+    {
+        String discussionReference = message.getDiscussion().getReference();
+        return this.discussionStoreService.get(discussionReference).map(
+            baseObject -> this.discussionsRightService.canDeleteMessage(message, baseObject.getDocumentReference()))
+            .orElse(false);
+    }
+
+    @Override
+    public void delete(String reference, String discussionReference)
+    {
+        this.getByReference(reference, discussionReference)
+            .ifPresent(message -> {
+                if (this.canDelete(message)) {
+                    this.messageStoreService.delete(message.getReference(), message.getDiscussion().getReference());
+                }
+            });
     }
 }

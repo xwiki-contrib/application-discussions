@@ -1,0 +1,5 @@
+org.xwiki.contrib.discussions.DiscussionRightsScriptService
+org.xwiki.contrib.discussions.DiscussionsScriptService
+org.xwiki.contrib.discussions.internal.QueryStringService
+org.xwiki.contrib.discussions.internal.server.DiscussionsResourceReferenceHandler
+org.xwiki.contrib.discussions.internal.server.DiscussionsResourceReferenceResolver

@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -32,12 +33,15 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Unstable
-@Component(roles = {DiscussionRightsScriptService.class})
+@Component(roles = { DiscussionRightsScriptService.class })
 @Singleton
 public class DiscussionRightsScriptService
 {
     @Inject
     private DiscussionService discussionService;
+
+    @Inject
+    private MessageService messageService;
 
     /**
      * @param discussionReference the discussion reference
@@ -47,7 +51,7 @@ public class DiscussionRightsScriptService
     {
         return this.discussionService.canRead(discussionReference);
     }
-    
+
     /**
      * @param discussionReference the discussion reference
      * @return {@code true} if the current user can write in the discussion, {@code false} otherwise
@@ -55,5 +59,14 @@ public class DiscussionRightsScriptService
     public boolean canWriteDiscussion(String discussionReference)
     {
         return this.discussionService.canWrite(discussionReference);
+    }
+
+    /**
+     * @param message the message
+     * @return {@code true} if the current user can remove the message, {@code false} otherwise
+     */
+    public boolean canDeleteMessage(Message message)
+    {
+        return this.messageService.canDelete(message);
     }
 }

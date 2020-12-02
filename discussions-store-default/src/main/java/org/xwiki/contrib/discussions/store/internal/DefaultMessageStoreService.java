@@ -196,14 +196,17 @@ public class DefaultMessageStoreService implements MessageStoreService
             } else {
 
                 if (baseObjects.size() > 1) {
-                    // TODO warn
+                    this.logger
+                        .debug("Found too many messages, expected one. With reference=[{}], discussionReference=[{}]",
+                            reference, discussionReference);
                 }
 
                 baseObject = Optional.of(baseObjects.get(0));
             }
         } catch (XWikiException e) {
-            e.printStackTrace();
-            // TODO log
+            this.logger.warn(
+                "Failed to get a message by reference with reference=[{}], discussionReference=[{}]. Cause: [{}].",
+                reference, discussionReference, getRootCauseMessage(e));
             baseObject = Optional.empty();
         }
         return baseObject;
@@ -232,10 +235,32 @@ public class DefaultMessageStoreService implements MessageStoreService
                 .<Long>execute()
                 .get(0);
         } catch (QueryException e) {
-            e.printStackTrace();
+            this.logger
+                .warn("Fail to count the messages with discussionReference=[{}]. Cause: [{}].", discussionReference,
+                    getRootCauseMessage(e));
             count = 0;
         }
         return count;
+    }
+
+    @Override
+    public void delete(String reference, String discussionReference)
+    {
+        this.getByReference(reference, discussionReference)
+            .ifPresent(message -> {
+                DocumentReference documentReference =
+                    this.discussionStoreService.get(discussionReference).get().getDocumentReference();
+                XWikiContext context = this.xcontextProvider.get();
+                try {
+                    XWikiDocument document = context.getWiki().getDocument(documentReference, context);
+                    document.removeXObject(message);
+                    context.getWiki().saveDocument(document, context);
+                } catch (XWikiException e) {
+                    this.logger
+                        .warn("Failed to delete a message with reference=[{}], discussionReference=[{}]. Cause: [{}].",
+                            reference, discussionReference, getRootCauseMessage(e));
+                }
+            });
     }
 
     private String generateUniqueReference(String discussionReference, XWikiDocument document)

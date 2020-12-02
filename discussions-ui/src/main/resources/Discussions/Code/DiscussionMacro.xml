@@ -125,10 +125,23 @@
     </property>
     <property>
       <code>require(['jquery', 'xwiki-events-bridge'], function ($) {
+
+  var deleteAction = undefined;
+
   $(".message-submit-button").click(function() {
     document.fire('xwiki:actions:beforeSave');
     $(this).parent('form').submit();
-  }) 
+  });
+
+  $("a.discussions.message.delete").click(function(e) {
+    if(e) e.preventDefault();
+    $("#discussions-delete-message-modal").modal('show');
+    deleteAction = $( this ).attr( "href" );
+  });
+
+   $("#discussions-delete-message-confirm").click(function() {
+      location.href = deleteAction;
+    });
 });</code>
     </property>
     <property>
@@ -341,6 +354,12 @@
 #if ($services.discussions.rights.canReadDiscussion($reference))
 #set ($discussion = $services.discussions.getDiscussion($reference))
 #set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
+#if ($request.getQueryString())
+  #set ($qs = "$escapetool.xml($request.getQueryString())")
+#else 
+  #set ($qs = '')
+#end
+#set($originalUrl = "$escapetool.xml($request.getRequestURL())?$qs")
 
 #if (!$offset)
   #set ($offset = 0)
@@ -353,6 +372,10 @@
 $discussion.description
 
 === Messages ===
+
+#if ($messages.size() == 0) 
+No messages!
+#end
 
 #foreach ($message in $messages)
 (% class='box' %)(((
@@ -372,9 +395,18 @@ $discussion.description
 
       $message.content
     )))
+    (% class='col-xs-12' %)(((
+      {{html}}
+        &lt;div class='text-right'&gt;
+          #if ($services.discussions.rights.canDeleteMessage($message))
+           #set ($deleteUrl = "${request.getContextPath()}/discussions/delete/Message/$discussion.reference?discussionReference=$escapetool.url($discussion.reference)&amp;reference=$escapetool.url($message.reference)&amp;originalURL=$escapetool.url($originalUrl)")
+            &lt;a class='btn btn-danger btn-xs discussions message delete' href="$deleteUrl"&gt;$services.icon.renderHTML('trash')&lt;/a&gt;
+          #end
+        &lt;/div&gt;
+      {{/html}}
+    )))
   )))
 )))
-
 #end
 
 {{html}}
@@ -423,27 +455,46 @@ $discussion.description
 === New Message ===
 
 #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
-#set ($createMessageDoc = $xwiki.getDocument('Discussions.Code.CreateMessage'))
 #set ($messageClass = $docMessageClass.getxWikiClass())
 #set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
 #set ($contentField = $messageClass.get('content'))
+#set ($url = "${request.getContextPath()}/discussions/create/Message/$discussion.reference")
 
 {{html}}
-&lt;form method="post" action="$createMessageDoc.getURL('view')" class="message-form"&gt;
+&lt;form method="post" action="$url" class="message-form"&gt;
 &lt;div class="form-group"&gt;
 $doc.displayEdit($contentField, '', $messageObj)
 &lt;/div&gt;
 &lt;button type="submit" class='btn btn-default message-submit-button'&gt;Submit&lt;/button&gt;
 &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
-#if ($request.getQueryString())
-  #set ($qs = "$escapetool.xml($request.getQueryString())")
-#else 
-  #set ($qs = '')
-#end
-&lt;input type="hidden" value="$escapetool.xml($request.getRequestURL())?$qs" name="originalURL" /&gt;
+&lt;input type="hidden" value="$originalUrl" name="originalURL" /&gt;
 &lt;/form&gt;
 #set ($discard = $xwiki.jsx.use('Discussions.Code.DiscussionMacro'))
 {{/html}}
+
+## Delete message modal
+{{html}}
+&lt;div class="modal fade" tabindex="-1" role="dialog" id="discussions-delete-message-modal" style="text-align: left;"&gt;
+&lt;div class="modal-dialog" role="document"&gt;
+&lt;div class="modal-content"&gt;
+&lt;div class="modal-header"&gt;
+&lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+&lt;h4 class="modal-title"&gt;Message Delete&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div class="modal-body"&gt;
+&lt;div id="activitypub-form-share-page" class='xform'&gt;
+Are you sure you want to delete this message?
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="modal-footer"&gt;
+&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;Cancel&lt;/button&gt;
+&lt;button type="button" class="btn btn-primary" id="discussions-delete-message-confirm"&gt;Confirm&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;!-- /.modal-content --&gt;
+&lt;/div&gt;&lt;!-- /.modal-dialog --&gt;
+&lt;/div&gt;&lt;!-- /.modal --&gt;
+{{/html}}
+
 #end
 #else
 You are not allowed to view this discussion.

@@ -50,7 +50,7 @@ public interface MessageService
      * Get a message by its unique reference.
      *
      * @param reference the reference
-     * @param discussionReference
+     * @param discussionReference the discussion reference
      * @return the message
      */
     Optional<Message> getByReference(String reference, String discussionReference);
@@ -72,4 +72,20 @@ public interface MessageService
      * @return the count of messages
      */
     long countByDiscussion(Discussion discussion);
+
+    /**
+     * Checks if the message can be deleted by the current user.
+     *
+     * @param message the message
+     * @return {@code true} of the current user can delete the message. {@code false} otherwise
+     */
+    boolean canDelete(Message message);
+
+    /**
+     * Delete a message.
+     *
+     * @param reference the message reference
+     * @param discussionReference the reference of the discussion of the message
+     */
+    void delete(String reference, String discussionReference);
 }
