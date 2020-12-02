@@ -24,49 +24,23 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <version>1.0-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
-  <artifactId>discussions-default</artifactId>
+  <artifactId>discussions-test</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>Discussions - Default</name>
-  <description>Default implementation of the discussions API.</description>
+  <packaging>pom</packaging>
+  <name>Discussions - Test</name>
+  <description>Test of the Discussions application.</description>
 
-  <properties>
-    <xwiki.extension.name>${description}</xwiki.extension.name>
-    <xwiki.extension.category>other</xwiki.extension.category>
-    <xwiki.jacoco.instructionRatio>0.50</xwiki.jacoco.instructionRatio>
-  </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.xwiki.contrib</groupId>
-      <artifactId>discussions-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.contrib</groupId>
-      <artifactId>discussions-store-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${platform.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-tool-test-component</artifactId>
-      <version>${commons.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <modules>
+        <module>discussions-test-docker</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>

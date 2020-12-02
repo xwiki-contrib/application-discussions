@@ -79,6 +79,15 @@
     <module>discussions-ui</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>integration-tests</id>
+      <modules>
+        <module>discussions-test</module>
+      </modules>
+    </profile>
+  </profiles>
+  
   <build>
     <plugins>
       <plugin>

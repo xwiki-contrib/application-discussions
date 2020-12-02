@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.internal.server;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -68,6 +69,12 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private static final String REFERENCE_PARAM = "reference";
 
     private static final String DISCUSSION_REFERENCE_PARAM = "discussionReference";
+
+    private static final String CONTENT_PARAMETER = "content";
+
+    private static final String REQUIRES_HTML_CONVERSION_PARAMETER = "RequiresHTMLConversion";
+
+    private static final String CONTENT_SYNTAX_PARAMETER = "content_syntax";
 
     @Inject
     private Logger logger;
@@ -192,9 +199,15 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         this.discussionService
             .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
             .ifPresent(d -> {
-                String content = request.getParameter("content");
-                String contentClean =
-                    this.htmlConverter.fromHTML(content, request.getParameter("content_syntax"));
+                String content = request.getParameter(CONTENT_PARAMETER);
+
+                String contentClean;
+                String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
+                if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
+                    contentClean = this.htmlConverter.fromHTML(content, request.getParameter(CONTENT_SYNTAX_PARAMETER));
+                } else {
+                    contentClean = content;
+                }
                 this.messageService.create(contentClean, d)
                     .ifPresent(m -> redirect(response, request.getParameter(ORIGINAL_URL_PARAM)));
             });

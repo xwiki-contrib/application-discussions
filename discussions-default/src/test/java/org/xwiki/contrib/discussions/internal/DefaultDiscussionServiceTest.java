@@ -1,0 +1,220 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+package org.xwiki.contrib.discussions.internal;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionsRightService;
+import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
+import org.xwiki.test.junit5.mockito.MockComponent;
+
+import com.xpn.xwiki.objects.BaseObject;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+/**
+ * Test of {@link DefaultDiscussionService}.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
+@ComponentTest
+class DefaultDiscussionServiceTest
+{
+    @InjectMockComponents
+    private DefaultDiscussionService defaultDiscussionService;
+
+    @MockComponent
+    private DiscussionStoreService discussionStoreService;
+
+    @MockComponent
+    private DiscussionsRightService discussionsRightService;
+
+    @Test
+    void createNotAllowed()
+    {
+        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(false);
+
+        Optional<Discussion> discussion =
+            this.defaultDiscussionService.create("title", "description");
+
+        assertEquals(Optional.empty(), discussion);
+        verifyNoInteractions(this.discussionStoreService);
+    }
+
+    @Test
+    void createCreateFail()
+    {
+        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
+        when(this.discussionStoreService.create("title", "description"))
+            .thenReturn(Optional.empty());
+
+        Optional<Discussion> discussion =
+            this.defaultDiscussionService.create("title", "description");
+
+        assertEquals(Optional.empty(), discussion);
+    }
+
+    @Test
+    void create()
+    {
+        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
+        when(this.discussionStoreService.create("title", "description"))
+            .thenReturn(Optional.of("reference"));
+
+        Optional<Discussion> discussion =
+            this.defaultDiscussionService.create("title", "description");
+
+        assertEquals(
+            Optional.of(new Discussion("reference", "title", "description")),
+            discussion);
+    }
+
+    @Test
+    void getDoesNotExist()
+    {
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
+        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
+        assertEquals(Optional.empty(), discussion);
+    }
+
+    @Test
+    void getNotAllowed()
+    {
+        DocumentReference dr = new DocumentReference("xwiki", "XWiki", "Discussion");
+        BaseObject discussionBaseObject = mock(BaseObject.class);
+
+        when(discussionBaseObject.getDocumentReference()).thenReturn(dr);
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionsRightService.canReadDiscussion(dr)).thenReturn(false);
+
+        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
+
+        assertEquals(Optional.empty(), discussion);
+    }
+
+    @Test
+    void get()
+    {
+        DocumentReference dr = new DocumentReference("xwiki", "XWiki", "Discussion");
+        BaseObject discussionBaseObject = mock(BaseObject.class);
+
+        when(discussionBaseObject.getDocumentReference()).thenReturn(dr);
+        when(discussionBaseObject.getStringValue("reference")).thenReturn("reference");
+        when(discussionBaseObject.getStringValue("title")).thenReturn("title");
+        when(discussionBaseObject.getStringValue("description")).thenReturn("description");
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionsRightService.canReadDiscussion(dr)).thenReturn(true);
+
+        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
+
+        assertEquals(Optional.of(new Discussion("reference", "title", "description")), discussion);
+    }
+
+    @Test
+    void canReadNotFound()
+    {
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
+
+        boolean reference = this.defaultDiscussionService.canRead("reference");
+
+        assertFalse(reference);
+    }
+
+    @Test
+    void canReadNotAllowed()
+    {
+        BaseObject baseObject = mock(BaseObject.class);
+        DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
+        when(baseObject.getDocumentReference()).thenReturn(documentReference);
+
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionsRightService.canReadDiscussion(documentReference)).thenReturn(false);
+
+        boolean reference = this.defaultDiscussionService.canRead("reference");
+
+        assertFalse(reference);
+    }
+
+    @Test
+    void canRead()
+    {
+        BaseObject baseObject = mock(BaseObject.class);
+        DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
+        when(baseObject.getDocumentReference()).thenReturn(documentReference);
+
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionsRightService.canReadDiscussion(documentReference)).thenReturn(true);
+
+        boolean reference = this.defaultDiscussionService.canRead("reference");
+
+        assertTrue(reference);
+    }
+
+    @Test
+    void canWriteNotFound()
+    {
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
+
+        boolean reference = this.defaultDiscussionService.canWrite("reference");
+
+        assertFalse(reference);
+    }
+
+    @Test
+    void canWriteNotAllowed()
+    {
+        BaseObject baseObject = mock(BaseObject.class);
+        DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
+        when(baseObject.getDocumentReference()).thenReturn(documentReference);
+
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionsRightService.canWriteDiscussion(documentReference)).thenReturn(false);
+
+        boolean reference = this.defaultDiscussionService.canWrite("reference");
+
+        assertFalse(reference);
+    }
+
+    @Test
+    void canWrite()
+    {
+        BaseObject baseObject = mock(BaseObject.class);
+        DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
+        when(baseObject.getDocumentReference()).thenReturn(documentReference);
+
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionsRightService.canWriteDiscussion(documentReference)).thenReturn(true);
+
+        boolean reference = this.defaultDiscussionService.canWrite("reference");
+
+        assertTrue(reference);
+    }
+}
