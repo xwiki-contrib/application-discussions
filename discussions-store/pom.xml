@@ -30,28 +30,20 @@
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
-  <artifactId>discussions-model</artifactId>
+  <packaging>pom</packaging>
+  <artifactId>discussions-store</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Discussions - Model</name>
-  <description>Discussions model classes definition.</description>
+  <name>Discussions - Store</name>
+  <description>Root module of the store of the Discussions application.</description>
 
   <properties>
     <xwiki.extension.name>${description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-component-api</artifactId>
-      <version>${commons.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-model-api</artifactId>
-      <version>${platform.version}</version>
-    </dependency>
-  </dependencies>
-
+  <modules>
+    <module>discussions-store-api</module>
+    <module>discussions-store-default</module>
+  </modules>
 </project>

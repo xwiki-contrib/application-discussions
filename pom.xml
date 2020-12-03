@@ -71,11 +71,9 @@
   <modules>
     <module>discussions-api</module>
     <module>discussions-default</module>
-    <module>discussions-model</module>
     <module>discussions-rest</module>
     <module>discussions-server</module>
-    <module>discussions-store-api</module>
-    <module>discussions-store-default</module>
+    <module>discussions-store</module>
     <module>discussions-ui</module>
   </modules>
 

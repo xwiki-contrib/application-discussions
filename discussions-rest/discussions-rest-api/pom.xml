@@ -52,7 +52,7 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
-      <artifactId>discussions-model</artifactId>
+      <artifactId>discussions-api</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
