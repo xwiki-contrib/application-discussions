@@ -28,7 +28,7 @@
   <parent>
     <version>1.0-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
-    <artifactId>application-discussions</artifactId>
+    <artifactId>discussions-store</artifactId>
   </parent>
   <artifactId>discussions-store-api</artifactId>
   <version>1.0-SNAPSHOT</version>
