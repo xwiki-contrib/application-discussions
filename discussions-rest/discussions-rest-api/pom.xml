@@ -41,6 +41,19 @@
     <xwiki.extension.category>other</xwiki.extension.category>
   </properties>
   <dependencies>
-
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-rest-api</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

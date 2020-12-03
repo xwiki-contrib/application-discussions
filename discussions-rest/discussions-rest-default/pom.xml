@@ -41,6 +41,20 @@
     <xwiki.extension.category>other</xwiki.extension.category>
   </properties>
   <dependencies>
-
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-rest-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-rest-server</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

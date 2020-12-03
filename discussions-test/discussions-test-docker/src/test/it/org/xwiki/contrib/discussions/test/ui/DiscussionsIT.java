@@ -21,17 +21,21 @@ package org.xwiki.contrib.discussions.test.ui;
 
 import java.util.List;
 
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.rest.DiscussionREST;
+import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.contrib.discussions.test.po.DiscussionPage;
 import org.xwiki.contrib.discussions.test.po.MessageBoxPage;
 import org.xwiki.test.docker.junit5.TestReference;
 import org.xwiki.test.docker.junit5.UITest;
 import org.xwiki.test.ui.TestUtils;
-import org.xwiki.test.ui.po.ViewPage;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * UI tests of the Discussions application.
@@ -39,28 +43,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @UITest
 class DiscussionsIT
 {
-    private String discussionReference;
+    private Discussion discussion;
 
     @Test
     @Order(1)
-    void createDiscussion(TestUtils setup, TestReference reference)
+    void createDiscussion(TestUtils setup) throws Exception
     {
         setup.loginAsSuperAdmin();
-        // TODO: update once the rest server is developed.
-        ViewPage discussion = setup.createPage(reference, "{{velocity}}"
-            + "$services.discussions.createDiscussion('title', 'description')"
-            + "{{/velocity}}", "discussion");
 
-        String content = discussion.getContent();
-        this.discussionReference = content.substring(13).split("]")[0];
-        assertTrue(this.discussionReference.startsWith("title-"));
+        PostMethod postMethod = setup.rest().executePost(DiscussionREST.class, new CreateDiscussion()
+            .setTitle("title")
+            .setDescription("description"));
+
+        Discussion discussion = new ObjectMapper().readValue(postMethod.getResponseBodyAsStream(), Discussion.class);
+        assertEquals(discussion.getTitle(), "title");
+        assertEquals(discussion.getDescription(), "description");
+
+        this.discussion = discussion;
     }
 
     @Test
     @Order(2)
-    void displayDiscussion(TestUtils setup, TestReference reference)
+    void displayDiscussion(TestReference reference)
     {
-        DiscussionPage discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussionReference,
+        DiscussionPage discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussion.getReference(),
             "discussionsns");
 
         assertEquals("title", discussionPage.getTitle());
