@@ -130,6 +130,8 @@
 
   $(".message-submit-button").click(function() {
     document.fire('xwiki:actions:beforeSave');
+    // TODO: Dangerous since if the user is editing another field in parallel, he will not be warned before submitting and will loose its changes.
+    $(document).trigger('xwiki:actions:cancel');
     $(this).parent('form').submit();
   });
 
@@ -347,7 +349,8 @@
       <async_enabled>0</async_enabled>
     </property>
     <property>
-      <code>{{velocity}}
+      <code>{{include reference='Discussions.Code.DisplayMessage' /}}
+{{velocity}}
 #set ($reference = $wikimacro.parameters.reference)
 #set ($pageSize = $wikimacro.parameters.pageSize)
 #set ($namespace = $wikimacro.parameters.namespace)
@@ -454,16 +457,17 @@ No messages!
 #if ($services.discussions.rights.canWriteDiscussion($reference))
 === New Message ===
 
-#set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
-#set ($messageClass = $docMessageClass.getxWikiClass())
-#set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
-#set ($contentField = $messageClass.get('content'))
+###set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
+###set ($messageClass = $docMessageClass.getxWikiClass())
+###set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
+###set ($contentField = $messageClass.get('content'))
 #set ($url = "${request.getContextPath()}/discussions/create/Message/$discussion.reference")
 
 {{html}}
 &lt;form method="post" action="$url" class="message-form"&gt;
 &lt;div class="form-group"&gt;
-$doc.displayEdit($contentField, '', $messageObj)
+##$doc.displayEdit($contentField, '', $messageObj)
+#displayMessageContentField()
 &lt;/div&gt;
 &lt;button type="submit" class='btn btn-default message-submit-button'&gt;Submit&lt;/button&gt;
 &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
