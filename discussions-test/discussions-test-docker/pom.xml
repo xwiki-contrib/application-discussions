@@ -45,6 +45,11 @@
       <type>xar</type>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-test-pageobjects</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-test-docker</artifactId>
       <version>${platform.version}</version>

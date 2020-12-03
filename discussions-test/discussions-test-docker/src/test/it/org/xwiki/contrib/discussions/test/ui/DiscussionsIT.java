@@ -20,14 +20,11 @@
 package org.xwiki.contrib.discussions.test.ui;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import org.xwiki.contrib.discussions.test.po.DiscussionPage;
+import org.xwiki.contrib.discussions.test.po.MessageBoxPage;
 import org.xwiki.test.docker.junit5.TestReference;
 import org.xwiki.test.docker.junit5.UITest;
 import org.xwiki.test.ui.TestUtils;
@@ -63,22 +60,20 @@ class DiscussionsIT
     @Order(2)
     void displayDiscussion(TestUtils setup, TestReference reference)
     {
-        setup.createPage(reference,
-            "{{discussion reference=\"" + this.discussionReference + "\" namespace=\"discussionsns\"/}}\n",
-            "view discussion");
+        DiscussionPage discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussionReference,
+            "discussionsns");
 
-        assertEquals("title", setup.getDriver().findElement(By.cssSelector("h2")).getText());
-        assertEquals("description", setup.getDriver().findElement(By.cssSelector("h2 + p")).getText());
-        assertEquals("No messages!", setup.getDriver().findElement(By.cssSelector("h3 + p")).getText());
+        assertEquals("title", discussionPage.getTitle());
+        assertEquals("description", discussionPage.getDescription());
+        assertEquals("No messages!", discussionPage.getNoMessagesText());
 
-        setup.getDriver().findElement(By.id("content")).sendKeys("New message");
-        setup.getDriver().findElement(By.cssSelector("button.message-submit-button")).click();
+        discussionPage.sendNewMessage("New message");
 
-        List<WebElement> messages = setup.getDriver().findElements(By.cssSelector("div.box"));
+        List<MessageBoxPage> messages = discussionPage.getMessages();
         assertEquals(1, messages.size());
-        WebElement message = messages.get(0);
-        List<WebElement> paragraphs = message.findElements(By.cssSelector(".col-xs-11 > p"));
-        assertEquals("xwiki:XWiki.superadmin", paragraphs.get(0).getText());
-        assertEquals("New message", paragraphs.get(1).getText());
+        MessageBoxPage message = messages.get(0);
+
+        assertEquals("xwiki:XWiki.superadmin", message.getAuthor());
+        assertEquals("New message", message.getMessageContent());
     }
 }

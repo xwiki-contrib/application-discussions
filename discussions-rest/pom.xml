@@ -32,13 +32,19 @@
   </parent>
   <artifactId>discussions-rest</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <name>Discussions - REST</name>
-  <description>REST API for the discussions application.</description>
+  <description>REST parent module for the discussions application.</description>
 
   <properties>
     <xwiki.extension.name>${description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
   </properties>
+  
+  <modules>
+    <module>discussions-rest-api</module>
+    <module>discussions-rest-default</module>
+  </modules>
 
 </project>

@@ -27,24 +27,17 @@
   <parent>
     <version>1.0-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
-    <artifactId>application-discussions</artifactId>
+    <artifactId>discussions-test</artifactId>
   </parent>
-  <artifactId>discussions-test</artifactId>
+  <artifactId>discussions-test-pageobjects</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Discussions - Test</name>
-  <description>Test of the Discussions application.</description>
-  
-  <modules>
-    <module>discussions-test-pageobjects</module>
-  </modules>
-
-  <profiles>
-    <profile>
-      <id>docker</id>
-      <modules>
-        <module>discussions-test-docker</module>
-      </modules>
-    </profile>
-  </profiles>
+  <name>Discussions - Test - Page Objects</name>
+  <description>Page Objects for the tests of the Discussions application.</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-test-ui</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+  </dependencies>
 </project>
