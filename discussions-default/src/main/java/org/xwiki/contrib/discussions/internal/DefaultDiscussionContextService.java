@@ -27,8 +27,18 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
+import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
+import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+
+import com.xpn.xwiki.objects.BaseObject;
+
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.REFERENCE_NAME;
 
 /**
  * Default implementation of {@link DefaultDiscussionContextService}.
@@ -44,6 +54,9 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     private DiscussionContextStoreService discussionContextStoreService;
 
     @Inject
+    private DiscussionStoreService discussionStoreService;
+
+    @Inject
     private DiscussionsRightService discussionsRightService;
 
     @Override
@@ -57,5 +70,64 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public void link(DiscussionContext discussionContext, Discussion discussion)
+    {
+        String discussionContextReference = discussionContext.getReference();
+        String discussionReference = discussion.getReference();
+        canWriteDiscussionContext(discussionContextReference, () -> canWriteDiscussion(discussionReference, () -> {
+            this.discussionContextStoreService.link(discussionContextReference, discussionReference);
+            this.discussionStoreService.link(discussionReference, discussionContextReference);
+        }));
+    }
+
+    private void canWriteDiscussionContext(String reference, Runnable r)
+    {
+        if (this.discussionContextStoreService.get(reference)
+            .map(it -> this.discussionsRightService.canWriteDiscussionContext(it.getDocumentReference())).orElse(false))
+        {
+            r.run();
+        }
+    }
+
+    private void canWriteDiscussion(String reference, Runnable r)
+    {
+        if (this.discussionStoreService.get(reference)
+            .map(it -> this.discussionsRightService.canWriteDiscussion(it.getDocumentReference())).orElse(false))
+        {
+            r.run();
+        }
+    }
+
+    @Override
+    public void unlink(DiscussionContext discussionContext, Discussion discussion)
+    {
+        String discussionContextReference = discussionContext.getReference();
+        String discussionReference = discussion.getReference();
+        canWriteDiscussionContext(discussionContextReference, () -> canWriteDiscussion(discussionReference, () -> {
+            this.discussionContextStoreService.unlink(discussionContextReference, discussionReference);
+            this.discussionStoreService.unlink(discussionReference, discussionContextReference);
+        }));
+    }
+
+    @Override
+    public Optional<DiscussionContext> get(String reference)
+    {
+        return this.discussionContextStoreService.get(reference)
+            .flatMap(this::mapBaseObject);
+    }
+
+    private Optional<DiscussionContext> mapBaseObject(BaseObject baseObject)
+    {
+        return Optional
+            .of(new DiscussionContext(
+                baseObject.getStringValue(REFERENCE_NAME),
+                baseObject.getStringValue(NAME_NAME),
+                baseObject.getStringValue(DESCRIPTION_NAME),
+                baseObject.getStringValue(ENTITY_REFERENCE_TYPE_NAME),
+                baseObject.getStringValue(ENTITY_REFERENCE_NAME)
+            ));
     }
 }

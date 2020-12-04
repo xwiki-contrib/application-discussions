@@ -26,4 +26,6 @@
 
 <suppressions>
   <suppress checks="MultipleStringLiterals" files="src/main/java/org/xwiki/contrib/discussions/store/internal/DefaultMessageStoreService.java"/>
+  <suppress checks="MultipleStringLiterals" 
+    files="src/main/java/org/xwiki/contrib/discussions/store/internal/DefaultDiscussionStoreService.java"/>
 </suppressions>

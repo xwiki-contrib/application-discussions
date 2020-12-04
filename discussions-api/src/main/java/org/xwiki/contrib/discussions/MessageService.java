@@ -41,10 +41,10 @@ public interface MessageService
      * Creates a message for the current user.
      *
      * @param content the message content
-     * @param discussion the discussion
+     * @param discussionReference the discussion reference
      * @return the created message
      */
-    Optional<Message> create(String content, Discussion discussion);
+    Optional<Message> create(String content, String discussionReference);
 
     /**
      * Get a message by its unique reference.
@@ -58,12 +58,12 @@ public interface MessageService
     /**
      * Returns the paginated list of messages of the discussion.
      *
-     * @param discussion the discussion
+     * @param discussionReference the discussion reference
      * @param offset the offset
      * @param limit the limit
      * @return the list of messages
      */
-    List<Message> getByDiscussion(Discussion discussion, int offset, int limit);
+    List<Message> getByDiscussion(String discussionReference, int offset, int limit);
 
     /**
      * Returns the count of messages of a discussion.

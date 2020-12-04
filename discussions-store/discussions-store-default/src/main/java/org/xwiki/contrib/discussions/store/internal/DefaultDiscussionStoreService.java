@@ -19,8 +19,10 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -33,6 +35,7 @@ import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 
@@ -41,8 +44,10 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
 import static org.xwiki.query.Query.XWQL;
@@ -117,14 +122,101 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             }
             String result = execute.get(0);
 
-            XWikiDocument document = this.xcontextProvider.get().getWiki()
-                .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
-            return Optional.of(document.getXObject(this.discussionMetadata.getDiscussionXClass()));
+            return mapToBaseObject(result);
         } catch (QueryException | XWikiException e) {
             this.logger.warn("Failed to get the Discussion with reference=[{}]. Cause: [{}]", reference,
                 getRootCauseMessage(e));
             return Optional.empty();
         }
+    }
+
+    private Optional<BaseObject> mapToBaseObject(String result) throws XWikiException
+    {
+        XWikiDocument document = this.xcontextProvider.get().getWiki()
+            .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
+        return Optional.of(document.getXObject(this.discussionMetadata.getDiscussionXClass()));
+    }
+
+    @Override
+    public List<BaseObject> findByDiscussionContexts(List<String> discussionContextReferences)
+    {
+        // TODO: this whole method can be simplified
+        String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
+        try {
+            // Selects the discussions that are linked EXACTLY to the requested discussion contexts.
+            List<List<String>> subResults = new ArrayList<>();
+            for (String discussionContextReference : discussionContextReferences) {
+                // Selects the discussions that are linked to the request contexts individually.
+                subResults.add(this.queryManager.createQuery(String.format(
+                    "select str_field.value "
+                        + "from XWikiDocument as doc , "
+                        + "BaseObject as obj , "
+                        + "com.xpn.xwiki.objects.DBStringListProperty as field , "
+                        + "com.xpn.xwiki.objects.StringProperty as str_field "
+                        + "where (:discussionContextReference in elements(field.list)) "
+                        + "and doc.fullName=obj.name "
+                        + "and obj.className='%s' "
+                        + "and field.id.id=obj.id "
+                        + "and str_field.id.id=obj.id "
+                        + "and field.id.name='discussionContexts' "
+                        + "and str_field.id.name='reference' ",
+                    discussionClass), Query.HQL)
+                    .bindValue("discussionContextReference", discussionContextReference)
+                    .execute());
+            }
+            // Selects the discussions that are linked to exactly as much contexts as the number requested.
+            subResults.add(this.queryManager.createQuery(String.format(
+                "select str_field.value "
+                    + "from XWikiDocument as doc , "
+                    + "BaseObject as obj , "
+                    + "com.xpn.xwiki.objects.DBStringListProperty as field , "
+                    + "com.xpn.xwiki.objects.StringProperty as str_field "
+                    + "where doc.fullName=obj.name "
+                    + "and obj.className='%s' "
+                    + "and field.id.id=obj.id "
+                    + "and str_field.id.id=obj.id "
+                    + "and field.id.name='discussionContexts' "
+                    + "and str_field.id.name='reference' "
+                    + "GROUP BY str_field.value HAVING sum(size(field.list)) = :contextsListSize",
+                discussionClass), Query.HQL)
+                .bindValue("contextsListSize", (long) discussionContextReferences.size()).execute());
+
+            return intersection(subResults).stream()
+                .map(this::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        } catch (QueryException e) {
+            this.logger.warn("Failed to retrieve the discussions link to the discussion contexts [{}]. Cause: [{}]",
+                discussionContextReferences, getRootCauseMessage(e));
+        }
+
+        return emptyList();
+    }
+
+    @Override
+    public void link(String discussionReference, String discussionContextReference)
+    {
+        get(discussionReference)
+            .ifPresent(discussion -> {
+                List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
+                if (!listValue.contains(discussionContextReference)) {
+                    listValue.add(discussionContextReference);
+                    save(discussion);
+                }
+
+            });
+    }
+
+    @Override
+    public void unlink(String discussionReference, String discussionContextReference)
+    {
+        get(discussionReference)
+            .ifPresent(
+                discussion -> {
+                    discussion.getListValue(DISCUSSION_CONTEXTS_NAME).remove(discussionContextReference);
+                    save(discussion);
+                });
     }
 
     private XWikiDocument generateUniquePage(String title) throws XWikiException
@@ -158,5 +250,30 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
 
         XWikiContext context = getContext();
         return context.getWiki().getDocument(documentReference, context);
+    }
+
+    private void save(BaseObject discussion)
+    {
+        XWikiContext context = getContext();
+        try {
+            context.getWiki().saveDocument(discussion.getOwnerDocument(), context);
+        } catch (XWikiException e) {
+            this.logger.warn("Failed to save the discussion context. Cause: [{}]", getRootCauseMessage(e));
+        }
+    }
+
+    /**
+     * Returns the intersection of the provided lists.
+     *
+     * @param lists the lists
+     * @return the element commons to all the provided lists
+     */
+    private List<String> intersection(List<List<String>> lists)
+    {
+        List<String> ret = lists.get(0);
+        for (int i = 1; i < lists.size(); i++) {
+            ret.retainAll(lists.get(i));
+        }
+        return ret;
     }
 }

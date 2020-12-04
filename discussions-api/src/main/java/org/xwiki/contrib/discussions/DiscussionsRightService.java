@@ -58,6 +58,12 @@ public interface DiscussionsRightService
     boolean canWriteDiscussion(DocumentReference discussion);
 
     /**
+     * @param discussionContext the discussion context page
+     * @return {@code true} if the current user can write in the discussion context, {@code false} otherwise.
+     */
+    boolean canWriteDiscussionContext(DocumentReference discussionContext);
+
+    /**
      * @param message the message
      * @param discussion the discussion page
      * @return {@code true} if the current user can delete the message, {@code false} otherwise

@@ -106,6 +106,17 @@ public class DiscussionsScriptService implements ScriptService
     {
         return this.discussionService.get(reference).orElse(null);
     }
+    
+    /**
+     * Retrieve a discussion context by its reference.
+     *
+     * @param reference the discussion context reference
+     * @return the discussion context, {@code null} if not found
+     */
+    public DiscussionContext getDiscussionContext(String reference)
+    {
+        return this.discussionContextService.get(reference).orElse(null);
+    }
 
     /**
      * Create a message in a discussion for the current user.
@@ -116,7 +127,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Message createMessage(String content, Discussion discussion)
     {
-        return this.messageService.create(content, discussion).orElse(null);
+        return this.messageService.create(content, discussion.getReference()).orElse(null);
     }
 
     /**
@@ -129,7 +140,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Message> getMessagesByDiscussion(Discussion discussion, int offset, int limit)
     {
-        return this.messageService.getByDiscussion(discussion, offset * limit, limit);
+        return this.messageService.getByDiscussion(discussion.getReference(), offset * limit, limit);
     }
 
     /**
@@ -153,5 +164,38 @@ public class DiscussionsScriptService implements ScriptService
     public String updateQueryString(Map<String, Object> parameterMap, Map<String, Object> newParameterMap)
     {
         return this.queryStringService.getString(parameterMap, newParameterMap);
+    }
+
+    /**
+     * Find the discussions linked to exactly the provided list of discussion context reference.
+     *
+     * @param discussionContextReferences the list of discussion context reference
+     * @return the list of discussions
+     */
+    public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
+    {
+        return this.discussionService.findByDiscussionContexts(discussionContextReferences);
+    }
+
+    /**
+     * Links a discussion and a discussion context.
+     *
+     * @param discussion the discussion
+     * @param discussionContext the discussion context
+     */
+    public void linkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
+    {
+        this.discussionContextService.link(discussionContext, discussion);
+    }
+
+    /**
+     * Unlinks a discussion and a discussion context.
+     *
+     * @param discussion the discussion
+     * @param discussionContext the discussion context
+     */
+    public void unlinkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
+    {
+        this.discussionContextService.unlink(discussionContext, discussion);
     }
 }

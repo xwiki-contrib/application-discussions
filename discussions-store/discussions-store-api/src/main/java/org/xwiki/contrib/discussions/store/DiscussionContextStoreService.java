@@ -24,6 +24,8 @@ import java.util.Optional;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.stability.Unstable;
 
+import com.xpn.xwiki.objects.BaseObject;
+
 /**
  * Low-level storage service for the discussion context objects.
  *
@@ -45,4 +47,28 @@ public interface DiscussionContextStoreService
      */
     Optional<String> create(String name, String description, String referenceType,
         String entityReference);
+
+    /**
+     * Returns a discussion context by its reference.
+     *
+     * @param reference the discussion context reference
+     * @return the discussion context base object
+     */
+    Optional<BaseObject> get(String reference);
+
+    /**
+     * Links (unidirectionally) a discussion context and a discussion.
+     *
+     * @param discussionContextReference the discussion context reference
+     * @param discussionReference the discussion reference
+     */
+    void link(String discussionContextReference, String discussionReference);
+
+    /**
+     * Uninks (unidirectionally) a discussion context and a discussion.
+     *
+     * @param discussionContextReference the discussion context reference
+     * @param discussionReference the discussion reference
+     */
+    void unlink(String discussionContextReference, String discussionReference);
 }

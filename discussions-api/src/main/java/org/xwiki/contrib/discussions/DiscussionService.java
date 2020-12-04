@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
@@ -63,4 +64,12 @@ public interface DiscussionService
      * @return {@code true} if the current user has the rights to write in the discussion, {@code false} otherwise
      */
     boolean canWrite(String reference);
+
+    /**
+     * Find a list of discussions that are attached to the list of discussion context.
+     *
+     * @param discussionContextReferences a list of discussion context references
+     * @return the list discussions attached to the list of discussion contexts
+     */
+    List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences);
 }

@@ -142,7 +142,7 @@ public class DiscussionMetadata
     private Provider<XWikiContext> xcontextProvider;
 
     /**
-     * @return the {@link DocumentReference} of the document holding the discussion XClass.
+     * @return the {@link DocumentReference} of the document holding the discussion XClass
      */
     public EntityReference getDiscussionXClass()
     {
@@ -151,7 +151,7 @@ public class DiscussionMetadata
     }
 
     /**
-     * @return the discussion storage space.
+     * @return the discussion storage space
      */
     public SpaceReference getDiscussionSpace()
     {
@@ -159,7 +159,7 @@ public class DiscussionMetadata
     }
 
     /**
-     * @return the full name of the discussion XClass.
+     * @return the full name of the discussion XClass
      */
     public String getDiscussionXClassFullName()
     {

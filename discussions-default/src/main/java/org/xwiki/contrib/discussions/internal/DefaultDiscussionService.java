@@ -19,7 +19,9 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,6 +31,8 @@ import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+
+import com.xpn.xwiki.objects.BaseObject;
 
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
@@ -64,18 +68,8 @@ public class DefaultDiscussionService implements DiscussionService
     @Override
     public Optional<Discussion> get(String reference)
     {
-        return this.discussionStoreService.get(reference).flatMap(
-            baseObject -> {
-                if (this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference())) {
-                    return Optional.of(new Discussion(
-                        baseObject.getStringValue(REFERENCE_NAME),
-                        baseObject.getStringValue(TITLE_NAME),
-                        baseObject.getStringValue(DESCRIPTION_NAME)
-                    ));
-                } else {
-                    return Optional.empty();
-                }
-            });
+        return this.discussionStoreService.get(reference)
+            .flatMap(this::mapBaseObject);
     }
 
     @Override
@@ -90,5 +84,30 @@ public class DefaultDiscussionService implements DiscussionService
     {
         return this.discussionStoreService.get(reference)
             .map(d -> this.discussionsRightService.canWriteDiscussion(d.getDocumentReference())).orElse(false);
+    }
+
+    @Override
+    public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
+    {
+        return this.discussionStoreService
+            .findByDiscussionContexts(discussionContextReferences)
+            .stream()
+            .map(this::mapBaseObject)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
+    }
+
+    private Optional<Discussion> mapBaseObject(BaseObject baseObject)
+    {
+        if (this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference())) {
+            return Optional.of(new Discussion(
+                baseObject.getStringValue(REFERENCE_NAME),
+                baseObject.getStringValue(TITLE_NAME),
+                baseObject.getStringValue(DESCRIPTION_NAME)
+            ));
+        } else {
+            return Optional.empty();
+        }
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
@@ -52,4 +53,28 @@ public interface DiscussionStoreService
      * @return the discussion attributes
      */
     Optional<BaseObject> get(String reference);
+
+    /**
+     * Find the list of discussions attached to the list of discussion context references.
+     *
+     * @param discussionContextReferences the list of discussion context reference
+     * @return the list of discussions
+     */
+    List<BaseObject> findByDiscussionContexts(List<String> discussionContextReferences);
+
+    /**
+     * Links (unidirectionally) a discussion to a discussion context.
+     *
+     * @param discussionReference the discussion reference
+     * @param discussionContextReference the discussion context reference
+     */
+    void link(String discussionReference, String discussionContextReference);
+
+    /**
+     * Unlinks (unidirectionally) a discussion to a discussion context.
+     *
+     * @param discussionReference the discussion reference
+     * @param discussionContextReference the discussion context reference
+     */
+    void unlink(String discussionReference, String discussionContextReference);
 }

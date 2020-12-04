@@ -110,6 +110,14 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
     }
 
     @Override
+    public boolean canWriteDiscussionContext(DocumentReference discussionContext)
+    {
+        XWikiContext xWikiContext = this.xcontextProvider.get();
+        DocumentReference userReference = xWikiContext.getUserReference();
+        return this.authorizationManager.hasAccess(this.writeDiscussionRight, userReference, discussionContext);
+    }
+
+    @Override
     public boolean canDeleteMessage(Message message, DocumentReference discussion)
     {
         // Either the current user is the creator of the message and still has write right.

@@ -199,18 +199,24 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         this.discussionService
             .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
             .ifPresent(d -> {
-                String content = request.getParameter(CONTENT_PARAMETER);
-
-                String contentClean;
-                String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
-                if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
-                    contentClean = this.htmlConverter.fromHTML(content, request.getParameter(CONTENT_SYNTAX_PARAMETER));
-                } else {
-                    contentClean = content;
-                }
-                this.messageService.create(contentClean, d)
+                String content = getContent(request);
+                this.messageService.create(content, d.getReference())
                     .ifPresent(m -> redirect(response, request.getParameter(ORIGINAL_URL_PARAM)));
             });
+    }
+
+    private String getContent(HttpServletRequest request)
+    {
+        String content = request.getParameter(CONTENT_PARAMETER);
+
+        String contentClean;
+        String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
+        if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
+            contentClean = this.htmlConverter.fromHTML(content, request.getParameter(CONTENT_SYNTAX_PARAMETER));
+        } else {
+            contentClean = content;
+        }
+        return contentClean;
     }
 
     private void redirect(HttpServletResponse response, String originalURL)

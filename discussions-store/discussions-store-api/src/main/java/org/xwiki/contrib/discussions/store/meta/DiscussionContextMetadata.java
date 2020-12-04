@@ -19,10 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store.meta;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -153,24 +156,36 @@ public class DiscussionContextMetadata
      */
     public static final String DISCUSSIONS_PRETTY_NAME = DISCUSSIONS_STR;
 
+    private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
+
+    private static final String XCLASS_NAME = "DiscussionContextClass";
+
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
     /**
-     * @return the {@link DocumentReference} of the document holding the discussion context XClass.
+     * @return the {@link DocumentReference} of the document holding the discussion context XClass
      */
     public DocumentReference getDiscussionContextXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_STR, "Code"),
-            "DiscussionContextClass");
+        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
+            XCLASS_NAME);
     }
 
     /**
-     * @return the discussion context storage space.
+     * @return the discussion context storage space
      */
     public SpaceReference getDiscussionContextSpace()
     {
         return new SpaceReference(this.xcontextProvider.get().getMainXWiki(),
             asList(DISCUSSIONS_STR, "DiscussionContext"));
+    }
+
+    /**
+     * @return the full name of the discussion context XClass
+     */
+    public String getDiscussionContextXClassFullName()
+    {
+        return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
     }
 }
