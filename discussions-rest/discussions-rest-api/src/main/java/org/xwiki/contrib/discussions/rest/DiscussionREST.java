@@ -54,7 +54,7 @@ public interface DiscussionREST
      * Creates a discussion.
      *
      * @param discussion the create discussion object
-     * @return tge created discussion
+     * @return the created discussion
      * @throws XWikiRestException in case of error when creating the discussion
      */
     @POST

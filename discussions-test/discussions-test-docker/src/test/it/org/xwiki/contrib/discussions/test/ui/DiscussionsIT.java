@@ -19,21 +19,26 @@
  */
 package org.xwiki.contrib.discussions.test.ui;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.contrib.discussions.test.po.DiscussionPage;
 import org.xwiki.contrib.discussions.test.po.MessageBoxPage;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.docker.junit5.TestReference;
 import org.xwiki.test.docker.junit5.UITest;
 import org.xwiki.test.ui.TestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,6 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @UITest
 class DiscussionsIT
 {
+    public static final ObjectMapper OBJECT_MAPPER = new XmlMapper();
+
     private Discussion discussion;
 
     @Test
@@ -51,11 +58,15 @@ class DiscussionsIT
     {
         setup.loginAsSuperAdmin();
 
-        PostMethod postMethod = setup.rest().executePost(DiscussionREST.class, new CreateDiscussion()
+        CreateDiscussion restObject = new CreateDiscussion()
             .setTitle("title")
-            .setDescription("description"));
+            .setDescription("description");
+        String s = OBJECT_MAPPER.writeValueAsString(restObject);
+        PostMethod postMethod = setup.rest().executePost(DiscussionREST.class, IOUtils.toInputStream(s,
+            StandardCharsets.UTF_8));
 
-        Discussion discussion = new ObjectMapper().readValue(postMethod.getResponseBodyAsStream(), Discussion.class);
+        InputStream responseBodyAsStream = postMethod.getResponseBodyAsStream();
+        Discussion discussion = OBJECT_MAPPER.readValue(responseBodyAsStream, Discussion.class);
         assertEquals(discussion.getTitle(), "title");
         assertEquals(discussion.getDescription(), "description");
 
@@ -64,8 +75,9 @@ class DiscussionsIT
 
     @Test
     @Order(2)
-    void displayDiscussion(TestReference reference)
+    void displayDiscussion(TestUtils setup, TestReference reference)
     {
+        setup.gotoPage(new DocumentReference("xwiki", "XWiki", "Main"));
         DiscussionPage discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussion.getReference(),
             "discussionsns");
 

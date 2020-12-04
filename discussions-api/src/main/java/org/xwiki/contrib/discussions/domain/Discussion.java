@@ -33,11 +33,11 @@ import org.xwiki.text.XWikiToStringBuilder;
 @Unstable
 public class Discussion
 {
-    private final String reference;
+    private String reference;
 
-    private final String title;
+    private String title;
 
-    private final String description;
+    private String description;
 
     /**
      * Default constructor.
@@ -48,10 +48,16 @@ public class Discussion
      */
     public Discussion(String reference, String title, String description)
     {
-
         this.reference = reference;
         this.title = title;
         this.description = description;
+    }
+
+    /**
+     * Empty constructor.
+     */
+    public Discussion()
+    {
     }
 
     /**
@@ -78,6 +84,30 @@ public class Discussion
         return this.description;
     }
 
+    /**
+     * @param reference the reference
+     */
+    public void setReference(String reference)
+    {
+        this.reference = reference;
+    }
+
+    /**
+     * @param title the title
+     */
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    /**
+     * @param description the description
+     */
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -92,9 +122,9 @@ public class Discussion
         Discussion that = (Discussion) o;
 
         return new EqualsBuilder()
-            .append(reference, that.reference)
-            .append(title, that.title)
-            .append(description, that.description)
+            .append(this.reference, that.reference)
+            .append(this.title, that.title)
+            .append(this.description, that.description)
             .isEquals();
     }
 
@@ -102,9 +132,9 @@ public class Discussion
     public int hashCode()
     {
         return new HashCodeBuilder(17, 37)
-            .append(reference)
-            .append(title)
-            .append(description)
+            .append(this.reference)
+            .append(this.title)
+            .append(this.description)
             .toHashCode();
     }
 
