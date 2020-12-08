@@ -35,6 +35,7 @@ import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 
@@ -61,6 +62,8 @@ import static org.xwiki.query.Query.XWQL;
 @Singleton
 public class DefaultDiscussionContextStoreService implements DiscussionContextStoreService
 {
+    private static final String REFERENCE_QUERY_PARAM = "reference";
+
     @Inject
     private Logger logger;
 
@@ -118,7 +121,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                         String.format("FROM doc.object(%s) obj where obj.%s = :reference", discussionClass,
                             DiscussionMetadata.REFERENCE_NAME),
                         XWQL)
-                    .bindValue("reference", reference)
+                    .bindValue(REFERENCE_QUERY_PARAM, reference)
                     .execute();
             if (execute == null || execute.isEmpty()) {
                 return Optional.empty();
@@ -165,6 +168,58 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                     .remove(discussionReference);
                 save(discussionContext);
             });
+    }
+
+    @Override
+    public Optional<BaseObject> findByReference(String referenceType, String entityReference)
+    {
+        try {
+
+            // TODO: replace reference_field.value by the object reference !
+
+            List<String> execute = this.queryManager.createQuery(String.format(
+                "select doc.fullName "
+                    + "from XWikiDocument as doc, "
+                    + "BaseObject as obj, "
+                    + "com.xpn.xwiki.objects.StringProperty as reference_field, "
+                    + "com.xpn.xwiki.objects.StringProperty as type_field, "
+                    + "com.xpn.xwiki.objects.StringProperty as entity_reference_field "
+                    + "where doc.fullName=obj.name "
+                    + "and obj.className='%s' "
+                    + "and reference_field.id.name = '%s' "
+                    + "and reference_field.id.id=obj.id "
+                    + "and type_field.id.name = '%s' "
+                    + "and type_field.id.id=obj.id "
+                    + "and entity_reference_field.id.id=obj.id "
+                    + "and entity_reference_field.id.name = '%s' "
+                    + "and type_field.value = :type "
+                    + "and entity_reference_field.value = :reference ",
+                this.discussionContextMetadata.getDiscussionContextXClassFullName(), REFERENCE_NAME,
+                ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_NAME),
+                Query.HQL)
+                .bindValue("type", referenceType)
+                .bindValue(REFERENCE_QUERY_PARAM, entityReference)
+                .execute();
+
+            if (execute == null || execute.isEmpty()) {
+                return Optional.empty();
+            }
+            if (execute.size() > 1) {
+                this.logger
+                    .debug("More than one discussion context found for referenceType=[{}] and entityReference=[{}]",
+                        referenceType, entityReference);
+            }
+            String result = execute.get(0);
+
+            return mapToBaseObject(result);
+        } catch (QueryException | XWikiException e) {
+            this.logger.warn(
+                "Failed to get the search a discussion context with referenceType=[{}] "
+                    + "and entityReference=[{}]. Cause: [{}]",
+                referenceType, entityReference,
+                getRootCauseMessage(e));
+        }
+        return Optional.empty();
     }
 
     private XWikiDocument generateUniquePage(String name) throws XWikiException

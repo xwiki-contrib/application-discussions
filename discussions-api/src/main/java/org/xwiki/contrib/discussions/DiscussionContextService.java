@@ -48,6 +48,20 @@ public interface DiscussionContextService
     Optional<DiscussionContext> create(String name, String description, String referenceType, String entityReference);
 
     /**
+     * If a discussion context already exist with the given reference type and entity reference, it is returned. If it
+     * does not the discussion context is created with the name and description passed in parameter, and it then
+     * returned.
+     *
+     * @param name the name
+     * @param description the description
+     * @param referenceType the reference type
+     * @param entityReference the entity reference
+     * @return the found or created discussion context
+     */
+    Optional<DiscussionContext> getOrCreate(String name, String description, String referenceType,
+        String entityReference);
+
+    /**
      * Link a discussion context and a discussion.
      *
      * @param discussionContext the discussion context

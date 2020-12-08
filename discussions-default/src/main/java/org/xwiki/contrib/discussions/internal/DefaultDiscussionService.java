@@ -66,6 +66,21 @@ public class DefaultDiscussionService implements DiscussionService
     }
 
     @Override
+    public Optional<Discussion> getOrCreate(String title, String description, List<String> discussionContexts)
+    {
+        List<BaseObject> byDiscussionContexts =
+            this.discussionStoreService.findByDiscussionContexts(discussionContexts);
+        if (byDiscussionContexts.isEmpty()) {
+            Optional<String> discussionReferenceOpt = this.discussionStoreService.create(title, description);
+            discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
+                discussionContextReference -> this.discussionStoreService
+                    .link(discussionReference, discussionContextReference)));
+            return discussionReferenceOpt.flatMap(this::get);
+        }
+        return this.get(byDiscussionContexts.get(0).getStringValue(REFERENCE_NAME));
+    }
+
+    @Override
     public Optional<Discussion> get(String reference)
     {
         return this.discussionStoreService.get(reference)

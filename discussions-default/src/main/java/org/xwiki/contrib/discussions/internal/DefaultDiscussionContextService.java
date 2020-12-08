@@ -73,6 +73,19 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
+    public Optional<DiscussionContext> getOrCreate(String name, String description, String referenceType,
+        String entityReference)
+    {
+        Optional<BaseObject> baseObject =
+            this.discussionContextStoreService.findByReference(referenceType, entityReference);
+        if (baseObject.isPresent()) {
+            return baseObject.flatMap(this::mapBaseObject);
+        } else {
+            return this.create(name, description, referenceType, entityReference);
+        }
+    }
+
+    @Override
     public void link(DiscussionContext discussionContext, Discussion discussion)
     {
         String discussionContextReference = discussionContext.getReference();

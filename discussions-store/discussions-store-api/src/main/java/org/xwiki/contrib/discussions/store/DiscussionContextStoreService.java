@@ -65,10 +65,19 @@ public interface DiscussionContextStoreService
     void link(String discussionContextReference, String discussionReference);
 
     /**
-     * Uninks (unidirectionally) a discussion context and a discussion.
+     * Unlinks (unidirectionally) a discussion context and a discussion.
      *
      * @param discussionContextReference the discussion context reference
      * @param discussionReference the discussion reference
      */
     void unlink(String discussionContextReference, String discussionReference);
+
+    /**
+     * Search for a discussion context by its reference.
+     *
+     * @param referenceType the reference type
+     * @param entityReference the entity reference
+     * @return the discussion context
+     */
+    Optional<BaseObject> findByReference(String referenceType, String entityReference);
 }

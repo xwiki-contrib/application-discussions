@@ -46,6 +46,18 @@ public interface DiscussionService
     Optional<Discussion> create(String title, String description);
 
     /**
+     * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly. If it
+     * does not, it is inialized with the provided title and description, and linked to the list of discussion
+     * contexts.
+     *
+     * @param title the title
+     * @param description the description
+     * @param discussionContexts the list of discussion contexts
+     * @return the created or found discussion
+     */
+    Optional<Discussion> getOrCreate(String title, String description, List<String> discussionContexts);
+
+    /**
      * Search and retrieve a discussion by its reference.
      *
      * @param reference the discussion reference
