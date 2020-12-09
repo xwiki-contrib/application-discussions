@@ -39,9 +39,7 @@ public class DiscussionContext
 
     private final String description;
 
-    private final String referenceType;
-
-    private final String entityReference;
+    private final DiscussionContextEntityReference entityReference;
 
     /**
      * Default constructor.
@@ -49,17 +47,15 @@ public class DiscussionContext
      * @param reference the discussion context unique reference
      * @param name the discussion context name
      * @param description the discussion context description
-     * @param referenceType the reference type of the entity of the discussion context
-     * @param entityReference the reference of the entity of the discussion context
+     * @param entityReference the entity reference
      */
-    public DiscussionContext(String reference, String name, String description, String referenceType,
-        String entityReference)
+    public DiscussionContext(String reference, String name, String description,
+        DiscussionContextEntityReference entityReference)
     {
 
         this.reference = reference;
         this.name = name;
         this.description = description;
-        this.referenceType = referenceType;
         this.entityReference = entityReference;
     }
 
@@ -88,17 +84,9 @@ public class DiscussionContext
     }
 
     /**
-     * @return the reference type of the entity of the discussion context
+     * @return the entity reference
      */
-    public String getReferenceType()
-    {
-        return this.referenceType;
-    }
-
-    /**
-     * @return the reference of the entity of the discussion context
-     */
-    public String getEntityReference()
+    public DiscussionContextEntityReference getEntityReference()
     {
         return this.entityReference;
     }
@@ -117,11 +105,10 @@ public class DiscussionContext
         DiscussionContext that = (DiscussionContext) o;
 
         return new EqualsBuilder()
-            .append(reference, that.reference)
-            .append(name, that.name)
-            .append(description, that.description)
-            .append(referenceType, that.referenceType)
-            .append(entityReference, that.entityReference)
+            .append(this.reference, that.reference)
+            .append(this.name, that.name)
+            .append(this.description, that.description)
+            .append(this.entityReference, that.entityReference)
             .isEquals();
     }
 
@@ -129,11 +116,10 @@ public class DiscussionContext
     public int hashCode()
     {
         return new HashCodeBuilder(17, 37)
-            .append(reference)
-            .append(name)
-            .append(description)
-            .append(referenceType)
-            .append(entityReference)
+            .append(this.reference)
+            .append(this.name)
+            .append(this.description)
+            .append(this.entityReference)
             .toHashCode();
     }
 
@@ -144,7 +130,6 @@ public class DiscussionContext
             .append("reference", this.getReference())
             .append("name", this.getName())
             .append("description", this.getDescription())
-            .append("referenceType", this.getReferenceType())
             .append("entityReference", this.getEntityReference())
             .build();
     }

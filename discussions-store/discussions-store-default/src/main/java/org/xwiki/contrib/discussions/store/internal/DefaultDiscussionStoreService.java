@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions.store.internal;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,10 +47,12 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.CREATION_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
 import static org.xwiki.query.Query.XWQL;
 
 /**
@@ -89,6 +92,9 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             object.set(DESCRIPTION_NAME, description, context);
             String pageName = document.getDocumentReference().getName();
             object.set(REFERENCE_NAME, pageName, context);
+            Date value = new Date();
+            object.setDateValue(UPDATE_DATE_NAME, value);
+            object.setDateValue(CREATION_DATE_NAME, value);
             context.getWiki().saveDocument(document, context);
             reference = Optional.of(pageName);
         } catch (XWikiException e) {
@@ -177,7 +183,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                     + "and str_field.id.id=obj.id "
                     + "and field.id.name='discussionContexts' "
                     + "and str_field.id.name='reference' "
-                    + "GROUP BY str_field.value HAVING sum(size(field.list)) = :contextsListSize",
+                    + "GROUP BY str_field.value HAVING sum(size(field.list)) <= :contextsListSize",
                 discussionClass), Query.HQL)
                 .bindValue("contextsListSize", (long) discussionContextReferences.size()).execute());
 
@@ -195,6 +201,105 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
+    public List<BaseObject> findByEntityReference(String type, String reference, Integer offset,
+        Integer limit)
+    {
+        try {
+            return this.queryManager.createQuery("SELECT distinct doc.fullName "
+                + "FROM XWikiDocument  doc, "
+                + "XWikiDocument docDC, "
+                + "BaseObject obj, "
+                + "BaseObject objDC, "
+                + "DBStringListProperty discussionContextReference, "
+                + "StringProperty discussionContextReferenceField, "
+                + "StringProperty discussionReferenceField, "
+                + "StringProperty discussionContextERType, "
+                + "StringProperty discussionContextERRef "
+                + "where doc.fullName = obj.name "
+                + "AND docDC.fullName = objDC.name "
+                + "AND obj.className='Discussions.Code.DiscussionClass' "
+                + "AND objDC.className='Discussions.Code.DiscussionContextClass' "
+                + "AND discussionContextReference.id.id = obj.id "
+                + "AND discussionContextReference.name = 'discussionContexts' "
+                + "AND discussionReferenceField.id.id = obj.id "
+                + "AND discussionReferenceField.name = 'reference' "
+                + "AND discussionContextReferenceField.id.id = objDC.id "
+                + "AND discussionContextReferenceField.name = 'reference' "
+                + "AND discussionContextERType.id.id = objDC.id "
+                + "AND discussionContextERType.name = 'entityReferenceType' "
+                + "AND discussionContextERRef.id.id = objDC.id "
+                + "AND discussionContextERRef.name = 'entityReference' "
+                + "AND discussionContextReferenceField.value IN elements(discussionContextReference.list) "
+                + "AND discussionContextERType.value = :type "
+                + "AND discussionContextERRef.value = :reference", Query.HQL)
+                .bindValue("type", type)
+                .bindValue("reference", reference)
+                .setOffset(offset)
+                .setLimit(limit)
+                .<String>execute()
+                .stream()
+                .map(it -> {
+                    try {
+                        return mapToBaseObject(it);
+                    } catch (XWikiException e) {
+                        return Optional.<BaseObject>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        } catch (QueryException e) {
+            e.printStackTrace();
+            // TODO logo
+            return emptyList();
+        }
+    }
+
+    @Override
+    public long countByEntityReference(String type, String reference)
+    {
+        long count;
+        try {
+            List<Long> execute = this.queryManager.createQuery("SELECT count(distinct discussionReferenceField.value) "
+                + "FROM XWikiDocument  doc, "
+                + "XWikiDocument docDC, "
+                + "BaseObject obj, "
+                + "BaseObject objDC, "
+                + "DBStringListProperty discussionContextReference, "
+                + "StringProperty discussionContextReferenceField, "
+                + "StringProperty discussionReferenceField, "
+                + "StringProperty discussionContextERType, "
+                + "StringProperty discussionContextERRef "
+                + "where doc.fullName = obj.name "
+                + "AND docDC.fullName = objDC.name "
+                + "AND obj.className='Discussions.Code.DiscussionClass' "
+                + "AND objDC.className='Discussions.Code.DiscussionContextClass' "
+                + "AND discussionContextReference.id.id = obj.id "
+                + "AND discussionContextReference.name = 'discussionContexts' "
+                + "AND discussionReferenceField.id.id = obj.id "
+                + "AND discussionReferenceField.name = 'reference' "
+                + "AND discussionContextReferenceField.id.id = objDC.id "
+                + "AND discussionContextReferenceField.name = 'reference' "
+                + "AND discussionContextERType.id.id = objDC.id "
+                + "AND discussionContextERType.name = 'entityReferenceType' "
+                + "AND discussionContextERRef.id.id = objDC.id "
+                + "AND discussionContextERRef.name = 'entityReference' "
+                + "AND discussionContextReferenceField.value IN elements(discussionContextReference.list) "
+                + "AND discussionContextERType.value = :type "
+                + "AND discussionContextERRef.value = :reference", Query.HQL)
+                .bindValue("type", type)
+                .bindValue("reference", reference).execute();
+            count = execute.get(0);
+        } catch (QueryException e) {
+            this.logger
+                .warn("Fail to count the discussions with type=[{}] and reference=[{}]. Cause: [{}].", type, reference,
+                    getRootCauseMessage(e));
+            count = 0;
+        }
+        return count;
+    }
+
+    @Override
     public void link(String discussionReference, String discussionContextReference)
     {
         get(discussionReference)
@@ -204,7 +309,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                     listValue.add(discussionContextReference);
                     save(discussion);
                 }
-
             });
     }
 
@@ -256,6 +360,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     {
         XWikiContext context = getContext();
         try {
+            discussion.setDateValue(UPDATE_DATE_NAME, new Date());
             context.getWiki().saveDocument(discussion.getOwnerDocument(), context);
         } catch (XWikiException e) {
             this.logger.warn("Failed to save the discussion context. Cause: [{}]", getRootCauseMessage(e));

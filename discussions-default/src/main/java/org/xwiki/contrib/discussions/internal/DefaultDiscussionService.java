@@ -37,6 +37,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
 
 /**
  * Default implementation of {@link DefaultDiscussionService}.
@@ -58,8 +59,7 @@ public class DefaultDiscussionService implements DiscussionService
     public Optional<Discussion> create(String title, String description)
     {
         if (this.discussionsRightService.canCreateDiscussion()) {
-            return this.discussionStoreService.create(title, description)
-                .map(reference -> new Discussion(reference, title, description));
+            return this.discussionStoreService.create(title, description).flatMap(this::get);
         } else {
             return Optional.empty();
         }
@@ -113,13 +113,31 @@ public class DefaultDiscussionService implements DiscussionService
             .collect(Collectors.toList());
     }
 
+    @Override
+    public long countByEntityReference(String type, String reference)
+    {
+        return this.discussionStoreService.countByEntityReference(type, reference);
+    }
+
+    @Override
+    public List<Discussion> findByEntityReference(String type, String reference, Integer offset, Integer limit)
+    {
+        return this.discussionStoreService.findByEntityReference(type, reference, offset, limit)
+            .stream()
+            .map(this::mapBaseObject)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
+    }
+
     private Optional<Discussion> mapBaseObject(BaseObject baseObject)
     {
         if (this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference())) {
             return Optional.of(new Discussion(
                 baseObject.getStringValue(REFERENCE_NAME),
                 baseObject.getStringValue(TITLE_NAME),
-                baseObject.getStringValue(DESCRIPTION_NAME)
+                baseObject.getStringValue(DESCRIPTION_NAME),
+                baseObject.getDateValue(UPDATE_DATE_NAME)
             ));
         } else {
             return Optional.empty();

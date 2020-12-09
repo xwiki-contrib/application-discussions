@@ -100,7 +100,7 @@ class DefaultMessageServiceTest
     @Test
     void createDisallowed()
     {
-        Discussion discussion = new Discussion("reference", "title", "description");
+        Discussion discussion = new Discussion("reference", "title", "description", new Date());
         when(this.discussionService.get("reference")).thenReturn(Optional.of(discussion));
         BaseObject discussionBaseObject = mock(BaseObject.class);
         when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
@@ -116,7 +116,7 @@ class DefaultMessageServiceTest
     @Test
     void createAllowed()
     {
-        Discussion discussion = new Discussion("reference", "title", "description");
+        Discussion discussion = new Discussion("reference", "title", "description", new Date());
         when(this.discussionService.get("reference")).thenReturn(Optional.of(discussion));
         BaseObject discussionBaseObject = mock(BaseObject.class);
         when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));

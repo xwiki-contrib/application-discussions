@@ -19,51 +19,40 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
 /**
- * Definition of the discussion class.
+ * A discussion context entity reference.
  *
  * @version $Id$
  * @since 1.0
  */
-@Unstable
-public class Discussion
+public class DiscussionContextEntityReference
 {
-    private String reference;
+    private final String type;
 
-    private String title;
-
-    private String description;
-
-    private Date updateDate;
+    private final String reference;
 
     /**
      * Default constructor.
      *
+     * @param type the type
      * @param reference the reference
-     * @param title the title
-     * @param description the description
-     * @param updateDate the date of the last update of the discussion
      */
-    public Discussion(String reference, String title, String description, Date updateDate)
+    public DiscussionContextEntityReference(String type, String reference)
     {
+        this.type = type;
         this.reference = reference;
-        this.title = title;
-        this.description = description;
-        this.updateDate = updateDate;
     }
 
     /**
-     * Empty constructor.
+     * @return the type
      */
-    public Discussion()
+    public String getType()
     {
+        return this.type;
     }
 
     /**
@@ -72,62 +61,6 @@ public class Discussion
     public String getReference()
     {
         return this.reference;
-    }
-
-    /**
-     * @return the title
-     */
-    public String getTitle()
-    {
-        return this.title;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription()
-    {
-        return this.description;
-    }
-
-    /**
-     * @param reference the reference
-     */
-    public void setReference(String reference)
-    {
-        this.reference = reference;
-    }
-
-    /**
-     * @param title the title
-     */
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
-
-    /**
-     * @param description the description
-     */
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
-    /**
-     * @return the update date
-     */
-    public Date getUpdateDate()
-    {
-        return this.updateDate;
-    }
-
-    /**
-     * @param updateDate the update date
-     */
-    public void setUpdateDate(Date updateDate)
-    {
-        this.updateDate = updateDate;
     }
 
     @Override
@@ -141,13 +74,11 @@ public class Discussion
             return false;
         }
 
-        Discussion that = (Discussion) o;
+        DiscussionContextEntityReference that = (DiscussionContextEntityReference) o;
 
         return new EqualsBuilder()
+            .append(this.type, that.type)
             .append(this.reference, that.reference)
-            .append(this.title, that.title)
-            .append(this.description, that.description)
-            .append(this.updateDate, that.updateDate)
             .isEquals();
     }
 
@@ -155,10 +86,8 @@ public class Discussion
     public int hashCode()
     {
         return new HashCodeBuilder(17, 37)
+            .append(this.type)
             .append(this.reference)
-            .append(this.title)
-            .append(this.description)
-            .append(this.updateDate)
             .toHashCode();
     }
 
@@ -166,10 +95,8 @@ public class Discussion
     public String toString()
     {
         return new XWikiToStringBuilder(this)
+            .append("type", this.getType())
             .append("reference", this.getReference())
-            .append("title", this.getTitle())
-            .append("description", this.getDescription())
-            .append("updateDate", this.getUpdateDate())
             .build();
     }
 }

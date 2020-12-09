@@ -39,6 +39,7 @@
   <properties>
     <xwiki.extension.name>${description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
+    <checkstyle.suppressions.location>${basedir}/src/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
   </properties>
   <dependencies>
     <dependency>
@@ -54,6 +55,10 @@
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>discussions-api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
     </dependency>
   </dependencies>
 </project>

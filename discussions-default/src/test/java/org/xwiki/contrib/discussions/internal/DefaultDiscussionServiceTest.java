@@ -19,12 +19,14 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -35,9 +37,11 @@ import com.xpn.xwiki.objects.BaseObject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.*;
 
 /**
  * Test of {@link DefaultDiscussionService}.
@@ -85,16 +89,26 @@ class DefaultDiscussionServiceTest
     @Test
     void create()
     {
+        Date updateDate = new Date();
+        Discussion discussion = new Discussion("reference", "title", "description", updateDate);
+        BaseObject baseObject = mock(BaseObject.class);
+
+        DocumentReference value = new DocumentReference("xwiki", "a", "b");
+        when(baseObject.getDocumentReference()).thenReturn(value);
+        when(baseObject.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(baseObject.getStringValue(TITLE_NAME)).thenReturn("title");
+        when(baseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
+        when(baseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
+        when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
         when(this.discussionStoreService.create("title", "description"))
             .thenReturn(Optional.of("reference"));
+        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
 
-        Optional<Discussion> discussion =
+        Optional<Discussion> discussionOpt =
             this.defaultDiscussionService.create("title", "description");
 
-        assertEquals(
-            Optional.of(new Discussion("reference", "title", "description")),
-            discussion);
+        assertEquals(Optional.of(discussion), discussionOpt);
     }
 
     @Test
@@ -125,17 +139,19 @@ class DefaultDiscussionServiceTest
     {
         DocumentReference dr = new DocumentReference("xwiki", "XWiki", "Discussion");
         BaseObject discussionBaseObject = mock(BaseObject.class);
+        Date updateDate = new Date();
 
         when(discussionBaseObject.getDocumentReference()).thenReturn(dr);
-        when(discussionBaseObject.getStringValue("reference")).thenReturn("reference");
-        when(discussionBaseObject.getStringValue("title")).thenReturn("title");
-        when(discussionBaseObject.getStringValue("description")).thenReturn("description");
+        when(discussionBaseObject.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(discussionBaseObject.getStringValue(TITLE_NAME)).thenReturn("title");
+        when(discussionBaseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
+        when(discussionBaseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
         when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
         when(this.discussionsRightService.canReadDiscussion(dr)).thenReturn(true);
 
         Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
 
-        assertEquals(Optional.of(new Discussion("reference", "title", "description")), discussion);
+        assertEquals(Optional.of(new Discussion("reference", "title", "description", updateDate)), discussion);
     }
 
     @Test

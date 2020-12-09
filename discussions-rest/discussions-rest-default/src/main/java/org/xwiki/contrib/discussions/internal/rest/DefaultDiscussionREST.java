@@ -19,16 +19,25 @@
  */
 package org.xwiki.contrib.discussions.internal.rest;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.rest.DiscussionLiveTableRow;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
+import org.xwiki.contrib.discussions.rest.LiveTableResult;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.rest.XWikiResource;
 import org.xwiki.rest.XWikiRestException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Default implementation of the {@link DiscussionREST} API.
@@ -49,6 +58,39 @@ public class DefaultDiscussionREST extends XWikiResource implements DiscussionRE
         return this.discussionService.get(reference)
             .orElseThrow(() -> new XWikiRestException(
                 String.format("Discussion with reference=[%s] not found.", reference)));
+    }
+
+    @Override
+    public String livetable(String type, String reference, Integer offset, Integer limit, String sort, String dir,
+        Integer reqNo, String linkTemplate)
+    {
+        // TODO: deal with missing type
+        // TODO: add sort
+        LiveTableResult<DiscussionLiveTableRow> ltr = new LiveTableResult<>();
+        ltr.setOffset(offset);
+        ltr.setReqNo(reqNo);
+        ltr.setTotalrows(this.discussionService.countByEntityReference(type, reference));
+        ltr.setRows(this.discussionService.findByEntityReference(type, reference, offset, limit)
+            .stream()
+            .map(d -> {
+                DiscussionLiveTableRow discussionLiveTableRow = new DiscussionLiveTableRow();
+                discussionLiveTableRow.setTitle(d.getTitle());
+                try {
+                    discussionLiveTableRow.setTitleUrl(linkTemplate.replace("__REFERENCE__", URLEncoder
+                        .encode(d.getReference(), "UTF-8")));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    // TODO
+                }
+                discussionLiveTableRow.setUpdateDate(d.getUpdateDate());
+                return discussionLiveTableRow;
+            }).collect(Collectors.toList()));
+        try {
+            return new ObjectMapper().writeValueAsString(ltr);
+        } catch (JsonProcessingException e) {
+            // TODO: better logging and error handling
+            return "{'error': 'failed to serialize'}";
+        }
     }
 
     @Override

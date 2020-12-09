@@ -29,6 +29,7 @@ import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 
@@ -66,7 +67,8 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         if (this.discussionsRightService.canCreateDiscussionContext()) {
             return this.discussionContextStoreService
                 .create(name, description, referenceType, entityReference)
-                .map(reference -> new DiscussionContext(reference, name, description, referenceType, entityReference));
+                .map(reference -> new DiscussionContext(reference, name, description,
+                    new DiscussionContextEntityReference(referenceType, entityReference)));
         } else {
             return Optional.empty();
         }
@@ -139,8 +141,10 @@ public class DefaultDiscussionContextService implements DiscussionContextService
                 baseObject.getStringValue(REFERENCE_NAME),
                 baseObject.getStringValue(NAME_NAME),
                 baseObject.getStringValue(DESCRIPTION_NAME),
-                baseObject.getStringValue(ENTITY_REFERENCE_TYPE_NAME),
-                baseObject.getStringValue(ENTITY_REFERENCE_NAME)
+                new DiscussionContextEntityReference(
+                    baseObject.getStringValue(ENTITY_REFERENCE_TYPE_NAME),
+                    baseObject.getStringValue(ENTITY_REFERENCE_NAME)
+                )
             ));
     }
 }

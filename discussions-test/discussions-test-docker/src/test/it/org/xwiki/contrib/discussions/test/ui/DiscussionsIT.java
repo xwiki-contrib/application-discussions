@@ -20,7 +20,9 @@
 package org.xwiki.contrib.discussions.test.ui;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -62,8 +64,10 @@ class DiscussionsIT
             .setTitle("title")
             .setDescription("description");
         String s = OBJECT_MAPPER.writeValueAsString(restObject);
-        PostMethod postMethod = setup.rest().executePost(DiscussionREST.class, IOUtils.toInputStream(s,
-            StandardCharsets.UTF_8));
+        URI createDiscussionURI = getCreateDiscussionURI(setup);
+        PostMethod postMethod =
+            setup.rest().executePost(createDiscussionURI, IOUtils.toInputStream(s,
+                StandardCharsets.UTF_8));
 
         InputStream responseBodyAsStream = postMethod.getResponseBodyAsStream();
         Discussion discussion = OBJECT_MAPPER.readValue(responseBodyAsStream, Discussion.class);
@@ -71,6 +75,12 @@ class DiscussionsIT
         assertEquals(discussion.getDescription(), "description");
 
         this.discussion = discussion;
+    }
+
+    private URI getCreateDiscussionURI(TestUtils setup)
+    {
+        URI uri = setup.rest().createUri(DiscussionREST.class, new HashMap<>());
+        return URI.create(uri.toASCIIString() + "/discussion");
     }
 
     @Test

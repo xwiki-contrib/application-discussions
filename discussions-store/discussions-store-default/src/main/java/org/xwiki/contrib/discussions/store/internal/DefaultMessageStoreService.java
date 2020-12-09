@@ -222,14 +222,15 @@ public class DefaultMessageStoreService implements MessageStoreService
                 " select count(*) "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
-                    + "com.xpn.xwiki.objects.StringProperty as obj_discussionReference1 , "
-                    + "com.xpn.xwiki.objects.StringProperty as obj_discussionReference2 "
-                    + "where ( obj_discussionReference1.value = :discussionReference ) "
-                    + "and doc.fullName=obj.name and obj.className='%s' "
-                    + "and obj_discussionReference1.id.id=obj.id "
-                    + "and obj_discussionReference2.id.id=obj.id "
-                    + "and obj_discussionReference1.id.name='%s' "
-                    + "and obj_discussionReference2.id.name='%s'",
+                    + "com.xpn.xwiki.objects.StringProperty as discussionReferenceField , "
+                    + "com.xpn.xwiki.objects.StringProperty as messageReferenceField "
+                    + "where discussionReferenceField.value = :discussionReference "
+                    + "and doc.fullName=obj.name " 
+                    + "and obj.className='%s' "
+                    + "and discussionReferenceField.id.id=obj.id "
+                    + "and messageReferenceField.id.id=obj.id "
+                    + "and discussionReferenceField.id.name='%s' "
+                    + "and messageReferenceField.id.name='%s'",
                 messageClass, DISCUSSION_REFERENCE_NAME, REFERENCE_NAME), Query.HQL)
                 .bindValue("discussionReference", discussionReference)
                 .<Long>execute()

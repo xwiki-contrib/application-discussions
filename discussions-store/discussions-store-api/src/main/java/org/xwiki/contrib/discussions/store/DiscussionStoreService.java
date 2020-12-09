@@ -63,6 +63,17 @@ public interface DiscussionStoreService
     List<BaseObject> findByDiscussionContexts(List<String> discussionContextReferences);
 
     /**
+     * Find the list of discussions attached to discussion contexts of the given type.
+     *
+     * @param type the type
+     * @param reference
+     * @param offset the offset
+     * @param limit the limit
+     * @return the paginated list of results
+     */
+    List<BaseObject> findByEntityReference(String type, String reference, Integer offset, Integer limit);
+
+    /**
      * Links (unidirectionally) a discussion to a discussion context.
      *
      * @param discussionReference the discussion reference
@@ -77,4 +88,13 @@ public interface DiscussionStoreService
      * @param discussionContextReference the discussion context reference
      */
     void unlink(String discussionReference, String discussionContextReference);
+
+    /**
+     * Count the number of of discussions linked to discussion contexts of a given type.
+     *
+     * @param type the type
+     * @param reference
+     * @return the count
+     */
+    long countByEntityReference(String type, String reference);
 }
