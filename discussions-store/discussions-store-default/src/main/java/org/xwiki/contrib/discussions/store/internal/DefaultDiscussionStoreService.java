@@ -183,7 +183,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                     + "and str_field.id.id=obj.id "
                     + "and field.id.name='discussionContexts' "
                     + "and str_field.id.name='reference' "
-                    + "GROUP BY str_field.value HAVING sum(size(field.list)) <= :contextsListSize",
+                    + "GROUP BY str_field.value HAVING sum(size(field.list)) >= :contextsListSize",
                 discussionClass), Query.HQL)
                 .bindValue("contextsListSize", (long) discussionContextReferences.size()).execute());
 
@@ -205,12 +205,13 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         Integer limit)
     {
         try {
-            return this.queryManager.createQuery("SELECT distinct doc.fullName "
+            Query query = this.queryManager.createQuery("SELECT distinct doc.fullName, discussionUpdateDate.value "
                 + "FROM XWikiDocument  doc, "
                 + "XWikiDocument docDC, "
                 + "BaseObject obj, "
                 + "BaseObject objDC, "
                 + "DBStringListProperty discussionContextReference, "
+                + "DateProperty as discussionUpdateDate, "
                 + "StringProperty discussionContextReferenceField, "
                 + "StringProperty discussionReferenceField, "
                 + "StringProperty discussionContextERType, "
@@ -221,6 +222,8 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 + "AND objDC.className='Discussions.Code.DiscussionContextClass' "
                 + "AND discussionContextReference.id.id = obj.id "
                 + "AND discussionContextReference.name = 'discussionContexts' "
+                + "AND discussionUpdateDate.id.id = obj.id "
+                + "AND discussionUpdateDate.name = '" + UPDATE_DATE_NAME + "' "
                 + "AND discussionReferenceField.id.id = obj.id "
                 + "AND discussionReferenceField.name = 'reference' "
                 + "AND discussionContextReferenceField.id.id = objDC.id "
@@ -231,16 +234,21 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 + "AND discussionContextERRef.name = 'entityReference' "
                 + "AND discussionContextReferenceField.value IN elements(discussionContextReference.list) "
                 + "AND discussionContextERType.value = :type "
-                + "AND discussionContextERRef.value = :reference", Query.HQL)
+                + "AND discussionContextERRef.value = :reference "
+                + "ORDER BY discussionUpdateDate.value DESC", Query.HQL)
                 .bindValue("type", type)
-                .bindValue("reference", reference)
-                .setOffset(offset)
-                .setLimit(limit)
-                .<String>execute()
+                .bindValue("reference", reference);
+            if (offset != null) {
+                query = query.setOffset(offset);
+            }
+            if (limit != null) {
+                query = query.setLimit(limit);
+            }
+            return query.<Object[]>execute()
                 .stream()
                 .map(it -> {
                     try {
-                        return mapToBaseObject(it);
+                        return mapToBaseObject((String) it[0]);
                     } catch (XWikiException e) {
                         return Optional.<BaseObject>empty();
                     }
@@ -300,27 +308,43 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public void link(String discussionReference, String discussionContextReference)
+    public void touch(String discussionReference)
     {
-        get(discussionReference)
-            .ifPresent(discussion -> {
+        get(discussionReference).ifPresent(discussion -> {
+            discussion.setDateValue(UPDATE_DATE_NAME, new Date());
+            save(discussion);
+        });
+    }
+
+    @Override
+    public boolean link(String discussionReference, String discussionContextReference)
+    {
+        return get(discussionReference)
+            .map(discussion -> {
                 List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
                 if (!listValue.contains(discussionContextReference)) {
                     listValue.add(discussionContextReference);
                     save(discussion);
+                    return true;
                 }
-            });
+                return false;
+            }).orElse(false);
     }
 
     @Override
-    public void unlink(String discussionReference, String discussionContextReference)
+    public boolean unlink(String discussionReference, String discussionContextReference)
     {
-        get(discussionReference)
-            .ifPresent(
+        return get(discussionReference)
+            .map(
                 discussion -> {
-                    discussion.getListValue(DISCUSSION_CONTEXTS_NAME).remove(discussionContextReference);
-                    save(discussion);
-                });
+                    List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
+                    if (listValue.contains(discussionContextReference)) {
+                        listValue.remove(discussionContextReference);
+                        save(discussion);
+                        return true;
+                    }
+                    return false;
+                }).orElse(false);
     }
 
     private XWikiDocument generateUniquePage(String title) throws XWikiException

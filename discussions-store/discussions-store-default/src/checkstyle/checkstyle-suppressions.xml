@@ -25,7 +25,7 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
 
 <suppressions>
-  <suppress checks="MultipleStringLiterals" files="src/main/java/org/xwiki/contrib/discussions/store/internal/DefaultMessageStoreService.java"/>
-  <suppress checks="MultipleStringLiterals" 
-    files="src/main/java/org/xwiki/contrib/discussions/store/internal/DefaultDiscussionStoreService.java"/>
+  <suppress checks="MultipleStringLiterals" files="DefaultDiscussionContextStoreService.java"/>
+  <suppress checks="MultipleStringLiterals" files="DefaultDiscussionStoreService.java"/>
+  <suppress checks="MultipleStringLiterals" files="DefaultMessageStoreService.java"/>
 </suppressions>

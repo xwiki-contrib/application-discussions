@@ -30,10 +30,15 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.events.DiscussionEvent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.observation.ObservationManager;
 
 import com.xpn.xwiki.objects.BaseObject;
 
+import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
+import static org.xwiki.contrib.discussions.events.ActionType.UPDATE;
+import static org.xwiki.contrib.discussions.events.DiscussionEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
@@ -55,11 +60,17 @@ public class DefaultDiscussionService implements DiscussionService
     @Inject
     private DiscussionsRightService discussionsRightService;
 
+    @Inject
+    private ObservationManager observationManager;
+
     @Override
     public Optional<Discussion> create(String title, String description)
     {
         if (this.discussionsRightService.canCreateDiscussion()) {
-            return this.discussionStoreService.create(title, description).flatMap(this::get);
+
+            Optional<Discussion> discussion = this.discussionStoreService.create(title, description).flatMap(this::get);
+            discussion.ifPresent(d -> this.observationManager.notify(new DiscussionEvent(CREATE), EVENT_SOURCE, d));
+            return discussion;
         } else {
             return Optional.empty();
         }
@@ -128,6 +139,20 @@ public class DefaultDiscussionService implements DiscussionService
             .filter(Optional::isPresent)
             .map(Optional::get)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public void touch(String discussionReference)
+    {
+        this.discussionStoreService.touch(discussionReference);
+        this.get(discussionReference).ifPresent(
+            discussion -> this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion));
+    }
+
+    @Override
+    public boolean findByDiscussionContext(String type, String reference)
+    {
+        return countByEntityReference(type, reference) > 0;
     }
 
     private Optional<Discussion> mapBaseObject(BaseObject baseObject)

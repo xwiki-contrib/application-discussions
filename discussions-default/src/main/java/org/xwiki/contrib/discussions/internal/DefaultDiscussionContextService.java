@@ -19,7 +19,9 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,11 +32,17 @@ import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.events.DiscussionContextEvent;
+import org.xwiki.contrib.discussions.events.DiscussionEvent;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.observation.ObservationManager;
 
 import com.xpn.xwiki.objects.BaseObject;
 
+import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
+import static org.xwiki.contrib.discussions.events.ActionType.UPDATE;
+import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
@@ -60,18 +68,35 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Inject
     private DiscussionsRightService discussionsRightService;
 
+    @Inject
+    private ObservationManager observationManager;
+
     @Override
     public Optional<DiscussionContext> create(String name, String description, String referenceType,
         String entityReference)
     {
         if (this.discussionsRightService.canCreateDiscussionContext()) {
-            return this.discussionContextStoreService
-                .create(name, description, referenceType, entityReference)
-                .map(reference -> new DiscussionContext(reference, name, description,
-                    new DiscussionContextEntityReference(referenceType, entityReference)));
+            return this.discussionContextStoreService.create(name, description, referenceType, entityReference)
+                .map(reference -> {
+                    DiscussionContext discussionContext = new DiscussionContext(reference, name, description,
+                        new DiscussionContextEntityReference(referenceType, entityReference));
+                    this.observationManager.notify(new DiscussionContextEvent(CREATE), EVENT_SOURCE, discussionContext);
+                    return discussionContext;
+                });
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<DiscussionContext> findByDiscussionReference(String reference)
+    {
+        return this.discussionContextStoreService.findByDiscussionReference(reference)
+            .stream()
+            .map(this::mapBaseObject)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -93,8 +118,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         String discussionContextReference = discussionContext.getReference();
         String discussionReference = discussion.getReference();
         canWriteDiscussionContext(discussionContextReference, () -> canWriteDiscussion(discussionReference, () -> {
-            this.discussionContextStoreService.link(discussionContextReference, discussionReference);
-            this.discussionStoreService.link(discussionReference, discussionContextReference);
+            if (this.discussionContextStoreService.link(discussionContextReference, discussionReference)) {
+                this.observationManager.notify(new DiscussionContextEvent(UPDATE), EVENT_SOURCE, discussionContext);
+            }
+            if (this.discussionStoreService.link(discussionReference, discussionContextReference)) {
+                this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion);
+            }
         }));
     }
 
@@ -122,8 +151,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         String discussionContextReference = discussionContext.getReference();
         String discussionReference = discussion.getReference();
         canWriteDiscussionContext(discussionContextReference, () -> canWriteDiscussion(discussionReference, () -> {
-            this.discussionContextStoreService.unlink(discussionContextReference, discussionReference);
-            this.discussionStoreService.unlink(discussionReference, discussionContextReference);
+            if (this.discussionContextStoreService.unlink(discussionContextReference, discussionReference)) {
+                this.observationManager.notify(new DiscussionContextEvent(UPDATE), EVENT_SOURCE, discussionContext);
+            }
+            if (this.discussionStoreService.unlink(discussionReference, discussionContextReference)) {
+                this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion);
+            }
         }));
     }
 

@@ -46,9 +46,9 @@ public interface DiscussionService
     Optional<Discussion> create(String title, String description);
 
     /**
-     * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly. If it
-     * does not, it is inialized with the provided title and description, and linked to the list of discussion
-     * contexts.
+     * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly
+     * returned. If it does not, it is initialized with the provided title and description, and linked to the list of
+     * discussion contexts.
      *
      * @param title the title
      * @param description the description
@@ -104,4 +104,20 @@ public interface DiscussionService
      * @return tge paginated list of discussions
      */
     List<Discussion> findByEntityReference(String type, String reference, Integer offset, Integer limit);
+
+    /**
+     * Set the update date of the discussion to now.
+     *
+     * @param discussionReference the reference of the discussion to update
+     */
+    void touch(String discussionReference);
+
+    /**
+     * Return true if a discussion exists with the request discussion context entity.
+     *
+     * @param type the type of the discussion context entity
+     * @param reference the reference of the discussion context entity
+     * @return {@code true} if a discussion context is found, {@code false} otherwise
+     */
+    boolean findByDiscussionContext(String type, String reference);
 }

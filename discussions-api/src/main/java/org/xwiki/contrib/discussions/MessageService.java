@@ -47,6 +47,17 @@ public interface MessageService
     Optional<Message> create(String content, String discussionReference);
 
     /**
+     * Creates a message for a specific user.
+     *
+     * @param content the message content
+     * @param discussionReference the discussion reference
+     * @param authorType the author type
+     * @param authorReference the author reference
+     * @return the create message
+     */
+    Optional<Message> create(String content, String discussionReference, String authorType, String authorReference);
+
+    /**
      * Get a message by its unique reference.
      *
      * @param reference the reference

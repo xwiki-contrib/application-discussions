@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
@@ -61,16 +62,18 @@ public interface DiscussionContextStoreService
      *
      * @param discussionContextReference the discussion context reference
      * @param discussionReference the discussion reference
+     * @return {@code true} if the link was not already existing, {@code false} otherwise
      */
-    void link(String discussionContextReference, String discussionReference);
+    boolean link(String discussionContextReference, String discussionReference);
 
     /**
      * Unlinks (unidirectionally) a discussion context and a discussion.
      *
      * @param discussionContextReference the discussion context reference
      * @param discussionReference the discussion reference
+     * @return {@code true} if the link was existing and has been removed, {@code false} otherwise
      */
-    void unlink(String discussionContextReference, String discussionReference);
+    boolean unlink(String discussionContextReference, String discussionReference);
 
     /**
      * Search for a discussion context by its reference.
@@ -80,4 +83,12 @@ public interface DiscussionContextStoreService
      * @return the discussion context
      */
     Optional<BaseObject> findByReference(String referenceType, String entityReference);
+
+    /**
+     * Search of the discussion contexts linked to a discussion.
+     *
+     * @param reference the reference of the discussion
+     * @return the list of the discussion contexts
+     */
+    List<BaseObject> findByDiscussionReference(String reference);
 }

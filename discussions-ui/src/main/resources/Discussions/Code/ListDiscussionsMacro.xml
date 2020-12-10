@@ -236,10 +236,11 @@
 #set ($entityType = $wikimacro.parameters.type)
 #set ($entityReference = $wikimacro.parameters.reference)
 #set ($linkTemplate = $wikimacro.parameters.linkTemplate)
-#set ($columns = ['title', 'updateDate'])
+#set ($columns = ['title', 'updateDate', 'messageCount'])
 #set ($columnsProperties = {
-  'title': { 'type': 'string', 'link': 'auto', 'sortable': false, 'filterable': false },
-  'updateDate': {'type': 'date', 'sortable': false, 'filterable': false }
+  'title': { 'type': 'none', 'link': 'auto', 'sortable': false, 'filterable': false },
+  'updateDate': {'type': 'date', 'sortable': false, 'filterable': false },
+  'messageCount': {'type': 'number', 'sortable': false, 'filterable': false }
 })
 #set($options = {
   'url': "${request.getContextPath()}/rest/discussions/livetable?type=$escapetool.url($entityType)&amp;reference=$escapetool.url($entityReference)&amp;linkTemplate=$escapetool.url($linkTemplate)"

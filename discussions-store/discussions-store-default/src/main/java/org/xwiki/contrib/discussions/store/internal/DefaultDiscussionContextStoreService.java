@@ -19,8 +19,10 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -46,6 +48,7 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DISCUSSIONS_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
@@ -147,36 +150,39 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     }
 
     @Override
-    public void link(String discussionContextReference, String discussionReference)
+    public boolean link(String discussionContextReference, String discussionReference)
     {
-        get(discussionContextReference)
-            .ifPresent(discussionContext -> {
-                List listValue = discussionContext.getListValue(DiscussionContextMetadata.DISCUSSIONS_NAME);
+        return get(discussionContextReference)
+            .map(discussionContext -> {
+                List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
                 if (!listValue.contains(discussionReference)) {
                     listValue.add(discussionReference);
                     save(discussionContext);
+                    return true;
                 }
-            });
+                return false;
+            }).orElse(false);
     }
 
     @Override
-    public void unlink(String discussionContextReference, String discussionReference)
+    public boolean unlink(String discussionContextReference, String discussionReference)
     {
-        get(discussionContextReference)
-            .ifPresent(discussionContext -> {
-                discussionContext.getListValue(DiscussionContextMetadata.DISCUSSIONS_NAME)
-                    .remove(discussionReference);
-                save(discussionContext);
-            });
+        return get(discussionContextReference)
+            .map(discussionContext -> {
+                List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
+                if (listValue.contains(discussionReference)) {
+                    listValue.remove(discussionReference);
+                    save(discussionContext);
+                    return true;
+                }
+                return false;
+            }).orElse(false);
     }
 
     @Override
     public Optional<BaseObject> findByReference(String referenceType, String entityReference)
     {
         try {
-
-            // TODO: replace reference_field.value by the object reference !
-
             List<String> execute = this.queryManager.createQuery(String.format(
                 "select doc.fullName "
                     + "from XWikiDocument as doc, "
@@ -222,9 +228,44 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         return Optional.empty();
     }
 
+    @Override
+    public List<BaseObject> findByDiscussionReference(String reference)
+    {
+        try {
+            String className =
+                this.discussionContextMetadata.getDiscussionContextXClassFullName();
+            return this.queryManager.createQuery(String.format("select doc.fullName "
+                    + "from XWikiDocument as doc, "
+                    + "BaseObject as obj, "
+                    + "DBStringListProperty as discussions "
+                    + "where doc.fullName=obj.name "
+                    + "and obj.className='%s' "
+                    + "and discussions.id.id=obj.id "
+                    + "and discussions.name = '%s' "
+                    + "and :reference in elements(discussions.list) ",
+                className, DISCUSSIONS_NAME), Query.HQL)
+                .bindValue("reference", reference)
+                .<String>execute()
+                .stream()
+                .map(ref -> {
+                    try {
+                        return this.mapToBaseObject(ref);
+                    } catch (XWikiException e) {
+                        return Optional.<BaseObject>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        } catch (QueryException e) {
+            e.printStackTrace();
+            return Arrays.asList();
+        }
+    }
+
     private XWikiDocument generateUniquePage(String name) throws XWikiException
     {
-        // TODO: Check if how regarding concurrency.
+        // TODO: Check if ok regarding concurrency.
         XWikiDocument document;
         synchronized (this) {
             document = generatePage(name);

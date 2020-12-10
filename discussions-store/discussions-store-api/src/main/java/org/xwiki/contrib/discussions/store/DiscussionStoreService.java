@@ -65,8 +65,8 @@ public interface DiscussionStoreService
     /**
      * Find the list of discussions attached to discussion contexts of the given type.
      *
-     * @param type the type
-     * @param reference
+     * @param type the entity type
+     * @param reference the entity reference
      * @param offset the offset
      * @param limit the limit
      * @return the paginated list of results
@@ -78,23 +78,32 @@ public interface DiscussionStoreService
      *
      * @param discussionReference the discussion reference
      * @param discussionContextReference the discussion context reference
+     * @return {@code true} if the link was not already existing, {@code false} otherwise
      */
-    void link(String discussionReference, String discussionContextReference);
+    boolean link(String discussionReference, String discussionContextReference);
 
     /**
      * Unlinks (unidirectionally) a discussion to a discussion context.
      *
      * @param discussionReference the discussion reference
      * @param discussionContextReference the discussion context reference
+     * @return {@code true} if the link was existing and has been removed, {@code false} otherwise
      */
-    void unlink(String discussionReference, String discussionContextReference);
+    boolean unlink(String discussionReference, String discussionContextReference);
 
     /**
      * Count the number of of discussions linked to discussion contexts of a given type.
      *
      * @param type the type
-     * @param reference
+     * @param reference the discussion reference
      * @return the count
      */
     long countByEntityReference(String type, String reference);
+
+    /**
+     * Update the update date of the discussion.
+     *
+     * @param discussionReference the reference of the discussion
+     */
+    void touch(String discussionReference);
 }

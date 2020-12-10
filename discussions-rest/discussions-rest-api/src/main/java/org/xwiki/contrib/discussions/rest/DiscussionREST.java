@@ -24,6 +24,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
@@ -66,7 +67,7 @@ public interface DiscussionREST
      */
     @Path("/livetable")
     @GET
-    String livetable(@QueryParam("type") String type, @QueryParam("reference") String reference,
+    Response livetable(@QueryParam("type") String type, @QueryParam("reference") String reference,
         @QueryParam("offset") Integer offset,
         @QueryParam("limit") Integer limit, @QueryParam("sort") String sort, @QueryParam("dir") String dir,
         @QueryParam("reqNo") Integer reqNo, @QueryParam("linkTemplate") String linkTemplate);

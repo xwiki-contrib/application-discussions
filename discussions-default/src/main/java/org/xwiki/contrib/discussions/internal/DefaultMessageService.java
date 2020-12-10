@@ -36,14 +36,19 @@ import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.events.MessageEvent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.observation.ObservationManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.objects.BaseObject;
 
+import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
+import static org.xwiki.contrib.discussions.events.ActionType.DELETE;
+import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
@@ -81,6 +86,9 @@ public class DefaultMessageService implements MessageService
     @Inject
     private DiscussionsRightService discussionsRightService;
 
+    @Inject
+    private ObservationManager observationManager;
+
     @Override
     public Optional<Message> create(String content, String discussionReference)
     {
@@ -90,8 +98,33 @@ public class DefaultMessageService implements MessageService
                 String authorReference = this.entityReferenceSerializer.serialize(author);
                 return this.messageStoreService
                     .create(content, DEFAULT_ACTOR_TYPE, authorReference, discussionReference)
-                    .flatMap(reference -> getByReference(reference, discussionReference));
+                    .flatMap(reference -> {
+                        this.discussionService.touch(discussionReference);
+                        Optional<Message> messageOpt = getByReference(reference, discussionReference);
+                        messageOpt
+                            .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                        return messageOpt;
+                    });
             },
+            Optional::empty
+        );
+    }
+
+    @Override
+    public Optional<Message> create(String content, String discussionReference, String authorType,
+        String authorReference)
+    {
+        // TODO: factorize with the create method above 
+        return canWriteDiscussion(discussionReference,
+            () -> this.messageStoreService
+                .create(content, authorType, authorReference, discussionReference)
+                .flatMap(reference -> {
+                    this.discussionService.touch(discussionReference);
+                    Optional<Message> messageOpt = getByReference(reference, discussionReference);
+                    messageOpt
+                        .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                    return messageOpt;
+                }),
             Optional::empty
         );
     }
@@ -111,7 +144,7 @@ public class DefaultMessageService implements MessageService
     private <T> T canReadDiscussion(String reference, Supplier<T> allowed, Supplier<T> disallowed)
     {
         boolean canReadDiscussion = this.discussionStoreService.get(reference)
-            .map(z -> this.discussionsRightService.canReadDiscussion(z.getDocumentReference()))
+            .map(baseObject -> this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference()))
             .orElse(false);
         if (canReadDiscussion) {
             return allowed.get();
@@ -179,6 +212,7 @@ public class DefaultMessageService implements MessageService
             .ifPresent(message -> {
                 if (this.canDelete(message)) {
                     this.messageStoreService.delete(message.getReference(), message.getDiscussion().getReference());
+                    this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);
                 }
             });
     }

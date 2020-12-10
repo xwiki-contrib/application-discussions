@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
@@ -84,4 +85,12 @@ public interface DiscussionContextService
      * @return the discussion context
      */
     Optional<DiscussionContext> get(String reference);
+
+    /**
+     * Returns the list of discussion contexts linked to the discussion reference.
+     *
+     * @param reference the discussion reference
+     * @return the list of discussion contexts
+     */
+    List<DiscussionContext> findByDiscussionReference(String reference);
 }

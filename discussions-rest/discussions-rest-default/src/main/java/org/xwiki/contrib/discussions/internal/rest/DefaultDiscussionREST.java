@@ -25,9 +25,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.rest.DiscussionLiveTableRow;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
@@ -38,6 +42,8 @@ import org.xwiki.rest.XWikiRestException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 
 /**
  * Default implementation of the {@link DiscussionREST} API.
@@ -52,6 +58,12 @@ public class DefaultDiscussionREST extends XWikiResource implements DiscussionRE
     @Inject
     private DiscussionService discussionService;
 
+    @Inject
+    private MessageService messageService;
+
+    @Inject
+    private Logger logger;
+
     @Override
     public Discussion get(String reference) throws XWikiRestException
     {
@@ -61,16 +73,14 @@ public class DefaultDiscussionREST extends XWikiResource implements DiscussionRE
     }
 
     @Override
-    public String livetable(String type, String reference, Integer offset, Integer limit, String sort, String dir,
+    public Response livetable(String type, String reference, Integer offset, Integer limit, String sort, String dir,
         Integer reqNo, String linkTemplate)
     {
-        // TODO: deal with missing type
-        // TODO: add sort
         LiveTableResult<DiscussionLiveTableRow> ltr = new LiveTableResult<>();
         ltr.setOffset(offset);
         ltr.setReqNo(reqNo);
         ltr.setTotalrows(this.discussionService.countByEntityReference(type, reference));
-        ltr.setRows(this.discussionService.findByEntityReference(type, reference, offset, limit)
+        ltr.setRows(this.discussionService.findByEntityReference(type, reference, offset - 1, limit)
             .stream()
             .map(d -> {
                 DiscussionLiveTableRow discussionLiveTableRow = new DiscussionLiveTableRow();
@@ -79,17 +89,19 @@ public class DefaultDiscussionREST extends XWikiResource implements DiscussionRE
                     discussionLiveTableRow.setTitleUrl(linkTemplate.replace("__REFERENCE__", URLEncoder
                         .encode(d.getReference(), "UTF-8")));
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    // TODO
+                    this.logger.warn("Failed to generate the title for discussion [{}]. Cause: [{}]", e,
+                        getRootCauseMessage(e));
                 }
                 discussionLiveTableRow.setUpdateDate(d.getUpdateDate());
+                discussionLiveTableRow.setMessageCount(this.messageService.countByDiscussion(d));
+
                 return discussionLiveTableRow;
             }).collect(Collectors.toList()));
         try {
-            return new ObjectMapper().writeValueAsString(ltr);
+            return Response.ok(new ObjectMapper().writeValueAsString(ltr), MediaType.APPLICATION_JSON).build();
         } catch (JsonProcessingException e) {
-            // TODO: better logging and error handling
-            return "{'error': 'failed to serialize'}";
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Cause: [" + getRootCauseMessage(e) + "]").build();
         }
     }
 

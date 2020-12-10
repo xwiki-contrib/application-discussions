@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.rest;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -36,6 +37,8 @@ public class DiscussionLiveTableRow
     private String titleUrl;
 
     private Date updateDate;
+
+    private long messageCount;
 
     /**
      * @return the discussion title
@@ -63,6 +66,20 @@ public class DiscussionLiveTableRow
     }
 
     /**
+     * Indicates if the field is viewable. In our context the fields are pre-filtered and are all visible at this
+     * point.
+     * <p>
+     * Once https://jira.xwiki.org/browse/XWIKI-15552 fixed, this field will not required.
+     *
+     * @return the constant {@code true}
+     */
+    @JsonProperty("doc_viewable")
+    public boolean docViewable()
+    {
+        return true;
+    }
+
+    /**
      * @param titleUrl the title url
      */
     public void setTitleUrl(String titleUrl)
@@ -73,6 +90,7 @@ public class DiscussionLiveTableRow
     /**
      * @return the update date of the discussion
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd hh:mm")
     public Date getUpdateDate()
     {
         return this.updateDate;
@@ -84,5 +102,21 @@ public class DiscussionLiveTableRow
     public void setUpdateDate(Date updateDate)
     {
         this.updateDate = updateDate;
+    }
+
+    /**
+     * @return the number of messages of the discussion
+     */
+    public long getMessageCount()
+    {
+        return this.messageCount;
+    }
+
+    /**
+     * @param messageCount the number of messages of the discussion
+     */
+    public void setMessageCount(long messageCount)
+    {
+        this.messageCount = messageCount;
     }
 }
