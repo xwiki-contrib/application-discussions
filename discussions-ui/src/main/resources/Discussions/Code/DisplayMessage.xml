@@ -36,17 +36,33 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{velocity output='false'}}
+  <content>{{template name="display_macros.vm" /}}
+{{velocity output='false'}}
 #macro (displayMessageContentField) 
-#set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
-#set ($messageClass = $docMessageClass.getxWikiClass())
-#set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
-#set ($contentField = $messageClass.get('content'))
-$doc.displayEdit($contentField, '', $messageObj)
+  #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
+  #set ($messageClass = $docMessageClass.getxWikiClass())
+  #set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
+  #set ($contentField = $messageClass.get('content'))
+
+  #initRequiredSkinExtensions()
+
+  ## FIXME: duplicate of getRequiredSkinExtensions from display_macro.vm
+  $doc.displayEdit($contentField, '', $messageObj)
+  #set ($macro.importStrings = [])
+  #foreach ($entry in $requiredSkinExtensionsMap.entrySet())
+    #set ($macro.importString = $xwiki.get($entry.key).importString)
+    ## Remove the always used skin extensions, keep only those that have been requested by the display macros above.
+    #set ($discard = $macro.importStrings.add($!stringtool.removeStart($macro.importString, $entry.value).trim()))
+  #end
+  #set ($macro.importStrings = $stringtool.join($macro.importStrings, ''))
+
+  #set ($discard = $response.setHeader('X-XWIKI-HTML-HEAD', $macro.importStrings))
 #end
 {{/velocity}}{{velocity}}
 #if ($request.showContentField == 'show')
+
 {{html}}#displayMessageContentField(){{/html}}
+
 #end
 {{/velocity}}
 </content>
