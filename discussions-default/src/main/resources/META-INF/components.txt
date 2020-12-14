@@ -2,3 +2,7 @@ org.xwiki.contrib.discussions.internal.DefaultDiscussionContextService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionsRightService
 org.xwiki.contrib.discussions.internal.DefaultMessageService
+org.xwiki.contrib.discussions.internal.UnsafeDiscussionContextService
+org.xwiki.contrib.discussions.internal.UnsafeDiscussionService
+org.xwiki.contrib.discussions.internal.UnsafeMessageService
+org.xwiki.contrib.discussions.internal.UnsafeDiscussionsRightService

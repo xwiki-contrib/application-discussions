@@ -20,23 +20,25 @@
 package org.xwiki.contrib.discussions.internal;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
-import org.xwiki.contrib.discussions.MessageService;
 
 /**
- * Default implementation of {@link MessageService}.
+ * Unsafe implementation of {@link org.xwiki.contrib.discussions.MessageService}.
  *
  * @version $Id$
  * @since 1.0
  */
 @Component
 @Singleton
-public class DefaultMessageService extends AbstractMessageService
+@Named("unsafe")
+public class UnsafeMessageService extends AbstractMessageService
 {
     @Inject
+    @Named("unsafe")
     private DiscussionsRightService discussionsRightService;
 
     @Override

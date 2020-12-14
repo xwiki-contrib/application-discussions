@@ -19,29 +19,65 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
-import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
-import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 
 /**
- * Default implementation of {@link MessageService}.
- *
- * @version $Id$
+ * Unsafe implementation of {@link DiscussionsRightService}.
+ * 
  * @since 1.0
+ * @version $Id$
  */
 @Component
 @Singleton
-public class DefaultMessageService extends AbstractMessageService
+@Named("unsafe")
+public class UnsafeDiscussionsRightService implements DiscussionsRightService
 {
-    @Inject
-    private DiscussionsRightService discussionsRightService;
+    @Override
+    public boolean canCreateDiscussion()
+    {
+        return true;
+    }
 
     @Override
-    DiscussionsRightService getDiscussionRightService()
+    public boolean canCreateDiscussionContext()
     {
-        return this.discussionsRightService;
+        return true;
+    }
+
+    @Override
+    public boolean canReadDiscussion(EntityReference discussion)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canWriteDiscussion(DocumentReference discussion)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canWriteDiscussionContext(DocumentReference discussionContext)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canDeleteMessage(Message message, DocumentReference discussion)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isAdminDiscussion(DocumentReference discussion)
+    {
+        return true;
     }
 }

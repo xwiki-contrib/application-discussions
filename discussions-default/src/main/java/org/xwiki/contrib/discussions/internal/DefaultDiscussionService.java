@@ -19,30 +19,11 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
-import org.xwiki.contrib.discussions.domain.Discussion;
-import org.xwiki.contrib.discussions.events.DiscussionEvent;
-import org.xwiki.contrib.discussions.store.DiscussionStoreService;
-import org.xwiki.observation.ObservationManager;
-
-import com.xpn.xwiki.objects.BaseObject;
-
-import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
-import static org.xwiki.contrib.discussions.events.ActionType.UPDATE;
-import static org.xwiki.contrib.discussions.events.DiscussionEvent.EVENT_SOURCE;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
 
 /**
  * Default implementation of {@link DefaultDiscussionService}.
@@ -52,120 +33,14 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE
  */
 @Component
 @Singleton
-public class DefaultDiscussionService implements DiscussionService
+public class DefaultDiscussionService extends AbstractDiscussionService
 {
-    @Inject
-    private DiscussionStoreService discussionStoreService;
-
     @Inject
     private DiscussionsRightService discussionsRightService;
 
-    @Inject
-    private ObservationManager observationManager;
-
     @Override
-    public Optional<Discussion> create(String title, String description)
+    DiscussionsRightService getDiscussionRightService()
     {
-        if (this.discussionsRightService.canCreateDiscussion()) {
-
-            Optional<Discussion> discussion = this.discussionStoreService.create(title, description).flatMap(this::get);
-            discussion.ifPresent(d -> this.observationManager.notify(new DiscussionEvent(CREATE), EVENT_SOURCE, d));
-            return discussion;
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Optional<Discussion> getOrCreate(String title, String description, List<String> discussionContexts)
-    {
-        List<BaseObject> byDiscussionContexts =
-            this.discussionStoreService.findByDiscussionContexts(discussionContexts);
-        if (byDiscussionContexts.isEmpty()) {
-            Optional<String> discussionReferenceOpt = this.discussionStoreService.create(title, description);
-            discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
-                discussionContextReference -> this.discussionStoreService
-                    .link(discussionReference, discussionContextReference)));
-            return discussionReferenceOpt.flatMap(this::get);
-        }
-        return this.get(byDiscussionContexts.get(0).getStringValue(REFERENCE_NAME));
-    }
-
-    @Override
-    public Optional<Discussion> get(String reference)
-    {
-        return this.discussionStoreService.get(reference)
-            .flatMap(this::mapBaseObject);
-    }
-
-    @Override
-    public boolean canRead(String reference)
-    {
-        return this.discussionStoreService.get(reference)
-            .map(d -> this.discussionsRightService.canReadDiscussion(d.getDocumentReference())).orElse(false);
-    }
-
-    @Override
-    public boolean canWrite(String reference)
-    {
-        return this.discussionStoreService.get(reference)
-            .map(d -> this.discussionsRightService.canWriteDiscussion(d.getDocumentReference())).orElse(false);
-    }
-
-    @Override
-    public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
-    {
-        return this.discussionStoreService
-            .findByDiscussionContexts(discussionContextReferences)
-            .stream()
-            .map(this::mapBaseObject)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public long countByEntityReference(String type, String reference)
-    {
-        return this.discussionStoreService.countByEntityReference(type, reference);
-    }
-
-    @Override
-    public List<Discussion> findByEntityReference(String type, String reference, Integer offset, Integer limit)
-    {
-        return this.discussionStoreService.findByEntityReference(type, reference, offset, limit)
-            .stream()
-            .map(this::mapBaseObject)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public void touch(String discussionReference)
-    {
-        this.discussionStoreService.touch(discussionReference);
-        this.get(discussionReference).ifPresent(
-            discussion -> this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion));
-    }
-
-    @Override
-    public boolean findByDiscussionContext(String type, String reference)
-    {
-        return countByEntityReference(type, reference) > 0;
-    }
-
-    private Optional<Discussion> mapBaseObject(BaseObject baseObject)
-    {
-        if (this.discussionsRightService.canReadDiscussion(baseObject.getDocumentReference())) {
-            return Optional.of(new Discussion(
-                baseObject.getStringValue(REFERENCE_NAME),
-                baseObject.getStringValue(TITLE_NAME),
-                baseObject.getStringValue(DESCRIPTION_NAME),
-                baseObject.getDateValue(UPDATE_DATE_NAME)
-            ));
-        } else {
-            return Optional.empty();
-        }
+        return this.discussionsRightService;
     }
 }

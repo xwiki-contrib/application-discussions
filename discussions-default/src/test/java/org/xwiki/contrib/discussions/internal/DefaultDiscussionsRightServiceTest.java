@@ -186,6 +186,26 @@ class DefaultDiscussionsRightServiceTest
     }
 
     @Test
+    void canWriteDiscussionContextDisallowed()
+    {
+        when(this.authorizationManager
+            .hasAccess(this.writeDiscussionRight, USER_DOCUMENT_REFERENCE, DISCUSSION_REFERENCE))
+            .thenReturn(false);
+        boolean b = this.defaultDiscussionsRightService.canWriteDiscussionContext(DISCUSSION_REFERENCE);
+        assertFalse(b);
+    }
+
+    @Test
+    void canWriteDiscussionContextAllowed()
+    {
+        when(this.authorizationManager
+            .hasAccess(this.writeDiscussionRight, USER_DOCUMENT_REFERENCE, DISCUSSION_REFERENCE))
+            .thenReturn(true);
+        boolean b = this.defaultDiscussionsRightService.canWriteDiscussionContext(DISCUSSION_REFERENCE);
+        assertTrue(b);
+    }
+
+    @Test
     void canDeleteMessageNotLocalUser()
     {
         Message message = new Message("reference", "content", "no_local", "actorReference", new Date(), new Date(),
