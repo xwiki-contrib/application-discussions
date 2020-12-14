@@ -27,6 +27,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.Message;
@@ -60,6 +61,9 @@ public class DiscussionsScriptService implements ScriptService
 
     @Inject
     private DiscussionRightsScriptService discussionRightsScriptService;
+
+    @Inject
+    private DiscussionsActorServiceResolver actorsServiceResolver;
 
     /**
      * @return the discussions rights script service
@@ -106,7 +110,7 @@ public class DiscussionsScriptService implements ScriptService
     {
         return this.discussionService.get(reference).orElse(null);
     }
-    
+
     /**
      * Retrieve a discussion context by its reference.
      *
@@ -197,5 +201,19 @@ public class DiscussionsScriptService implements ScriptService
     public void unlinkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
     {
         this.discussionContextService.unlink(discussionContext, discussion);
+    }
+
+    /**
+     * Returns an actor descriptor for the provided reference according to its type.
+     *
+     * @param type the type of the actor
+     * @param reference the reference of the actor
+     * @return the {@link ActorDescriptor}, or {@code null} in case of error during the resolution
+     */
+    public ActorDescriptor getActorDescriptor(String type, String reference)
+    {
+        return this.actorsServiceResolver.get(type)
+            .flatMap(resolver -> resolver.resolve(reference))
+            .orElse(null);
     }
 }

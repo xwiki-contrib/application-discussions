@@ -381,6 +381,7 @@ No messages!
 #end
 
 #foreach ($message in $messages)
+#set ($actorDescriptor = $services.discussions.getActorDescriptor($message.actorType, $message.actorReference))
 (% class='box' %)(((
   (% class='row' %)(((
     (% class='col-xs-1' %)(((
@@ -394,7 +395,7 @@ No messages!
           &lt;small &gt;$escapetool.xml($services.date.displayTimeAgo($message.updateDate))&lt;/small&gt;
         {{/html}}
       )))
-      **$message.actorReference**
+      **[[$actorDescriptor.name&gt;&gt;$actorDescriptor.link.toASCIIString()]]**
 
       $message.content
     )))

@@ -101,7 +101,7 @@ class DiscussionsIT
         assertEquals(1, messages.size());
         MessageBoxPage message = messages.get(0);
 
-        assertEquals("xwiki:XWiki.superadmin", message.getAuthor());
+        assertEquals("superadmin", message.getAuthor());
         assertEquals("New message", message.getMessageContent());
     }
 }
