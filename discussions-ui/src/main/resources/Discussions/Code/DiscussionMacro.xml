@@ -371,10 +371,10 @@
 
 $discussion.description
 
-=== Messages ===
+=== $services.localization.render('discussions.discussion.messages.title') ===
 
 #if ($messages.size() == 0) 
-No messages!
+$services.localization.render('discussions.discussion.messages.empty')
 #end
 
 #foreach ($message in $messages)
@@ -456,7 +456,7 @@ No messages!
 
 
 #if ($services.discussions.rights.canWriteDiscussion($reference))
-=== New Message ===
+=== $services.localization.render('discussions.discussion.newMessage.form.title') ===
 
 ###set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
 ###set ($messageClass = $docMessageClass.getxWikiClass())
@@ -484,16 +484,20 @@ No messages!
 &lt;div class="modal-content"&gt;
 &lt;div class="modal-header"&gt;
 &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
-&lt;h4 class="modal-title"&gt;Message Delete&lt;/h4&gt;
+&lt;h4 class="modal-title"&gt;$services.localization.render('discussions.discussion.deleteMessage.form.title')&lt;/h4&gt;
 &lt;/div&gt;
 &lt;div class="modal-body"&gt;
 &lt;div id="activitypub-form-share-page" class='xform'&gt;
-Are you sure you want to delete this message?
+$services.localization.render('discussions.discussion.deleteMessage.form.confirmation')
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class="modal-footer"&gt;
-&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;Cancel&lt;/button&gt;
-&lt;button type="button" class="btn btn-primary" id="discussions-delete-message-confirm"&gt;Confirm&lt;/button&gt;
+&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;
+  $services.localization.render('discussions.discussion.deleteMessage.form.cancel')
+&lt;/button&gt;
+&lt;button type="button" class="btn btn-primary" id="discussions-delete-message-confirm"&gt;
+  $services.localization.render('discussions.discussion.deleteMessage.form.confirm')
+&lt;/button&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;!-- /.modal-content --&gt;
 &lt;/div&gt;&lt;!-- /.modal-dialog --&gt;
@@ -502,7 +506,7 @@ Are you sure you want to delete this message?
 
 #end
 #else
-You are not allowed to view this discussion.
+$services.localization.render('discussions.discussion.notAllowed.view')
 #end
 {{/velocity}}</code>
     </property>

@@ -243,7 +243,8 @@
   'messageCount': {'type': 'number', 'sortable': false, 'filterable': false }
 })
 #set($options = {
-  'url': "${request.getContextPath()}/rest/discussions/livetable?type=$escapetool.url($entityType)&amp;reference=$escapetool.url($entityReference)&amp;linkTemplate=$escapetool.url($linkTemplate)"
+  'url': "${request.getContextPath()}/rest/discussions/livetable?type=$escapetool.url($entityType)&amp;reference=$escapetool.url($entityReference)&amp;linkTemplate=$escapetool.url($linkTemplate)",
+  'translationPrefix': 'discussions.discussions.table.header.'
 })
 #livetable($listId $columns $columnsProperties $options)
 {{/velocity}}</code>
