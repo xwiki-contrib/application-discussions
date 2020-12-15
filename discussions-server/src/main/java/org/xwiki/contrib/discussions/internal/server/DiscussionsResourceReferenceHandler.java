@@ -20,8 +20,11 @@
 package org.xwiki.contrib.discussions.internal.server;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,9 +32,13 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.container.Container;
+import org.xwiki.container.servlet.ServletRequest;
+import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
@@ -106,9 +113,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
         DiscussionsResourceReference discussionsResourceReference = (DiscussionsResourceReference) reference;
         HttpServletRequest request =
-            ((org.xwiki.container.servlet.ServletRequest) this.container.getRequest()).getHttpServletRequest();
+            ((ServletRequest) this.container.getRequest()).getHttpServletRequest();
         HttpServletResponse response =
-            ((org.xwiki.container.servlet.ServletResponse) this.container.getResponse()).getHttpServletResponse();
+            ((ServletResponse) this.container.getResponse()).getHttpServletResponse();
 
         switch (discussionsResourceReference.getActionType()) {
             case CREATE:
@@ -153,7 +160,6 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     {
         switch (discussionsResourceReference.getDiscussionsEntityType()) {
             case MESSAGE:
-//                    this.messageService.getByReference()
                 break;
             case DISCUSSION:
                 break;
@@ -168,7 +174,6 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     {
         switch (discussionsResourceReference.getDiscussionsEntityType()) {
             case MESSAGE:
-//                    this.messageService.getByReference()
                 break;
             case DISCUSSION:
                 break;
@@ -202,7 +207,23 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             .ifPresent(d -> {
                 String content = getContent(request);
                 this.messageService.create(content, XWIKI_2_0, d.getReference())
-                    .ifPresent(m -> redirect(response, request.getParameter(ORIGINAL_URL_PARAM)));
+                    .ifPresent(m -> {
+                        String parameter = request.getParameter(ORIGINAL_URL_PARAM);
+                        try {
+                            URIBuilder uriBuilder = new URIBuilder(parameter);
+                            List<NameValuePair> queryParams = uriBuilder
+                                .getQueryParams();
+                            String offsetName = request.getParameter("namespace") + "_offset";
+                            List<NameValuePair> collect =
+                                queryParams.stream().filter(it -> !it.getName().equals(offsetName))
+                                    .collect(Collectors.toList());
+                            URI namespace = uriBuilder.clearParameters().setParameters(collect)
+                                .build();
+                            redirect(response, namespace.toASCIIString());
+                        } catch (URISyntaxException e) {
+                            redirect(response, parameter);
+                        }
+                    });
             });
     }
 

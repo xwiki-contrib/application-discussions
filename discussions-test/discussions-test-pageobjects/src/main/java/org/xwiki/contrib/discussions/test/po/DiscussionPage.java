@@ -52,6 +52,9 @@ public final class DiscussionPage extends ViewPage
     @FindBy(css = "div.box")
     private List<WebElement> messageBoxes;
 
+    @FindBy(css = "a.prevPagination")
+    private WebElement previousPageLink;
+
     /**
      * Default constructor.
      *
@@ -59,10 +62,11 @@ public final class DiscussionPage extends ViewPage
      * @param discussionReference the discussion reference
      * @param namespace the discussion macro namespace
      */
-    private DiscussionPage(DocumentReference reference, String discussionReference, String namespace)
+    private DiscussionPage(DocumentReference reference, String discussionReference, String namespace, long pageSize)
     {
         getUtil().createPage(reference,
-            String.format("{{discussion reference=\"%s\" namespace=\"%s\"/}}", discussionReference, namespace),
+            String.format("{{discussion reference=\"%s\" namespace=\"%s\" pageSize=\"%s\"/}}", discussionReference,
+                namespace, pageSize),
             "view discussion");
     }
 
@@ -72,12 +76,13 @@ public final class DiscussionPage extends ViewPage
      * @param reference reference of the page
      * @param discussionReference reference of the discussion
      * @param namespace namespace of the discussion macro
+     * @param pageSize the number of messages on a page
      * @return the resulting page object
      */
     public static DiscussionPage createDiscussionPage(DocumentReference reference, String discussionReference,
-        String namespace)
+        String namespace, long pageSize)
     {
-        return new DiscussionPage(reference, discussionReference, namespace);
+        return new DiscussionPage(reference, discussionReference, namespace, pageSize);
     }
 
     /**
@@ -121,5 +126,13 @@ public final class DiscussionPage extends ViewPage
         return this.messageBoxes.stream()
             .map(MessageBoxPage::new)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Use the pagination to go to the previous page.
+     */
+    public void goToPreviousPage()
+    {
+        this.previousPageLink.click();
     }
 }

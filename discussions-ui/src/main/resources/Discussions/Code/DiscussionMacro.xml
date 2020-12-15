@@ -363,8 +363,10 @@
   #set ($qs = '')
 #end
 #set($originalUrl = "$escapetool.xml($request.getRequestURL())?$qs")
+#set ($count = $services.discussions.countMessagesByDiscussion($discussion))
+#set ($totalNumberPages = $mathtool.ceil($numbertool.toNumber($count).doubleValue()/$numbertool.toNumber($pageSize).doubleValue()))
 #if (!$offset)
-  #set ($offset = 0)
+  #set ($offset = $totalNumberPages - 1)
 #end
 #set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
 == $discussion.title ==
@@ -374,139 +376,140 @@ $discussion.description
 === $services.localization.render('discussions.discussion.messages.title') ===
 
 #if ($messages.size() == 0) 
-$services.localization.render('discussions.discussion.messages.empty')
+  $services.localization.render('discussions.discussion.messages.empty')
 #end
 
 #foreach ($message in $messages)
-#set ($actorDescriptor = $services.discussions.getActorDescriptor($message.actorType, $message.actorReference))
-(% class='box' %)(((
-  (% class='row' %)(((
-    (% class='col-xs-1' %)(((
-      #if ($message.actorType == 'user')
-        {{html}}#mediumUserAvatar($message.actorReference){{/html}}
-      #end
-    )))
-    (% class='col-xs-11' %)(((
-      (% class='pull-right text-muted' %)(((
+  #set ($actorDescriptor = $services.discussions.getActorDescriptor($message.actorType, $message.actorReference))
+  (% class='box' %)(((
+    (% class='row' %)(((
+      (% class='col-xs-1' %)(((
+        #if ($message.actorType == 'user')
+          {{html}}#mediumUserAvatar($message.actorReference){{/html}}
+        #end
+      )))
+      (% class='col-xs-11' %)(((
+        (% class='pull-right text-muted' %)(((
+          {{html}}
+            &lt;small &gt;$escapetool.xml($services.date.displayTimeAgo($message.updateDate))&lt;/small&gt;
+          {{/html}}
+        )))
+        **[[$actorDescriptor.name&gt;&gt;$actorDescriptor.link.toASCIIString()]]**
+        #set ($parsedMessage = $services.rendering.parse($message.content, $message.syntax.toIdString()))
+
         {{html}}
-          &lt;small &gt;$escapetool.xml($services.date.displayTimeAgo($message.updateDate))&lt;/small&gt;
+        $services.rendering.render($parsedMessage, 'xhtml/1.0')
         {{/html}}
       )))
-      **[[$actorDescriptor.name&gt;&gt;$actorDescriptor.link.toASCIIString()]]**
-      #set ($parsedMessage = $services.rendering.parse($message.content, $message.syntax.toIdString()))
-
-      {{html}}
-      $services.rendering.render($parsedMessage, 'xhtml/1.0')
-      {{/html}}
-    )))
-    (% class='col-xs-12' %)(((
-      {{html}}
-        &lt;div class='text-right'&gt;
-          #if ($services.discussions.rights.canDeleteMessage($message))
-           #set ($deleteUrl = "${request.getContextPath()}/discussions/delete/Message/$discussion.reference?discussionReference=$escapetool.url($discussion.reference)&amp;reference=$escapetool.url($message.reference)&amp;originalURL=$escapetool.url($originalUrl)")
-            &lt;a class='btn btn-danger btn-xs discussions message delete' href="$deleteUrl"&gt;$services.icon.renderHTML('trash')&lt;/a&gt;
-          #end
-        &lt;/div&gt;
-      {{/html}}
+      (% class='col-xs-12' %)(((
+        {{html}}
+          &lt;div class='text-right'&gt;
+            #if ($services.discussions.rights.canDeleteMessage($message))
+            #set ($deleteUrl = "${request.getContextPath()}/discussions/delete/Message/$discussion.reference?discussionReference=$escapetool.url($discussion.reference)&amp;reference=$escapetool.url($message.reference)&amp;originalURL=$escapetool.url($originalUrl)")
+              &lt;a class='btn btn-danger btn-xs discussions message delete' href="$deleteUrl"&gt;$services.icon.renderHTML('trash')&lt;/a&gt;
+            #end
+          &lt;/div&gt;
+        {{/html}}
+      )))
     )))
   )))
-)))
 #end
 
 {{html}}
-#set ($count = $services.discussions.countMessagesByDiscussion($discussion))
 #if ($count &gt; 0)
-&lt;div class="paginationFilter"&gt;
-#set ($pageRangeStart = $offset*$pageSize+1)
-#set ($pageRangeEnd = ($offset+1)*$pageSize)
-#set ($pageRangeEnd = $mathtool.min($pageRangeEnd, $count))
-#set ($totalNumberPages = $mathtool.ceil($numbertool.toNumber($count).doubleValue()/$numbertool.toNumber($pageSize).doubleValue()))
+  &lt;div class="paginationFilter"&gt;
+  #set ($pageRangeStart = $offset*$pageSize+1)
+  #set ($pageRangeEnd = ($offset+1)*$pageSize)
+  #set ($pageRangeEnd = $mathtool.min($pageRangeEnd, $count))
 
-  &lt;span class="resultsNo"&gt;$services.localization.render("xe.pagination.results") &lt;span class="currentResultsNo"&gt;${pageRangeStart}-${pageRangeEnd}&lt;/span&gt; $services.localization.render("xe.pagination.results.of") &lt;span class="totalResultsNo"&gt;$count&lt;/span&gt;&lt;/span&gt;
+    &lt;span class="resultsNo"&gt;$services.localization.render("xe.pagination.results") 
+      &lt;span class="currentResultsNo"&gt;${pageRangeStart}-${pageRangeEnd}&lt;/span&gt; 
+      $services.localization.render("xe.pagination.results.of") &lt;span class="totalResultsNo"&gt;$count&lt;/span&gt;
+    &lt;/span&gt;
 
-  &lt;span class="controlPagination"&gt;
-#if ($offset &gt; 0)
-  #set ($new_offset = $offset - 1)
-  #set($pagination = {
-    "${namespace}_offset": [$new_offset]
-  })
-     &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" title="$services.localization.render('xe.pagination.page.prev.title')" class="prevPagination"&gt;&lt;/a&gt;
-#end
-#set ($totalNumberOffsets = $totalNumberPages - 1)
-#if ($offset &lt; $totalNumberOffsets)
-#set ($new_offset = $offset + 1)
-     #set($pagination = {
-       "${namespace}_offset": [$new_offset]
-     })
-     &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" title="$services.localization.render('xe.pagination.page.next.title')" class="nextPagination"&gt;&lt;/a&gt;
-#end
-  &lt;/span&gt;
-  &lt;span class="pagination"&gt;$services.localization.render("xe.pagination.page")
-#foreach($page_number in [1..$totalNumberPages])
-#set ($new_offset = $page_number - 1)
-#set($pagination = {
-       "${namespace}_offset": [$new_offset]
-     })
-    &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" class="#if($page_number == $offset)currentPagination#end" title="$services.localization.render('xe.pagination.page.title',[$page_number])"&gt;$page_number&lt;/a&gt; 
-#end
-  &lt;/span&gt;
-&lt;/div&gt;
-#end
-{{/html}}
+    &lt;span class="controlPagination"&gt;
+      #if ($offset &gt; 0)
+        #set ($new_offset = $offset - 1)
+        #set($pagination = {
+          "${namespace}_offset": [$new_offset]
+        })
+          &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" 
+            title="$services.localization.render('xe.pagination.page.prev.title')" class="prevPagination"&gt;&lt;/a&gt;
+      #end
+      #set ($totalNumberOffsets = $totalNumberPages - 1)
+      #if ($offset &lt; $totalNumberOffsets)
+      #set ($new_offset = $offset + 1)
+          #set($pagination = {
+            "${namespace}_offset": [$new_offset]
+          })
+          &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" 
+            title="$services.localization.render('xe.pagination.page.next.title')" class="nextPagination"&gt;&lt;/a&gt;
+      #end
+    &lt;/span&gt;
+    &lt;span class="pagination"&gt;$services.localization.render("xe.pagination.page")
+      #foreach($page_number in [1..$totalNumberPages])
+        #set ($new_offset = $page_number - 1)
+        #set($pagination = {
+              "${namespace}_offset": [$new_offset]
+            })
+            &lt;a href="$escapetool.xml($request.getRequestURL())?$services.discussions.updateQueryString($request.getParameterMap(), $pagination)" 
+              class="#if($page_number == $offset)currentPagination#end" title="$services.localization.render('xe.pagination.page.title',[$page_number])"&gt;$page_number&lt;/a&gt; 
+      #end
+    &lt;/span&gt;
+  &lt;/div&gt;
+  #end
+  {{/html}}
 
 
-#if ($services.discussions.rights.canWriteDiscussion($reference))
-=== $services.localization.render('discussions.discussion.newMessage.form.title') ===
+  #if ($services.discussions.rights.canWriteDiscussion($reference))
+    === $services.localization.render('discussions.discussion.newMessage.form.title') ===
 
-###set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
-###set ($messageClass = $docMessageClass.getxWikiClass())
-###set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
-###set ($contentField = $messageClass.get('content'))
-#set ($url = "${request.getContextPath()}/discussions/create/Message/$discussion.reference")
+    #set ($url = "${request.getContextPath()}/discussions/create/Message/$discussion.reference")
 
-{{html}}
-&lt;form method="post" action="$url" class="message-form"&gt;
-&lt;div class="form-group"&gt;
-##$doc.displayEdit($contentField, '', $messageObj)
-#displayMessageContentField()
-&lt;/div&gt;
-&lt;button type="submit" class='btn btn-default message-submit-button'&gt;Submit&lt;/button&gt;
-&lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
-&lt;input type="hidden" value="$originalUrl" name="originalURL" /&gt;
-&lt;/form&gt;
-#set ($discard = $xwiki.jsx.use('Discussions.Code.DiscussionMacro'))
-{{/html}}
+    {{html}}
+    &lt;form method="post" action="$url" class="message-form"&gt;
+    &lt;div class="form-group"&gt;
+    ##$doc.displayEdit($contentField, '', $messageObj)
+    #displayMessageContentField()
+    &lt;/div&gt;
+    &lt;button type="submit" class='btn btn-default message-submit-button'&gt;Submit&lt;/button&gt;
+    &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
+    &lt;input type="hidden" value="$originalUrl" name="originalURL" /&gt;
+    &lt;input type="hidden" value="$namespace" name="namespace" /&gt;
+    &lt;/form&gt;
+    #set ($discard = $xwiki.jsx.use('Discussions.Code.DiscussionMacro'))
+    {{/html}}
 
-## Delete message modal
-{{html}}
-&lt;div class="modal fade" tabindex="-1" role="dialog" id="discussions-delete-message-modal" style="text-align: left;"&gt;
-&lt;div class="modal-dialog" role="document"&gt;
-&lt;div class="modal-content"&gt;
-&lt;div class="modal-header"&gt;
-&lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
-&lt;h4 class="modal-title"&gt;$services.localization.render('discussions.discussion.deleteMessage.form.title')&lt;/h4&gt;
-&lt;/div&gt;
-&lt;div class="modal-body"&gt;
-&lt;div id="activitypub-form-share-page" class='xform'&gt;
-$services.localization.render('discussions.discussion.deleteMessage.form.confirmation')
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="modal-footer"&gt;
-&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;
-  $services.localization.render('discussions.discussion.deleteMessage.form.cancel')
-&lt;/button&gt;
-&lt;button type="button" class="btn btn-primary" id="discussions-delete-message-confirm"&gt;
-  $services.localization.render('discussions.discussion.deleteMessage.form.confirm')
-&lt;/button&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;!-- /.modal-content --&gt;
-&lt;/div&gt;&lt;!-- /.modal-dialog --&gt;
-&lt;/div&gt;&lt;!-- /.modal --&gt;
-{{/html}}
+    ## Delete message modal
+    {{html}}
+    &lt;div class="modal fade" tabindex="-1" role="dialog" id="discussions-delete-message-modal" style="text-align: left;"&gt;
+    &lt;div class="modal-dialog" role="document"&gt;
+    &lt;div class="modal-content"&gt;
+    &lt;div class="modal-header"&gt;
+    &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+    &lt;h4 class="modal-title"&gt;$services.localization.render('discussions.discussion.deleteMessage.form.title')&lt;/h4&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-body"&gt;
+    &lt;div id="activitypub-form-share-page" class='xform'&gt;
+    $services.localization.render('discussions.discussion.deleteMessage.form.confirmation')
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-footer"&gt;
+    &lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;
+      $services.localization.render('discussions.discussion.deleteMessage.form.cancel')
+    &lt;/button&gt;
+    &lt;button type="button" class="btn btn-primary" id="discussions-delete-message-confirm"&gt;
+      $services.localization.render('discussions.discussion.deleteMessage.form.confirm')
+    &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;&lt;!-- /.modal-content --&gt;
+    &lt;/div&gt;&lt;!-- /.modal-dialog --&gt;
+    &lt;/div&gt;&lt;!-- /.modal --&gt;
+    {{/html}}
 
-#end
+  #end
 #else
-$services.localization.render('discussions.discussion.notAllowed.view')
+  $services.localization.render('discussions.discussion.notAllowed.view')
 #end
 {{/velocity}}</code>
     </property>

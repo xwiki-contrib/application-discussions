@@ -52,7 +52,6 @@ public class DiscussionContext
     public DiscussionContext(String reference, String name, String description,
         DiscussionContextEntityReference entityReference)
     {
-
         this.reference = reference;
         this.name = name;
         this.description = description;
