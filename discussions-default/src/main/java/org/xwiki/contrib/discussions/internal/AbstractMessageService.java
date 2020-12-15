@@ -34,12 +34,15 @@ import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.MessageContent;
 import org.xwiki.contrib.discussions.events.MessageEvent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.observation.ObservationManager;
+import org.xwiki.rendering.parser.ParseException;
+import org.xwiki.rendering.syntax.Syntax;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.objects.BaseObject;
@@ -52,6 +55,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TY
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -85,14 +89,14 @@ public abstract class AbstractMessageService implements MessageService
     abstract DiscussionsRightService getDiscussionRightService();
 
     @Override
-    public Optional<Message> create(String content, String discussionReference)
+    public Optional<Message> create(String content, Syntax syntax, String discussionReference)
     {
         return canWriteDiscussion(discussionReference,
             () -> {
                 DocumentReference author = this.xcontextProvider.get().getUserReference();
                 String authorReference = this.entityReferenceSerializer.serialize(author);
                 return this.messageStoreService
-                    .create(content, DEFAULT_ACTOR_TYPE, authorReference, discussionReference)
+                    .create(content, syntax, DEFAULT_ACTOR_TYPE, authorReference, discussionReference)
                     .flatMap(reference -> {
                         this.discussionService.touch(discussionReference);
                         Optional<Message> messageOpt = getByReference(reference, discussionReference);
@@ -106,13 +110,14 @@ public abstract class AbstractMessageService implements MessageService
     }
 
     @Override
-    public Optional<Message> create(String content, String discussionReference, String authorType,
+    public Optional<Message> create(String content, Syntax syntax,
+        String discussionReference, String authorType,
         String authorReference)
     {
         // TODO: factorize with the create method above 
         return canWriteDiscussion(discussionReference,
             () -> this.messageStoreService
-                .create(content, authorType, authorReference, discussionReference)
+                .create(content, syntax, authorType, authorReference, discussionReference)
                 .flatMap(reference -> {
                     this.discussionService.touch(discussionReference);
                     Optional<Message> messageOpt = getByReference(reference, discussionReference);
@@ -201,14 +206,23 @@ public abstract class AbstractMessageService implements MessageService
 
     private Function<BaseObject, Message> convertToMessage(Discussion discussion)
     {
-        return bo -> new Message(
-            bo.getStringValue(REFERENCE_NAME),
-            bo.getLargeStringValue(CONTENT_NAME),
-            bo.getStringValue(AUTHOR_TYPE_NAME),
-            bo.getStringValue(AUTHOR_REFERENCE_NAME),
-            bo.getDateValue(CREATE_DATE_NAME),
-            bo.getDateValue(UPDATE_DATE_NAME),
-            discussion
-        );
+
+        return bo -> {
+            Syntax syntax;
+            try {
+                syntax = Syntax.valueOf(bo.getStringValue(SYNTAX_NAME));
+            } catch (ParseException e) {
+                syntax = Syntax.XWIKI_2_1;
+            }
+            return new Message(
+                bo.getStringValue(REFERENCE_NAME),
+                new MessageContent(bo.getLargeStringValue(CONTENT_NAME), syntax),
+                bo.getStringValue(AUTHOR_TYPE_NAME),
+                bo.getStringValue(AUTHOR_REFERENCE_NAME),
+                bo.getDateValue(CREATE_DATE_NAME),
+                bo.getDateValue(UPDATE_DATE_NAME),
+                discussion
+            );
+        };
     }
 }

@@ -23,6 +23,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
@@ -37,8 +38,6 @@ public class Message
 {
     private final String reference;
 
-    private final String content;
-
     private final String actorReference;
 
     private final String actorType;
@@ -49,22 +48,25 @@ public class Message
 
     private final Discussion discussion;
 
+    private final MessageContent messageContent;
+
     /**
      * Default constructor.
      *
      * @param reference the reference
-     * @param content the content
+     * @param messageContent the content of the message and its syntax
      * @param actorType the actor type
      * @param actorReference the actor reference
      * @param createDate date of creation of the message
      * @param updateDate date of the last update of the message
      * @param discussion the discussion of the message
      */
-    public Message(String reference, String content, String actorType, String actorReference, Date createDate,
+    public Message(String reference, MessageContent messageContent, String actorType, String actorReference,
+        Date createDate,
         Date updateDate, Discussion discussion)
     {
         this.reference = reference;
-        this.content = content;
+        this.messageContent = messageContent;
         this.actorType = actorType;
         this.actorReference = actorReference;
         this.createDate = createDate;
@@ -85,7 +87,7 @@ public class Message
      */
     public String getContent()
     {
-        return this.content;
+        return this.messageContent.getContent();
     }
 
     /**
@@ -128,6 +130,14 @@ public class Message
         return this.discussion;
     }
 
+    /**
+     * @return the syntax of the message content
+     */
+    public Syntax getSyntax()
+    {
+        return this.messageContent.getSyntax();
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -143,7 +153,7 @@ public class Message
 
         return new EqualsBuilder()
             .append(this.reference, message.reference)
-            .append(this.content, message.content)
+            .append(this.messageContent, message.messageContent)
             .append(this.actorReference, message.actorReference)
             .append(this.actorType, message.actorType)
             .append(this.createDate, message.createDate)
@@ -157,7 +167,7 @@ public class Message
     {
         return new HashCodeBuilder(17, 37)
             .append(this.reference)
-            .append(this.content)
+            .append(this.messageContent)
             .append(this.actorReference)
             .append(this.actorType)
             .append(this.createDate)
@@ -172,6 +182,7 @@ public class Message
         return new XWikiToStringBuilder(this)
             .append("reference", this.getReference())
             .append("content", this.getContent())
+            .append("syntax", this.getSyntax())
             .append("actorType", this.getActorType())
             .append("actorReference", this.getActorReference())
             .append("createDate", this.getCreateDate())

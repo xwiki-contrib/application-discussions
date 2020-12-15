@@ -95,13 +95,14 @@ class DiscussionsIT
         assertEquals("description", discussionPage.getDescription());
         assertEquals("No messages!", discussionPage.getNoMessagesText());
 
-        discussionPage.sendNewMessage("New message");
+        discussionPage.sendNewMessage("New **message**");
 
         List<MessageBoxPage> messages = discussionPage.getMessages();
         assertEquals(1, messages.size());
         MessageBoxPage message = messages.get(0);
 
         assertEquals("superadmin", message.getAuthor());
+        // the xwiki syntax is interpreted and the text is "new message" without the stars since message is in bold.
         assertEquals("New message", message.getMessageContent());
     }
 }

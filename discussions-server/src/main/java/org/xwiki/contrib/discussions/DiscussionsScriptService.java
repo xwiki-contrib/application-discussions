@@ -32,6 +32,7 @@ import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.internal.QueryStringService;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
@@ -126,12 +127,13 @@ public class DiscussionsScriptService implements ScriptService
      * Create a message in a discussion for the current user.
      *
      * @param content the content
+     * @param syntax the syntax of the content of the message
      * @param discussion the discussion
      * @return the created message
      */
-    public Message createMessage(String content, Discussion discussion)
+    public Message createMessage(String content, Syntax syntax, Discussion discussion)
     {
-        return this.messageService.create(content, discussion.getReference()).orElse(null);
+        return this.messageService.create(content, syntax, discussion.getReference()).orElse(null);
     }
 
     /**

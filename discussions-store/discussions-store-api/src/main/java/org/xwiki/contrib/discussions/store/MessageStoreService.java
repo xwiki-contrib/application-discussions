@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.objects.BaseObject;
@@ -41,12 +42,14 @@ public interface MessageStoreService
      * Creates a message object.
      *
      * @param content the message content
+     * @param syntax the syntax of the content of the message
      * @param authorType the author type
      * @param authorReference the author reference
      * @param discussionReference the discussion reference
      * @return the unique reference of the created message
      */
-    Optional<String> create(String content, String authorType, String authorReference, String discussionReference);
+    Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
+        String discussionReference);
 
     /**
      * Returns a paginate list of messages of a discussion.

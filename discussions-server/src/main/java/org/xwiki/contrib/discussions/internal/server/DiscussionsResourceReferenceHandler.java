@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.container.Container;
 import org.xwiki.contrib.discussions.DiscussionService;
-import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
 import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
@@ -44,6 +44,7 @@ import org.xwiki.resource.annotations.Authenticate;
 import org.xwiki.wysiwyg.converter.HTMLConverter;
 
 import static java.util.Collections.singletonList;
+import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
 
 /**
  * Main handler for the Discussions.
@@ -200,7 +201,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
             .ifPresent(d -> {
                 String content = getContent(request);
-                this.messageService.create(content, d.getReference())
+                this.messageService.create(content, XWIKI_2_0, d.getReference())
                     .ifPresent(m -> redirect(response, request.getParameter(ORIGINAL_URL_PARAM)));
             });
     }

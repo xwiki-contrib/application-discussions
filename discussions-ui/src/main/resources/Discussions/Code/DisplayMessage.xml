@@ -46,7 +46,8 @@
 
   #initRequiredSkinExtensions()
 
-  ## FIXME: duplicate of getRequiredSkinExtensions from display_macro.vm
+
+  ## TODO: duplicate of getRequiredSkinExtensions from display_macro.vm
   $doc.displayEdit($contentField, '', $messageObj)
   #set ($macro.importStrings = [])
   #foreach ($entry in $requiredSkinExtensionsMap.entrySet())
@@ -64,6 +65,5 @@
 {{html}}#displayMessageContentField(){{/html}}
 
 #end
-{{/velocity}}
-</content>
+{{/velocity}}</content>
 </xwikidoc>

@@ -39,6 +39,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
+import org.xwiki.rendering.syntax.Syntax;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -55,6 +56,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_N
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -86,7 +88,7 @@ public class DefaultMessageStoreService implements MessageStoreService
     private RandomGeneratorService randomGeneratorService;
 
     @Override
-    public Optional<String> create(String content, String authorType, String authorReference,
+    public Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
         String discussionReference)
     {
         XWikiContext context = this.xcontextProvider.get();
@@ -115,6 +117,7 @@ public class DefaultMessageStoreService implements MessageStoreService
                     messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
                     messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference, context);
                     messageBaseObject.set(CONTENT_NAME, content, context);
+                    messageBaseObject.set(SYNTAX_NAME, syntax.toIdString(), context);
                     messageBaseObject.set(DISCUSSION_REFERENCE_NAME, discussionReference, context);
                     Date now = new Date();
                     messageBaseObject.setDateValue(CREATE_DATE_NAME, now);

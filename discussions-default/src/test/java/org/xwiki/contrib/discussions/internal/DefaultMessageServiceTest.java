@@ -31,6 +31,7 @@ import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.MessageContent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
@@ -42,7 +43,7 @@ import org.xwiki.test.junit5.mockito.MockComponent;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.objects.BaseObject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
@@ -51,6 +52,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_N
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
+import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_1;
 
 /**
  * Test of {@link DefaultMessageService}.
@@ -108,7 +110,7 @@ class DefaultMessageServiceTest
         when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
         setDiscussionWriteRight(discussionDocumentReference, false);
 
-        Optional<Message> message = this.defaultMessageService.create("content", "reference");
+        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, "reference");
 
         assertEquals(Optional.empty(), message);
     }
@@ -124,7 +126,7 @@ class DefaultMessageServiceTest
         when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
         setDiscussionWriteRight(discussionDocumentReference, true);
         setDiscussionReadRight(discussionDocumentReference, true);
-        when(this.messageStoreService.create("content", "user", USER_REFERENCE, "reference"))
+        when(this.messageStoreService.create("content", XWIKI_2_1, "user", USER_REFERENCE, "reference"))
             .thenReturn(Optional.of("messageReference"));
         BaseObject messageBaseObject = mock(BaseObject.class);
         when(this.messageStoreService.getByReference("messageReference", "reference"))
@@ -139,10 +141,12 @@ class DefaultMessageServiceTest
         Date updateDate = new Date();
         when(messageBaseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
 
-        Optional<Message> message = this.defaultMessageService.create("content", "reference");
+        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, "reference");
 
         assertEquals(
-            Optional.of(new Message("messageReference", "CONTENT_NAME", "AUTHOR_TYPE_NAME", "AUTHOR_REFERENCE_NAME",
+            Optional.of(new Message("messageReference", new MessageContent("CONTENT_NAME", XWIKI_2_1),
+                "AUTHOR_TYPE_NAME",
+                "AUTHOR_REFERENCE_NAME",
                 createDate, updateDate, discussion)),
             message);
     }

@@ -363,13 +363,10 @@
   #set ($qs = '')
 #end
 #set($originalUrl = "$escapetool.xml($request.getRequestURL())?$qs")
-
 #if (!$offset)
   #set ($offset = 0)
 #end
 #set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
-
-
 == $discussion.title ==
 
 $discussion.description
@@ -396,8 +393,11 @@ No messages!
         {{/html}}
       )))
       **[[$actorDescriptor.name&gt;&gt;$actorDescriptor.link.toASCIIString()]]**
+      #set ($parsedMessage = $services.rendering.parse($message.content, $message.syntax.toIdString()))
 
-      $message.content
+      {{html}}
+      $services.rendering.render($parsedMessage, 'xhtml/1.0')
+      {{/html}}
     )))
     (% class='col-xs-12' %)(((
       {{html}}

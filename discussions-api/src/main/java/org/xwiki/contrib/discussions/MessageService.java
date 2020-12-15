@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -41,21 +42,24 @@ public interface MessageService
      * Creates a message for the current user.
      *
      * @param content the message content
+     * @param syntax the syntax of the content of the message
      * @param discussionReference the discussion reference
      * @return the created message
      */
-    Optional<Message> create(String content, String discussionReference);
+    Optional<Message> create(String content, Syntax syntax, String discussionReference);
 
     /**
      * Creates a message for a specific user.
      *
      * @param content the message content
+     * @param syntax the syntax of the content of the message
      * @param discussionReference the discussion reference
      * @param authorType the author type
      * @param authorReference the author reference
      * @return the create message
      */
-    Optional<Message> create(String content, String discussionReference, String authorType, String authorReference);
+    Optional<Message> create(String content, Syntax syntax, String discussionReference,
+        String authorType, String authorReference);
 
     /**
      * Get a message by its unique reference.

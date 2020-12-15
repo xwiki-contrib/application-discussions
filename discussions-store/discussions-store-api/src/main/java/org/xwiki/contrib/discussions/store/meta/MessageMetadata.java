@@ -72,6 +72,16 @@ public class MessageMetadata
     public static final String CONTENT_PRETTY_NAME = "Content";
 
     /**
+     * Syntax field name.
+     */
+    public static final String SYNTAX_NAME = "syntax";
+
+    /**
+     * Syntax field pretty name.
+     */
+    public static final String SYNTAX_PRETTY_NAME = "Syntax";
+
+    /**
      * Discussion reference field name.
      */
     public static final String DISCUSSION_REFERENCE_NAME = "discussionReference";

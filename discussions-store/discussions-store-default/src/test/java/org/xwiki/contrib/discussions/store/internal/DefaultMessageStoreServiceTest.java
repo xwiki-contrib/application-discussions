@@ -21,7 +21,6 @@
 package org.xwiki.contrib.discussions.store.internal;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +34,6 @@ import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.Query;
-import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.junit5.LogCaptureExtension;
 import org.xwiki.test.junit5.mockito.ComponentTest;
@@ -49,7 +47,7 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import ch.qos.logback.classic.Level;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,6 +61,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TY
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_1;
 import static org.xwiki.test.LogLevel.DEBUG;
 
 /**
@@ -109,8 +108,9 @@ class DefaultMessageStoreServiceTest
     void createWrongDiscussion()
     {
         when(this.discussionStoreService.get("discussionReference")).thenReturn(Optional.empty());
-        Optional<String> reference = this.defaultMessageStoreService.create("content", "authorType", "authorReference",
-            "discussionReference");
+        Optional<String> reference =
+            this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
+                "discussionReference");
         assertFalse(reference.isPresent());
         assertEquals(1, this.logCapture.size());
         assertEquals(Level.WARN, this.logCapture.getLogEvent(0).getLevel());
@@ -134,8 +134,9 @@ class DefaultMessageStoreServiceTest
         when(this.randomGeneratorService.randomString()).thenReturn("randomString", "randomString2");
         when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
 
-        Optional<String> reference = this.defaultMessageStoreService.create("content", "authorType", "authorReference",
-            "discussionReference");
+        Optional<String> reference =
+            this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
+                "discussionReference");
         assertEquals(Optional.of("discussionReference-randomString"), reference);
         assertEquals(0, this.logCapture.size());
         verify(messageBaseObject).set(REFERENCE_NAME, "discussionReference-randomString", this.xWikiContext);

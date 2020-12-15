@@ -52,6 +52,8 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REPLY_TO_
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REPLY_TO_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.STATES_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.STATES_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_PRETTY_NAME;
 
@@ -94,6 +96,7 @@ public class MessageXClassInitializer implements MandatoryDocumentInitializer
             STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
         xClass.addTextField(REPLY_TO_NAME, REPLY_TO_PRETTY_NAME, textSize);
         xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
+        xClass.addTextField(SYNTAX_NAME, SYNTAX_PRETTY_NAME, textSize);
         return true;
     }
 }

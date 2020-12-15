@@ -28,12 +28,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.MessageContent;
 import org.xwiki.contrib.discussions.internal.rights.AdminDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.ReadDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.WriteDiscussionRight;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.WikiReference;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.security.authorization.AuthorizationManager;
 import org.xwiki.security.authorization.Right;
 import org.xwiki.test.junit5.mockito.ComponentTest;
@@ -45,6 +47,7 @@ import com.xpn.xwiki.XWikiContext;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.xwiki.rendering.syntax.Syntax.*;
 
 /**
  * Test of {@link DefaultDiscussionsRightService}.
@@ -208,8 +211,10 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotLocalUser()
     {
-        Message message = new Message("reference", "content", "no_local", "actorReference", new Date(), new Date(),
-            DISCUSSION);
+        Message message =
+            new Message("reference", new MessageContent("content", XWIKI_2_1), "no_local", "actorReference",
+                new Date(), new Date(),
+                DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
         assertFalse(b);
     }
@@ -217,8 +222,10 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotAuthor()
     {
-        Message message = new Message("reference", "content", "user", "actorReference", new Date(), new Date(),
-            DISCUSSION);
+        Message message =
+            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "actorReference",
+                new Date(), new Date(),
+                DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
         assertFalse(b);
     }
@@ -226,8 +233,10 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageIsAuthorButWriteDisallowed()
     {
-        Message message = new Message("reference", "content", "user", "xwiki:XWiki.User", new Date(), new Date(),
-            DISCUSSION);
+        Message message =
+            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+                new Date(),
+                DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
         assertFalse(b);
     }
@@ -235,8 +244,10 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageIsAuthorAndWriteAllowed()
     {
-        Message message = new Message("reference", "content", "user", "xwiki:XWiki.User", new Date(), new Date(),
-            DISCUSSION);
+        Message message =
+            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+                new Date(),
+                DISCUSSION);
         when(this.authorizationManager
             .hasAccess(this.writeDiscussionRight, USER_DOCUMENT_REFERENCE, DISCUSSION_REFERENCE)).thenReturn(true);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -246,8 +257,10 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotAuthorButAdmin()
     {
-        Message message = new Message("reference", "content", "user", "actorReference", new Date(), new Date(),
-            DISCUSSION);
+        Message message =
+            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "actorReference", new Date(),
+                new Date(),
+                DISCUSSION);
         when(this.authorizationManager
             .hasAccess(this.adminDiscussionRight, USER_DOCUMENT_REFERENCE, DISCUSSION_REFERENCE)).thenReturn(true);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
