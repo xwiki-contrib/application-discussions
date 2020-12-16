@@ -19,12 +19,45 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.events.MessageEvent;
+import org.xwiki.contrib.discussions.store.DiscussionStoreService;
+import org.xwiki.contrib.discussions.store.MessageStoreService;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.observation.ObservationManager;
+import org.xwiki.rendering.parser.ParseException;
+import org.xwiki.rendering.syntax.Syntax;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.objects.BaseObject;
+
+import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
+import static org.xwiki.contrib.discussions.events.ActionType.DELETE;
+import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
  * Default implementation of {@link MessageService}.
@@ -34,14 +67,117 @@ import org.xwiki.contrib.discussions.MessageService;
  */
 @Component
 @Singleton
-public class DefaultMessageService extends AbstractMessageService
+public class DefaultMessageService implements MessageService
 {
+    private static final String DEFAULT_ACTOR_TYPE = "user";
+
     @Inject
     private DiscussionsRightService discussionsRightService;
 
+    @Inject
+    private MessageStoreService messageStoreService;
+
+    @Inject
+    private DiscussionService discussionService;
+
+    @Inject
+    private DiscussionStoreService discussionStoreService;
+
+    @Inject
+    private Provider<XWikiContext> xcontextProvider;
+
+    @Inject
+    private EntityReferenceSerializer<String> entityReferenceSerializer;
+
+    @Inject
+    private ObservationManager observationManager;
+
     @Override
-    DiscussionsRightService getDiscussionRightService()
+    public Optional<Message> create(String content, Syntax syntax, String discussionReference)
     {
-        return this.discussionsRightService;
+        DocumentReference author = this.xcontextProvider.get().getUserReference();
+        String authorReference = this.entityReferenceSerializer.serialize(author);
+        return this.create(content, syntax, discussionReference, DEFAULT_ACTOR_TYPE, authorReference);
+    }
+
+    @Override
+    public Optional<Message> create(String content, Syntax syntax,
+        String discussionReference, String authorType,
+        String authorReference)
+    {
+        return this.messageStoreService
+            .create(content, syntax, authorType, authorReference, discussionReference)
+            .flatMap(reference -> {
+                this.discussionService.touch(discussionReference);
+                Optional<Message> messageOpt = getByReference(reference, discussionReference);
+                messageOpt
+                    .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                return messageOpt;
+            });
+    }
+
+    @Override
+    public Optional<Message> getByReference(String reference, String discussionReference)
+    {
+        return this.messageStoreService.getByReference(reference, discussionReference)
+            .flatMap(messageObject -> this.discussionService.get(discussionReference)
+                .map(discussion -> convertToMessage(discussion).apply(messageObject)));
+    }
+
+    @Override
+    public List<Message> getByDiscussion(String discussionReference, int offset, int limit)
+    {
+        return this.discussionService.get(discussionReference)
+            .map(discussion -> this.messageStoreService.getByDiscussion(discussionReference, offset, limit)
+                .stream()
+                .map(convertToMessage(discussion))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    @Override
+    public long countByDiscussion(Discussion discussion)
+    {
+        return this.messageStoreService.countByDiscussion(discussion.getReference());
+    }
+
+    @Override
+    public void delete(String reference, String discussionReference)
+    {
+        this.getByReference(reference, discussionReference)
+            .ifPresent(message -> {
+                this.messageStoreService.delete(message.getReference(), message.getDiscussion().getReference());
+                this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);
+            });
+    }
+    
+    @Override
+    public boolean canDelete(Message message)
+    {
+        String discussionReference = message.getDiscussion().getReference();
+        return this.discussionStoreService.get(discussionReference).map(
+            baseObject -> this.discussionsRightService.canDeleteMessage(message, baseObject.getDocumentReference()))
+            .orElse(false);
+    }
+
+    private Function<BaseObject, Message> convertToMessage(Discussion discussion)
+    {
+        return bo -> {
+            Syntax syntax;
+            try {
+                syntax = Syntax.valueOf(bo.getStringValue(SYNTAX_NAME));
+            } catch (ParseException e) {
+                syntax = Syntax.XWIKI_2_1;
+            }
+            return new Message(
+                bo.getStringValue(REFERENCE_NAME),
+                new MessageContent(bo.getLargeStringValue(CONTENT_NAME), syntax),
+                bo.getStringValue(AUTHOR_TYPE_NAME),
+                bo.getStringValue(AUTHOR_REFERENCE_NAME),
+                bo.getDateValue(CREATE_DATE_NAME),
+                bo.getDateValue(UPDATE_DATE_NAME),
+                discussion
+            );
+        };
     }
 }

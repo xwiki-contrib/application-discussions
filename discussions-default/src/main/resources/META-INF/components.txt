@@ -4,8 +4,4 @@ org.xwiki.contrib.discussions.internal.DefaultDiscussionsRightService
 org.xwiki.contrib.discussions.internal.DefaultMessageService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionsActorsService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionsActorsServiceResolver
-org.xwiki.contrib.discussions.internal.UnsafeDiscussionContextService
-org.xwiki.contrib.discussions.internal.UnsafeDiscussionService
-org.xwiki.contrib.discussions.internal.UnsafeDiscussionsRightService
-org.xwiki.contrib.discussions.internal.UnsafeMessageService
 org.xwiki.contrib.discussions.internal.UserDiscussionsActorsService

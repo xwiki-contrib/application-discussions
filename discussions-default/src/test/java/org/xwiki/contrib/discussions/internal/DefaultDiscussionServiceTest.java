@@ -62,18 +62,6 @@ class DefaultDiscussionServiceTest
     private DiscussionsRightService discussionsRightService;
 
     @Test
-    void createNotAllowed()
-    {
-        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(false);
-
-        Optional<Discussion> discussion =
-            this.defaultDiscussionService.create("title", "description");
-
-        assertEquals(Optional.empty(), discussion);
-        verifyNoInteractions(this.discussionStoreService);
-    }
-
-    @Test
     void createCreateFail()
     {
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
@@ -118,22 +106,7 @@ class DefaultDiscussionServiceTest
         Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
         assertEquals(Optional.empty(), discussion);
     }
-
-    @Test
-    void getNotAllowed()
-    {
-        DocumentReference dr = new DocumentReference("xwiki", "XWiki", "Discussion");
-        BaseObject discussionBaseObject = mock(BaseObject.class);
-
-        when(discussionBaseObject.getDocumentReference()).thenReturn(dr);
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
-        when(this.discussionsRightService.canReadDiscussion(dr)).thenReturn(false);
-
-        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
-
-        assertEquals(Optional.empty(), discussion);
-    }
-
+    
     @Test
     void get()
     {

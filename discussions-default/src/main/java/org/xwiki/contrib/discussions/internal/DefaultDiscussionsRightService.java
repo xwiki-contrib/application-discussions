@@ -29,10 +29,12 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
+import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.internal.rights.AdminDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.ReadDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.WriteDiscussionRight;
+import org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -67,6 +69,9 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
 
     private Right writeDiscussionRight;
 
+    @Inject
+    private DiscussionsRightsStoreService discussionsRightsStoreService;
+    
     @Override
     public void initialize() throws InitializationException
     {
@@ -135,6 +140,20 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
     public boolean isAdminDiscussion(DocumentReference discussion)
     {
         return canWriteEntityReference(discussion, this.adminDiscussionRight);
+    }
+
+    @Override
+    public void setRead(Discussion discussion, DocumentReference user)
+    {
+        this.discussionsRightsStoreService
+            .setDiscussionRightToUser(discussion.getReference(), user, this.readDiscussionRight.getName());
+    }
+
+    @Override
+    public void setWrite(Discussion discussion, DocumentReference user)
+    {
+        this.discussionsRightsStoreService
+            .setDiscussionRightToUser(discussion.getReference(), user, this.writeDiscussionRight.getName());
     }
 
     private boolean isAdministrator()

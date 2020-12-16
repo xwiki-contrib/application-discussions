@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -75,4 +76,20 @@ public interface DiscussionsRightService
      * @return {@code} true if the current user is an administrator of the discussion, {@code} false otherwise
      */
     boolean isAdminDiscussion(DocumentReference discussion);
+
+    /**
+     * Allow the user to read the discussion.
+     *
+     * @param discussion the discussion
+     * @param user the user
+     */
+    void setRead(Discussion discussion, DocumentReference user);
+
+    /**
+     * Allow the user to write the discussion.
+     *
+     * @param discussion the discussion
+     * @param user the user
+     */
+    void setWrite(Discussion discussion, DocumentReference user);
 }

@@ -17,33 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.internal;
+package org.xwiki.contrib.discussions.store;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionsRightService;
+import org.xwiki.component.annotation.Role;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
- * Unsafe implementation of {@link org.xwiki.contrib.discussions.MessageService}.
+ * API to manipulate the discussions rights.
  *
  * @version $Id$
  * @since 1.0
  */
-@Component
-@Singleton
-@Named("unsafe")
-public class UnsafeMessageService extends AbstractMessageService
+@Role
+@Unstable
+public interface DiscussionsRightsStoreService
 {
-    @Inject
-    @Named("unsafe")
-    private DiscussionsRightService discussionsRightService;
-
-    @Override
-    DiscussionsRightService getDiscussionRightService()
-    {
-        return this.discussionsRightService;
-    }
+    /**
+     * Set a right to a user on a discussion.
+     *
+     * @param discussionReference the discussion reference
+     * @param user the user
+     * @param rightName the name of the right to add
+     */
+    void setDiscussionRightToUser(String discussionReference, DocumentReference user, String rightName);
 }

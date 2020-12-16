@@ -120,4 +120,15 @@ public interface DiscussionService
      * @return {@code true} if a discussion context is found, {@code false} otherwise
      */
     boolean findByDiscussionContext(String type, String reference);
+
+    /**
+     * @return {@code true} if the current user can create a discussion, {@code false} otherwise
+     */
+    boolean canCreateDiscussion();
+
+    /**
+     * @param reference the reference of the discussion
+     * @return {@code true} if the current user is allowed to view the discussion, {@code false} otherwise
+     */
+    boolean canViewDiscussion(String reference);
 }

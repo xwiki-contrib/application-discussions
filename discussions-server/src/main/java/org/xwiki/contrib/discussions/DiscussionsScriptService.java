@@ -86,7 +86,11 @@ public class DiscussionsScriptService implements ScriptService
     public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
         String entityReference)
     {
-        return this.discussionContextService.create(name, description, referenceType, entityReference).orElse(null);
+        if (this.discussionContextService.canCreateDiscussionContext()) {
+            return this.discussionContextService.create(name, description, referenceType, entityReference).orElse(null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -98,7 +102,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion createDiscussion(String title, String description)
     {
-        return this.discussionService.create(title, description).orElse(null);
+        if (this.discussionService.canCreateDiscussion()) {
+            return this.discussionService.create(title, description).orElse(null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -109,7 +117,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion getDiscussion(String reference)
     {
-        return this.discussionService.get(reference).orElse(null);
+        if (this.discussionService.canViewDiscussion(reference)) {
+            return this.discussionService.get(reference).orElse(null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -120,7 +132,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public DiscussionContext getDiscussionContext(String reference)
     {
-        return this.discussionContextService.get(reference).orElse(null);
+        if (this.discussionContextService.canViewDiscussionContext(reference)) {
+            return this.discussionContextService.get(reference).orElse(null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -133,7 +149,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Message createMessage(String content, Syntax syntax, Discussion discussion)
     {
-        return this.messageService.create(content, syntax, discussion.getReference()).orElse(null);
+        if (this.discussionService.canWrite(discussion.getReference())) {
+            return this.messageService.create(content, syntax, discussion.getReference()).orElse(null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -146,7 +166,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Message> getMessagesByDiscussion(Discussion discussion, int offset, int limit)
     {
-        return this.messageService.getByDiscussion(discussion.getReference(), offset * limit, limit);
+        if (this.discussionService.canViewDiscussion(discussion.getReference())) {
+            return this.messageService.getByDiscussion(discussion.getReference(), offset * limit, limit);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -157,7 +181,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public long countMessagesByDiscussion(Discussion discussion)
     {
-        return this.messageService.countByDiscussion(discussion);
+        if (this.discussionService.canViewDiscussion(discussion.getReference())) {
+            return this.messageService.countByDiscussion(discussion);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -180,6 +208,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
     {
+        // TODO: rights
         return this.discussionService.findByDiscussionContexts(discussionContextReferences);
     }
 
@@ -191,6 +220,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public void linkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
     {
+        // TODO: rights
         this.discussionContextService.link(discussionContext, discussion);
     }
 
@@ -202,6 +232,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public void unlinkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
     {
+        // TODO: rights
         this.discussionContextService.unlink(discussionContext, discussion);
     }
 

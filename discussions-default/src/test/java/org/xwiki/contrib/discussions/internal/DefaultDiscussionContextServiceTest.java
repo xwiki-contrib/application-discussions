@@ -53,18 +53,6 @@ class DefaultDiscussionContextServiceTest
     private DiscussionsRightService discussionsRightService;
 
     @Test
-    void createNotAllowed()
-    {
-        when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(false);
-
-        Optional<DiscussionContext> discussionContext =
-            this.defaultDiscussionContextService.create("name", "description", "referenceType", "entityReference");
-
-        assertEquals(Optional.empty(), discussionContext);
-        verifyNoInteractions(this.discussionContextStoreService);
-    }
-
-    @Test
     void createCreateFail()
     {
         when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(true);

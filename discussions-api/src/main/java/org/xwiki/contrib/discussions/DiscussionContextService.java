@@ -93,4 +93,15 @@ public interface DiscussionContextService
      * @return the list of discussion contexts
      */
     List<DiscussionContext> findByDiscussionReference(String reference);
+
+    /**
+     * @return {@code true} if the current actor can create a discussion context, {@code false} otherwise
+     */
+    boolean canCreateDiscussionContext();
+
+    /**
+     * @param reference the reference of the discussion content
+     * @return {@code true} if the current user can view the discussion context, {@code false} otherwise
+     */
+    boolean canViewDiscussionContext(String reference);
 }
