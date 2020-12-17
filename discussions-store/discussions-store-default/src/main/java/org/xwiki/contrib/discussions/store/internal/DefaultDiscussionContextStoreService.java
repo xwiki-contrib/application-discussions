@@ -258,7 +258,8 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                 .map(Optional::get)
                 .collect(Collectors.toList());
         } catch (QueryException e) {
-            e.printStackTrace();
+            this.logger.warn("Failed to query a discussion by reference [{}]. Cause: [{}].", reference,
+                getRootCauseMessage(e));
             return Arrays.asList();
         }
     }

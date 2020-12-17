@@ -257,8 +257,10 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 .map(Optional::get)
                 .collect(Collectors.toList());
         } catch (QueryException e) {
-            e.printStackTrace();
-            // TODO logo
+            this.logger.warn(
+                "Failed to find an entity by reference with type [{}], reference [{}], offset [{}], and limit [{}]."
+                    + " Cause: [{}].",
+                type, reference, offset, limit, getRootCauseMessage(e));
             return emptyList();
         }
     }

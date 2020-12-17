@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService;
@@ -43,6 +44,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.LevelsClass;
 import com.xpn.xwiki.objects.classes.UsersClass;
 
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.security.internal.XWikiConstants.ALLOW_FIELD_NAME;
 import static org.xwiki.security.internal.XWikiConstants.LEVELS_FIELD_NAME;
 import static org.xwiki.security.internal.XWikiConstants.LOCAL_CLASSNAME;
@@ -68,6 +70,9 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
     @Inject
     private EntityReferenceSerializer<String> serializer;
 
+    @Inject
+    private Logger logger;
+
     @Override
     public void setDiscussionRightToUser(String discussionReference, DocumentReference user, String rightName)
     {
@@ -86,7 +91,6 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                 Optional<BaseObject> any =
                     xObjects.stream().filter(obj -> LevelsClass.getListFromString(obj.getStringValue(LEVELS_FIELD_NAME))
                         .stream()
-//                        .map(Right::toRight)
                         .anyMatch(right -> Objects.equals(right, rightName))).findAny();
                 if (any.isPresent()) {
                     // add the the existing base object
@@ -108,7 +112,9 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                     wiki.saveDocument(document, context);
                 }
             } catch (XWikiException e) {
-                e.printStackTrace();
+                this.logger
+                    .warn("Failed to set right [{}] to user [{}] on document [{}]. Cause: [{}].", rightName, user,
+                        discussionReference, getRootCauseMessage(e));
             }
         });
     }

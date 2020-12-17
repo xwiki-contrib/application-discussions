@@ -21,6 +21,8 @@
 package org.xwiki.contrib.discussions.store.internal;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +63,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TY
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_1;
 import static org.xwiki.test.LogLevel.DEBUG;
 
@@ -98,7 +101,7 @@ class DefaultMessageStoreServiceTest
     private XWiki xWiki;
 
     @BeforeEach
-    void setUp() throws Exception
+    void setUp()
     {
         when(this.xcontextProvider.get()).thenReturn(this.xWikiContext);
         when(this.xWikiContext.getWiki()).thenReturn(this.xWiki);
@@ -181,5 +184,43 @@ class DefaultMessageStoreServiceTest
         verify(query).setLimit(10);
         verify(query).setOffset(0);
         verify(query).bindValue("discussionReference", "discussionReference");
+    }
+
+    @Test
+    void getByReference() throws Exception
+    {
+        BaseObject discussionBaseObject = mock(BaseObject.class);
+        XWikiDocument xWikiDocument = mock(XWikiDocument.class);
+        DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "DiscussionObject");
+        DocumentReference messageXClassDocumentReference = new DocumentReference("xwiki", "XWiki", "MessageClass");
+        BaseObject messageBaseObject = mock(BaseObject.class);
+        BaseObject messageBaseObject1 = mock(BaseObject.class);
+        BaseObject messageBaseObject2 = mock(BaseObject.class);
+        List<BaseObject> value2 = Arrays.asList(
+            messageBaseObject1,
+            null,
+            messageBaseObject2
+        );
+
+        when(messageBaseObject1.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(messageBaseObject2.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(messageBaseObject1.getDateValue(UPDATE_DATE_NAME)).thenReturn(new Date());
+        Calendar instance = Calendar.getInstance();
+        instance.add(Calendar.SECOND, 10);
+        when(messageBaseObject2.getDateValue(UPDATE_DATE_NAME)).thenReturn(instance.getTime());
+
+        when(this.discussionStoreService.get("discussionReference")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.xWiki.getDocument(discussionDocumentReference, this.xWikiContext)).thenReturn(xWikiDocument);
+        when(xWikiDocument.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
+        when(this.randomGeneratorService.randomString()).thenReturn("randomString", "randomString2");
+        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
+        when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
+        when(xWikiDocument.getXObjects(this.messageMetadata.getMessageXClass())).thenReturn(value2);
+
+        Optional<BaseObject> actual = this.defaultMessageStoreService.getByReference("reference", "discussionReference");
+        assertEquals(Optional.of(messageBaseObject1), actual);
+        assertEquals(1, this.logCapture.size());
+        assertEquals(Level.DEBUG, this.logCapture.getLogEvent(0).getLevel());
+        assertEquals("Found too many messages, expected one. With reference=[reference], discussionReference=[discussionReference]", this.logCapture.getMessage(0));
     }
 }

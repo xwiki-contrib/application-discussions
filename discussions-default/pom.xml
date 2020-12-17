@@ -38,7 +38,7 @@
   <properties>
     <xwiki.extension.name>${description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
-    <xwiki.jacoco.instructionRatio>0.50</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.52</xwiki.jacoco.instructionRatio>
   </properties>
 
   <dependencies>
