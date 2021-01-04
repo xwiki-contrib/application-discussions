@@ -62,6 +62,22 @@ public interface MessageService
         String authorType, String authorReference);
 
     /**
+     * Creates a message for a specific user.
+     *
+     * @param content the message content
+     * @param syntax the syntax of the content of the message
+     * @param discussionReference the discussion reference
+     * @param authorType the author type
+     * @param authorReference the author reference
+     * @param notify {@code true} if the notifications for the message creation can be sent, {@code false}
+     *     otherwise
+     * @return the create message
+     */
+    Optional<Message> create(String content, Syntax syntax, String discussionReference, String authorType,
+        String authorReference,
+        boolean notify);
+
+    /**
      * Get a message by its unique reference.
      *
      * @param reference the reference

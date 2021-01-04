@@ -105,13 +105,23 @@ public class DefaultMessageService implements MessageService
         String discussionReference, String authorType,
         String authorReference)
     {
+        return create(content, syntax, discussionReference, authorType, authorReference, true);
+    }
+
+    @Override
+    public Optional<Message> create(String content, Syntax syntax,
+        String discussionReference, String authorType,
+        String authorReference, boolean notify)
+    {
         return this.messageStoreService
             .create(content, syntax, authorType, authorReference, discussionReference)
             .flatMap(reference -> {
                 this.discussionService.touch(discussionReference);
                 Optional<Message> messageOpt = getByReference(reference, discussionReference);
-                messageOpt
-                    .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                if (notify) {
+                    messageOpt
+                        .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                }
                 return messageOpt;
             });
     }
@@ -150,7 +160,7 @@ public class DefaultMessageService implements MessageService
                 this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);
             });
     }
-    
+
     @Override
     public boolean canDelete(Message message)
     {
