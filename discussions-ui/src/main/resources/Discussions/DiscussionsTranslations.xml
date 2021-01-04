@@ -47,7 +47,17 @@ discussions.discussion.deleteMessage.form.cancel=Cancel
 discussions.discussion.deleteMessage.form.confirm=Cancel
 discussions.discussions.table.header.title=Title
 discussions.discussions.table.header.updateDate=Last update
-discussions.discussions.table.header.messageCount=Message count</content>
+discussions.discussions.table.header.messageCount=Message count
+discussions.home.description=This space contains the code of the Discussions application.
+discussions.home.discussionsTable.column.title=Title
+discussions.home.discussionsTable.column.creationDate=Creation Date
+discussions.home.discussionsTable.column.updateDate=Update Date
+discussions.home.discussionsTable.column.discussionContexts=Discussion Contexts
+discussions.home.discussionContextsTable.column.name=Name
+discussions.home.discussionContextsTable.column.entityReferenceType=Entity Reference Type
+discussions.home.discussionContextsTable.column.entityReference=Entity Reference
+discussions.home.discussionContextsTable.column.creationDate=Creation Date
+discussions.home.discussionContextsTable.column.discussions=Discussions</content>
   <object>
     <name>Discussions.DiscussionsTranslations</name>
     <number>0</number>
