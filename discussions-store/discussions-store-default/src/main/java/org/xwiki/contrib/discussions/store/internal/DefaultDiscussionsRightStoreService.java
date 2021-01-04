@@ -76,31 +76,31 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
     @Override
     public void setDiscussionRightToUser(String discussionReference, DocumentReference user, String rightName)
     {
-        Optional<BaseObject> baseObject = this.discussionStoreService.get(discussionReference);
-        String userReference = this.serializer.serialize(user);
-        baseObject.ifPresent(d -> {
-            DocumentReference documentReference = d.getDocumentReference();
+        this.discussionStoreService.get(discussionReference).ifPresent(d -> {
             XWikiContext context = this.xWikiContextProvider.get();
             try {
                 XWiki wiki = context.getWiki();
-                XWikiDocument document = wiki.getDocument(documentReference, context);
+                XWikiDocument document = wiki.getDocument(d.getDocumentReference(), context);
 
                 EntityReference rightsClassReference = new LocalDocumentReference(XWIKI_SPACE, LOCAL_CLASSNAME);
                 List<BaseObject> xObjects =
                     document.getXObjects(rightsClassReference);
-                Optional<BaseObject> any =
-                    xObjects.stream().filter(obj -> LevelsClass.getListFromString(obj.getStringValue(LEVELS_FIELD_NAME))
+                String userReference = this.serializer.serialize(user);
+                Optional<BaseObject> userRightObject =
+                    xObjects.stream()
+                        .filter(obj -> UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME))
                         .stream()
-                        .anyMatch(right -> Objects.equals(right, rightName))).findAny();
-                if (any.isPresent()) {
+                        .anyMatch(userId -> Objects.equals(userId, userReference)))
+                        .findAny();
+                if (userRightObject.isPresent()) {
                     // add the the existing base object
-                    BaseObject obj = any.get();
-                    List<String> listFromString =
-                        UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME));
-                    if (!listFromString.contains(userReference)) {
-                        listFromString.add(userReference);
+                    BaseObject obj = userRightObject.get();
+                    List<String> levels =
+                        LevelsClass.getListFromString(obj.getStringValue(LEVELS_FIELD_NAME));
+                    if (!levels.contains(rightName)) {
+                        levels.add(rightName);
                     }
-                    obj.setStringValue(USERS_FIELD_NAME, UsersClass.getStringFromList(listFromString));
+                    obj.setStringValue(LEVELS_FIELD_NAME, LevelsClass.getStringFromList(levels, ","));
                     obj.setIntValue(ALLOW_FIELD_NAME, 1);
                     wiki.saveDocument(document, context);
                 } else {
