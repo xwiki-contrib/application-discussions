@@ -43,10 +43,7 @@
   #set ($messageClass = $docMessageClass.getxWikiClass())
   #set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
   #set ($contentField = $messageClass.get('content'))
-
   #initRequiredSkinExtensions()
-
-
   ## TODO: duplicate of getRequiredSkinExtensions from display_macro.vm
   $doc.displayEdit($contentField, '', $messageObj)
   #set ($macro.importStrings = [])
@@ -56,14 +53,11 @@
     #set ($discard = $macro.importStrings.add($!stringtool.removeStart($macro.importString, $entry.value).trim()))
   #end
   #set ($macro.importStrings = $stringtool.join($macro.importStrings, ''))
-
   #set ($discard = $response.setHeader('X-XWIKI-HTML-HEAD', $macro.importStrings))
 #end
 {{/velocity}}{{velocity}}
 #if ($request.showContentField == 'show')
-
 {{html}}#displayMessageContentField(){{/html}}
-
 #end
 {{/velocity}}</content>
 </xwikidoc>

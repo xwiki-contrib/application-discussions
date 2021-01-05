@@ -20,9 +20,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.4" reference="Discussions.WebHome" locale="">
-  <web>Discussions</web>
-  <name>WebHome</name>
+<xwikidoc version="1.4" reference="Discussions.MessageStream.Discussion" locale="">
+  <web>Discussions.MessageStream</web>
+  <name>Discussion</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
@@ -31,12 +31,13 @@
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <version>1.1</version>
-  <title>Discussions</title>
+  <title>Discussion</title>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-$services.localization.render('discussions.home.description')
-{{/velocity}}</content>
+{{discussion reference="$request.reference" namespace="MessageStreamDiscussion"/}}
+{{/velocity}}
+</content>
 </xwikidoc>

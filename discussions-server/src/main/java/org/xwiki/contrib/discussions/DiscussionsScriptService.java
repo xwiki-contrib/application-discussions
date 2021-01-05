@@ -26,15 +26,19 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.internal.QueryStringService;
+import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
+
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 
 /**
  * Discussions script service.
@@ -66,6 +70,9 @@ public class DiscussionsScriptService implements ScriptService
     @Inject
     private DiscussionsActorServiceResolver actorsServiceResolver;
 
+    @Inject
+    private Logger logger;
+
     /**
      * @return the discussions rights script service
      */
@@ -88,6 +95,26 @@ public class DiscussionsScriptService implements ScriptService
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
             return this.discussionContextService.create(name, description, referenceType, entityReference).orElse(null);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get a discussion context. Creates it if it does not already exist.
+     *
+     * @param name the discussion context name
+     * @param description the discussion context description
+     * @param referenceType the entity reference type
+     * @param entityReference the entity reference
+     * @return the request discussion context
+     */
+    public DiscussionContext getOrCreateDiscussionContext(String name, String description, String referenceType,
+        String entityReference)
+    {
+        if (this.discussionContextService.canCreateDiscussionContext()) {
+            return this.discussionContextService.getOrCreate(name, description, referenceType, entityReference)
+                .orElse(null);
         } else {
             return null;
         }
@@ -147,10 +174,16 @@ public class DiscussionsScriptService implements ScriptService
      * @param discussion the discussion
      * @return the created message
      */
-    public Message createMessage(String content, Syntax syntax, Discussion discussion)
+    public Message createMessage(String content, String syntax, Discussion discussion)
     {
         if (this.discussionService.canWrite(discussion.getReference())) {
-            return this.messageService.create(content, syntax, discussion.getReference()).orElse(null);
+            try {
+                return this.messageService.create(content, Syntax.valueOf(syntax), discussion.getReference())
+                    .orElse(null);
+            } catch (ParseException e) {
+                this.logger.warn("Malformed syntax [{}]. Cause: [{}].", syntax, getRootCauseMessage(e));
+                return null;
+            }
         } else {
             return null;
         }

@@ -75,6 +75,7 @@
     <module>discussions-server</module>
     <module>discussions-store</module>
     <module>discussions-ui</module>
+    <module>discussions-messagestream</module>
   </modules>
 
   <profiles>
