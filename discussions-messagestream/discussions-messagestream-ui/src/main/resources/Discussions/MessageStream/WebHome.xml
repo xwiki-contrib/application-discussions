@@ -39,30 +39,34 @@
   <content>{{velocity}}
 #if ('POST' == $request.method)
 #set ($to = $request.to)
+## Computes the discussion contexts according to the recipients and emitter.
+#set($discussionContexts = [$services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-emitter', $xcontext.userReference)])
 #if ($to == 'public')
-  #set($discussionContexts = [$services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-public', '*')])
+  #set($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-public', '*')))
 #elseif ($to == 'followers')
-  #set($discussionContexts = [$services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-followers', '*')])
+  #set($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-followers', '*')))
 #elseif ($to == 'users')
-  #set($discussionContexts = [])
   #foreach ($user in $request.getParameterValues('new-discussion-users'))
     #if ($user != '')
       #set ($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-user', $user)))
     #end
   #end
 #else 
-  #set($discussionContexts = [])
   #foreach ($group in $request.getParameterValues('new-discussion-groups'))
     #if ($group != '')
       #set ($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-group', $group)))
     #end
   #end
 #end
+## Creates the discussion.
 #set ($discussion = $services.discussions.createDiscussion($request.title, $request.description))
+## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
 #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
 #end
+## Add the first message.
 #set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
+## Redirect to the view page of the discussion.
 $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$discussion.reference"))
 #else
 = Create a Discussion =
