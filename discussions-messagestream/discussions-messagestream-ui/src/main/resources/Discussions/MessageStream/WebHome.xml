@@ -80,7 +80,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
 #set ($descriptionField = $discussionClass.get('description'))
 #set ($contentField = $messageClass.get('content'))
 {{html}}
-&lt;form class="xform" action="." method="POST"&gt;
+&lt;form class="xform" action="." method="POST" id="new-discussion-form"&gt;
   &lt;dl&gt;
     &lt;dt&gt;
       &lt;label for="title"&gt;Title&lt;/label&gt;
@@ -236,6 +236,13 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
     </property>
     <property>
       <code>require(['jquery'], function($) {
+
+  $("#new-discussion-form").submit(function(e) {
+    $(document).trigger('xwiki:actions:beforeSave');
+    // TODO: Dangerous since if the user is editing another field in parallel, he will not be warned before submitting and will loose its changes.
+    $(document).trigger('xwiki:actions:cancel');
+  });
+
   $('#new-discussion-to').on('change', function() {
     const value = $(this).val();
     const usersField = $('#new-discussion-users-field');
