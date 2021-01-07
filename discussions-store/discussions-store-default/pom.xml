@@ -34,7 +34,7 @@
   <name>Discussions - Store - Default</name>
   <description>Default implementation of the store API for the discussions application.</description>
   <properties>
-    <xwiki.extension.name>${description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
     <xwiki.jacoco.instructionRatio>0.14</xwiki.jacoco.instructionRatio>
   </properties>

@@ -38,7 +38,7 @@
   <description>Rest parent module for the discussions application.</description>
 
   <properties>
-    <xwiki.extension.name>${description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
   </properties>
   
