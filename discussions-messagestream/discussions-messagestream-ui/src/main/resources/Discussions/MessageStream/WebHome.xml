@@ -38,38 +38,49 @@
   <hidden>true</hidden>
   <content>{{velocity}}
 #if ('POST' == $request.method)
+## Replace by a pre-computation of all the actors related to the discussion (so at the end only 
 #set ($to = $request.to)
 ## Computes the discussion contexts according to the recipients and emitter.
-#set($discussionContexts = [$services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-emitter', $xcontext.userReference)])
+## Register the emitter as emitter as well as user in the discussion
+
+#set($discussionContexts = [
+  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-emitter', $xcontext.userReference),
+  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-user', $xcontext.userReference)
+])
 #if ($to == 'public')
-  #set($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-public', '*')))
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextPublic($xcontext.userReference))
 #elseif ($to == 'followers')
-  #set($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-followers', '*')))
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextFollowers($xcontext.userReference))
 #elseif ($to == 'users')
-  #foreach ($user in $request.getParameterValues('new-discussion-users'))
-    #if ($user != '')
-      #set ($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-user', $user)))
-    #end
-  #end
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextUsers($xcontext.userReference, 
+    $request.getParameterValues('new-discussion-users')))
 #else 
-  #foreach ($group in $request.getParameterValues('new-discussion-groups'))
-    #if ($group != '')
-      #set ($discard = $discussionContexts.add($services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-group', $group)))
-    #end
-  #end
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextGroups($xcontext.userReference, 
+    $request.getParameterValues('new-discussion-groups')))
 #end
 ## Creates the discussion.
 #set ($discussion = $services.discussions.createDiscussion($request.title, $request.description))
 ## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
-#set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
+  #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
+  #if ($discussionContext.entityReference.type == 'messagestream-user')
+     #set ($discard = $services.discussions.rights.setRead($discussion, $discussionContext.entityReference.reference))
+     #set ($discard = $services.discussions.rights.setWrite($discussion, $discussionContext.entityReference.reference))
+  #end
 #end
 ## Add the first message.
 #set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
 ## Redirect to the view page of the discussion.
 $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$discussion.reference"))
-#else
-= Create a Discussion =
+#elseif(!$isGuest)
+== Discussions List ==
+
+#set ($discussionDoc = $xwiki.getDocument('Discussions.MessageStream.Discussion'))
+#set ($url = "$discussionDoc.getURL('view')?reference=__REFERENCE__")
+
+{{listDiscussions listId="messageStreamLivetable" type="messagestream-user" reference="$xcontext.userReference" linkTemplate="$url"/}}
+
+== Create a Discussion ==
 #set ($docDiscussionClass = $xwiki.getDocument('Discussions.Code.DiscussionClass'))
 #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
 #set ($discussionClass = $docDiscussionClass.getxWikiClass())
@@ -146,6 +157,8 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
 &lt;/form&gt;
 {{/html}}
 #set ($discard = $xwiki.jsx.use('Discussions.MessageStream.WebHome'))
+#else
+$services.localization.render('discussions.messagestream.isGuest.message')
 #end
 {{/velocity}}</content>
   <object>

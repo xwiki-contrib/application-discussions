@@ -40,6 +40,7 @@
     <xwiki.extension.name>${project.description}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
     <checkstyle.suppressions.location>${basedir}/src/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
+    <xwiki.jacoco.instructionRatio>0.69</xwiki.jacoco.instructionRatio>
   </properties>
   <dependencies>
     <dependency>
@@ -56,6 +57,12 @@
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>discussions-api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
+      <version>${commons.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

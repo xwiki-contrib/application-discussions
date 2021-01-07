@@ -66,7 +66,6 @@ public class QueryStringService
             stringHashMap.putAll(newParameterMap);
         }
 
-        // TODO: simplify!
         return stringHashMap.entrySet()
             .stream()
             .flatMap(it -> {

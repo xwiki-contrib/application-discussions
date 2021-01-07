@@ -27,21 +27,38 @@
   <parent>
     <version>1.0-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
-    <artifactId>application-discussions</artifactId>
+    <artifactId>discussions-messagestream</artifactId>
   </parent>
-  <artifactId>discussions-messagestream</artifactId>
+  <artifactId>discussions-messagestream-api</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Discussions - Message Stream</name>
-  <description>Parent POM of the discussions Message Stream application.</description>
-
+  <name>Discussions - Message Stream - API</name>
+  <description>API of the Message Stream Discussions application</description>
   <properties>
-    <xwiki.extension.name>${project.description}</xwiki.extension.name>
-    <xwiki.extension.category>other</xwiki.extension.category>
+    <xwiki.extension.name>Message Stream Discussions Application API</xwiki.extension.name>
+    <xwiki.extension.category>api</xwiki.extension.category>
+    <xwiki.jacoco.instructionRatio>0.80</xwiki.jacoco.instructionRatio>
   </properties>
-
-  <modules>
-    <module>discussions-messagestream-ui</module>
-    <module>discussions-messagestream-api</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-script</artifactId>
+      <version>${commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-user-api</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
+      <version>${commons.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

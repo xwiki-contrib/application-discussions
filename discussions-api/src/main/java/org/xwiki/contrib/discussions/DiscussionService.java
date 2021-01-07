@@ -86,24 +86,24 @@ public interface DiscussionService
     List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences);
 
     /**
-     * Count the number of discussions linked to a context with the given entity reference.
+     * Count the number of discussions linked to a context with the given entity references values.
      *
      * @param type the type of the entity reference
-     * @param reference the reference value of the entity reference
+     * @param references the reference values of the entity references
      * @return the count result
      */
-    long countByEntityReference(String type, String reference);
+    long countByEntityReferences(String type, List<String> references);
 
     /**
-     * Find the list of discussions linked to discussion contexts with the given entity reference.
+     * Find the list of discussions linked to discussion contexts with the given entity references.
      *
      * @param type the entity reference type
-     * @param reference the entity reference value
+     * @param references the entity reference values
      * @param offset the offset
      * @param limit the limit
      * @return tge paginated list of discussions
      */
-    List<Discussion> findByEntityReference(String type, String reference, Integer offset, Integer limit);
+    List<Discussion> findByEntityReferences(String type, List<String> references, Integer offset, Integer limit);
 
     /**
      * Set the update date of the discussion to now.

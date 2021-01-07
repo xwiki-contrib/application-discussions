@@ -21,10 +21,13 @@ package org.xwiki.contrib.discussions.internal.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -37,7 +40,7 @@ import org.xwiki.contrib.discussions.rest.DiscussionLiveTableRow;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
 import org.xwiki.contrib.discussions.rest.LiveTableResult;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
-import org.xwiki.rest.XWikiResource;
+import org.xwiki.rest.XWikiRestComponent;
 import org.xwiki.rest.XWikiRestException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,7 +56,8 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
  */
 @Component
 @Named("org.xwiki.contrib.discussions.internal.rest.DefaultDiscussionREST")
-public class DefaultDiscussionREST extends XWikiResource implements DiscussionREST
+@Singleton
+public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
 {
     @Inject
     private DiscussionService discussionService;
@@ -74,13 +78,19 @@ public class DefaultDiscussionREST extends XWikiResource implements DiscussionRE
 
     @Override
     public Response livetable(String type, String reference, Integer offset, Integer limit, String sort, String dir,
-        Integer reqNo, String linkTemplate)
+        Integer reqNo, String linkTemplate, Boolean jokerAllowed)
     {
         LiveTableResult<DiscussionLiveTableRow> ltr = new LiveTableResult<>();
         ltr.setOffset(offset);
         ltr.setReqNo(reqNo);
-        ltr.setTotalrows(this.discussionService.countByEntityReference(type, reference));
-        ltr.setRows(this.discussionService.findByEntityReference(type, reference, offset - 1, limit)
+        List<String> references;
+        if (jokerAllowed.equals(Boolean.TRUE)) {
+            references = Arrays.asList(reference, "*");
+        } else {
+            references = Arrays.asList(reference);
+        }
+        ltr.setTotalrows(this.discussionService.countByEntityReferences(type, references));
+        ltr.setRows(this.discussionService.findByEntityReferences(type, references, offset - 1, limit)
             .stream()
             .map(d -> {
                 DiscussionLiveTableRow discussionLiveTableRow = new DiscussionLiveTableRow();

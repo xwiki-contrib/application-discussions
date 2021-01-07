@@ -40,7 +40,7 @@
 #if ($hasAdmin)
 = Discussions Index =
 
-#set($columns = ['title', 'creationDate', 'updateDate', 'discussionContexts'])
+#set($columns = ['reference', 'title', 'creationDate', 'updateDate', 'discussionContexts'])
 #set($columnsProperties = {
   'title': { 'link': 'auto' },
   'creationDate': { 'type': 'date' },
@@ -54,7 +54,7 @@
 
 = Discussions Context Index =
 
-#set($columns = ['name', 'entityReferenceType', 'entityReference', 'creationDate', 'discussions'])
+#set($columns = ['reference', 'name', 'entityReferenceType', 'entityReference', 'creationDate', 'discussions'])
 #set($columnsProperties = {
   'name': { 'link': 'auto' },
   'creationDate': { 'type': 'date' }

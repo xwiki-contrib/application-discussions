@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -117,15 +118,15 @@ public class DefaultDiscussionService implements DiscussionService
     }
 
     @Override
-    public long countByEntityReference(String type, String reference)
+    public long countByEntityReferences(String type, List<String> references)
     {
-        return this.discussionStoreService.countByEntityReference(type, reference);
+        return this.discussionStoreService.countByEntityReferences(type, references);
     }
 
     @Override
-    public List<Discussion> findByEntityReference(String type, String reference, Integer offset, Integer limit)
+    public List<Discussion> findByEntityReferences(String type, List<String> references, Integer offset, Integer limit)
     {
-        return this.discussionStoreService.findByEntityReference(type, reference, offset, limit)
+        return this.discussionStoreService.findByEntityReferences(type, references, offset, limit)
             .stream()
             .map(this::mapBaseObject)
             .collect(Collectors.toList());
@@ -142,7 +143,7 @@ public class DefaultDiscussionService implements DiscussionService
     @Override
     public boolean findByDiscussionContext(String type, String reference)
     {
-        return countByEntityReference(type, reference) > 0;
+        return countByEntityReferences(type, Arrays.asList(reference)) > 0;
     }
 
     @Override

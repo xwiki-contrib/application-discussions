@@ -63,6 +63,7 @@ public interface DiscussionREST
      * @param dir the sort direction (asc or desc)
      * @param reqNo the request number
      * @param linkTemplate the template used to generate the links to the discussions
+     * @param jokerAllowed when {@code true}, the '*' value will also be used in addition to the reference
      * @return a paginated list of discussions, in the form of the string of a json object
      */
     @Path("/livetable")
@@ -70,7 +71,8 @@ public interface DiscussionREST
     Response livetable(@QueryParam("type") String type, @QueryParam("reference") String reference,
         @QueryParam("offset") Integer offset,
         @QueryParam("limit") Integer limit, @QueryParam("sort") String sort, @QueryParam("dir") String dir,
-        @QueryParam("reqNo") Integer reqNo, @QueryParam("linkTemplate") String linkTemplate);
+        @QueryParam("reqNo") Integer reqNo, @QueryParam("linkTemplate") String linkTemplate,
+        @QueryParam("jokerAllowed") Boolean jokerAllowed);
 
     /**
      * Creates a discussion.

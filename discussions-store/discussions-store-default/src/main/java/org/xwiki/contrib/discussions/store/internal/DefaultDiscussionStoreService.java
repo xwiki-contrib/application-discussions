@@ -201,7 +201,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public List<BaseObject> findByEntityReference(String type, String reference, Integer offset,
+    public List<BaseObject> findByEntityReferences(String type, List<String> references, Integer offset,
         Integer limit)
     {
         try {
@@ -234,10 +234,10 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 + "AND discussionContextERRef.name = 'entityReference' "
                 + "AND discussionContextReferenceField.value IN elements(discussionContextReference.list) "
                 + "AND discussionContextERType.value = :type "
-                + "AND discussionContextERRef.value = :reference "
+                + "AND discussionContextERRef.value IN :references "
                 + "ORDER BY discussionUpdateDate.value DESC", Query.HQL)
                 .bindValue("type", type)
-                .bindValue("reference", reference);
+                .bindValue("references", references);
             if (offset != null) {
                 query = query.setOffset(offset);
             }
@@ -260,13 +260,13 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             this.logger.warn(
                 "Failed to find an entity by reference with type [{}], reference [{}], offset [{}], and limit [{}]."
                     + " Cause: [{}].",
-                type, reference, offset, limit, getRootCauseMessage(e));
+                type, references, offset, limit, getRootCauseMessage(e));
             return emptyList();
         }
     }
 
     @Override
-    public long countByEntityReference(String type, String reference)
+    public long countByEntityReferences(String type, List<String> references)
     {
         long count;
         try {
@@ -296,13 +296,13 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 + "AND discussionContextERRef.name = 'entityReference' "
                 + "AND discussionContextReferenceField.value IN elements(discussionContextReference.list) "
                 + "AND discussionContextERType.value = :type "
-                + "AND discussionContextERRef.value = :reference", Query.HQL)
+                + "AND discussionContextERRef.value IN :references", Query.HQL)
                 .bindValue("type", type)
-                .bindValue("reference", reference).execute();
+                .bindValue("references", references).execute();
             count = execute.get(0);
         } catch (QueryException e) {
             this.logger
-                .warn("Fail to count the discussions with type=[{}] and reference=[{}]. Cause: [{}].", type, reference,
+                .warn("Fail to count the discussions with type=[{}] and reference=[{}]. Cause: [{}].", type, references,
                     getRootCauseMessage(e));
             count = 0;
         }

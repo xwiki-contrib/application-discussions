@@ -44,7 +44,7 @@ discussions.discussion.newMessage.form.title=New Message
 discussions.discussion.deleteMessage.form.title=Delete a message
 discussions.discussion.deleteMessage.form.confirmation=Are you sure you want to delete this message?
 discussions.discussion.deleteMessage.form.cancel=Cancel
-discussions.discussion.deleteMessage.form.confirm=Confirm
+discussions.discussion.deleteMessage.form.confirm=Cancel
 discussions.discussions.table.header.title=Title
 discussions.discussions.table.header.updateDate=Last update
 discussions.discussions.table.header.messageCount=Message count
@@ -53,11 +53,14 @@ discussions.home.discussionsTable.column.title=Title
 discussions.home.discussionsTable.column.creationDate=Creation Date
 discussions.home.discussionsTable.column.updateDate=Update Date
 discussions.home.discussionsTable.column.discussionContexts=Discussion Contexts
+discussions.home.discussionsTable.column.reference=Reference
+discussions.home.discussionsTable.column.emptyvalue=
 discussions.home.discussionContextsTable.column.name=Name
 discussions.home.discussionContextsTable.column.entityReferenceType=Entity Reference Type
 discussions.home.discussionContextsTable.column.entityReference=Entity Reference
 discussions.home.discussionContextsTable.column.creationDate=Creation Date
 discussions.home.discussionContextsTable.column.discussions=Discussions
+discussions.home.discussionContextsTable.column.reference=Reference
 discussions.home.discussionContextsTable.column.emptyvalue=</content>
   <object>
     <name>Discussions.DiscussionsTranslations</name>

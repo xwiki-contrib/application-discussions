@@ -23,8 +23,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.stability.Unstable;
+
+import com.xpn.xwiki.util.Programming;
 
 /**
  * Script service dedicated to the discussions rights.
@@ -42,6 +46,9 @@ public class DiscussionRightsScriptService
 
     @Inject
     private MessageService messageService;
+
+    @Inject
+    private DiscussionsRightService discussionsRightService;
 
     /**
      * @param discussionReference the discussion reference
@@ -68,5 +75,29 @@ public class DiscussionRightsScriptService
     public boolean canDeleteMessage(Message message)
     {
         return this.messageService.canDelete(message);
+    }
+
+    /**
+     * Allows a user to read a discussion.
+     *
+     * @param discussion a discussion
+     * @param user a user
+     */
+    @Programming
+    public void setRead(Discussion discussion, DocumentReference user)
+    {
+        this.discussionsRightService.setRead(discussion, user);
+    }
+
+    /**
+     * Allows a user to write on a discussion.
+     *
+     * @param discussion a discussion
+     * @param user a user
+     */
+    @Programming
+    public void setWrite(Discussion discussion, DocumentReference user)
+    {
+        this.discussionsRightService.setWrite(discussion, user);
     }
 }

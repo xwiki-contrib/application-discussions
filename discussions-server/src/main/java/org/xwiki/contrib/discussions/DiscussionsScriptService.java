@@ -129,11 +129,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion createDiscussion(String title, String description)
     {
-        if (this.discussionService.canCreateDiscussion()) {
-            return this.discussionService.create(title, description).orElse(null);
-        } else {
-            return null;
-        }
+        return this.discussionService.create(title, description).orElse(null);
     }
 
     /**

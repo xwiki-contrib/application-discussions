@@ -43,6 +43,11 @@
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-messagestream-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
       <artifactId>discussions-ui</artifactId>
       <version>${project.version}</version>
       <type>xar</type>

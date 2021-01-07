@@ -236,6 +236,7 @@
 #set ($entityType = $wikimacro.parameters.type)
 #set ($entityReference = $wikimacro.parameters.reference)
 #set ($linkTemplate = $wikimacro.parameters.linkTemplate)
+#set ($jokerAllowed = $wikimacro.parameters.jokerAllowed)
 #set ($columns = ['title', 'updateDate', 'messageCount'])
 #set ($columnsProperties = {
   'title': { 'type': 'none', 'link': 'auto', 'sortable': false, 'filterable': false },
@@ -243,7 +244,7 @@
   'messageCount': {'type': 'number', 'sortable': false, 'filterable': false }
 })
 #set($options = {
-  'url': "${request.getContextPath()}/rest/discussions/livetable?type=$escapetool.url($entityType)&amp;reference=$escapetool.url($entityReference)&amp;linkTemplate=$escapetool.url($linkTemplate)",
+  'url': "${request.getContextPath()}/rest/discussions/livetable?type=$escapetool.url($entityType)&amp;reference=$escapetool.url($entityReference)&amp;linkTemplate=$escapetool.url($linkTemplate)&amp;jokerAllowed=$escapetool.url($jokerAllowed)",
   'translationPrefix': 'discussions.discussions.table.header.'
 })
 #livetable($listId $columns $columnsProperties $options)
@@ -587,6 +588,84 @@
     </property>
     <property>
       <type>java.lang.String</type>
+    </property>
+  </object>
+  <object>
+    <name>Discussions.Code.ListDiscussionsMacro</name>
+    <number>4</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>8a0fc4bd-9f5b-45ac-be7f-0c9445e24cdb</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <type>
+        <disabled>0</disabled>
+        <name>type</name>
+        <number>5</number>
+        <prettyName>Parameter type</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </type>
+    </class>
+    <property>
+      <defaultValue>true</defaultValue>
+    </property>
+    <property>
+      <description>If set to true, the joker (*) value will also be used when looking for the discussion contexts references.</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>jokerAllowed</name>
+    </property>
+    <property>
+      <type>java.lang.Boolean</type>
     </property>
   </object>
 </xwikidoc>
