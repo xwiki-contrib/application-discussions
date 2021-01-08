@@ -90,7 +90,7 @@ public class DiscussionLiveTableRow
     /**
      * @return the update date of the discussion
      */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd hh:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm")
     public Date getUpdateDate()
     {
         return this.updateDate;

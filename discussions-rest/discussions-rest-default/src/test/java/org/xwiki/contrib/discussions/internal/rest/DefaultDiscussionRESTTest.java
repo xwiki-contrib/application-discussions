@@ -22,6 +22,7 @@ package org.xwiki.contrib.discussions.internal.rest;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import javax.ws.rs.core.Response;
 
@@ -79,20 +80,21 @@ class DefaultDiscussionRESTTest
     @ParameterizedTest
     @CsvSource(value = { "true;{\"reqNo\":1,\"totalrows\":123,\"rows\":[{\"title\":\"d1-ttl\","
         + "\"updateDate\":\"2020/06/03 "
-        + "12:01\",\"messageCount\":5,\"title_url\":\"http://server/ref=__AAA__\",\"doc_viewable\":true},"
-        + "{\"title\":\"d2-ttl\",\"updateDate\":\"2020/06/03 12:01\",\"messageCount\":15,"
+        + "04:01\",\"messageCount\":5,\"title_url\":\"http://server/ref=__AAA__\",\"doc_viewable\":true},"
+        + "{\"title\":\"d2-ttl\",\"updateDate\":\"2020/06/03 04:01\",\"messageCount\":15,"
         + "\"title_url\":\"http://server/ref=__AAA__\",\"doc_viewable\":true},{\"title\":\"d3-ttl\","
-        + "\"updateDate\":\"2020/06/03 12:01\",\"messageCount\":0,\"title_url\":\"http://server/ref=__AAA__\","
+        + "\"updateDate\":\"2020/06/03 04:01\",\"messageCount\":0,\"title_url\":\"http://server/ref=__AAA__\","
         + "\"doc_viewable\":true}],\"offset\":1,\"returnedrows\":3}",
-        "false;{\"reqNo\":1,\"totalrows\":12,\"rows\":[{\"title\":\"d1-ttl\",\"updateDate\":\"2020/06/03 12:01\","
+        "false;{\"reqNo\":1,\"totalrows\":12,\"rows\":[{\"title\":\"d1-ttl\",\"updateDate\":\"2020/06/03 04:01\","
             + "\"messageCount\":5,\"title_url\":\"http://server/ref=__AAA__\",\"doc_viewable\":true},"
-            + "{\"title\":\"d2-ttl\",\"updateDate\":\"2020/06/03 12:01\",\"messageCount\":15,"
+            + "{\"title\":\"d2-ttl\",\"updateDate\":\"2020/06/03 04:01\",\"messageCount\":15,"
             + "\"title_url\":\"http://server/ref=__AAA__\",\"doc_viewable\":true}],\"offset\":1,"
             + "\"returnedrows\":2}" }, delimiter = ';')
     void livetable(boolean joker, String expected)
     {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2020, Calendar.JUNE, 3, 2, 1, 0);
+        calendar.set(2020, Calendar.JUNE, 3, 4, 1, 0);
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC+1"));
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref"))).thenReturn(12L);
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref", "*"))).thenReturn(123L);
         Discussion discussion1 = new Discussion("d1-ref", "d1-ttl", "d1-desc", calendar.getTime());
