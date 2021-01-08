@@ -37,7 +37,7 @@
   <description>Server part of the Discussions modules.</description>
 
   <properties>
-    <xwiki.extension.name>${project.description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.name}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
     <!-- The server should only be installed at farm level so it can handle the URLs -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>

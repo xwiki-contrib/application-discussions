@@ -37,7 +37,7 @@
   <description>Rest API of the Discussions application.</description>
 
   <properties>
-    <xwiki.extension.name>${project.description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.name}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
     <checkstyle.suppressions.location>${basedir}/src/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
   </properties>

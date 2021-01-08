@@ -36,7 +36,7 @@
   <description>UI of the discussions Message Stream application.</description>
 
   <properties>
-    <xwiki.extension.name>${project.description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.name}</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
   </properties>
 

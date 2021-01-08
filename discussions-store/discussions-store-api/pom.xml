@@ -37,7 +37,7 @@
   <description>Storage API for the discussions application.</description>
 
   <properties>
-    <xwiki.extension.name>${project.description}</xwiki.extension.name>
+    <xwiki.extension.name>${project.name}</xwiki.extension.name>
     <xwiki.extension.category>api</xwiki.extension.category>
   </properties>
 
