@@ -20,12 +20,14 @@
 package org.xwiki.contrib.discussions;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.util.Programming;
@@ -37,9 +39,10 @@ import com.xpn.xwiki.util.Programming;
  * @since 1.0
  */
 @Unstable
-@Component(roles = { DiscussionRightsScriptService.class })
+@Component
+@Named("discussions.rights")
 @Singleton
-public class DiscussionRightsScriptService
+public class DiscussionRightsScriptService implements ScriptService
 {
     @Inject
     private DiscussionService discussionService;

@@ -36,6 +36,7 @@ import org.xwiki.contrib.discussions.internal.QueryStringService;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.script.service.ScriptService;
+import org.xwiki.script.service.ScriptServiceManager;
 import org.xwiki.stability.Unstable;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
@@ -47,11 +48,16 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
  * @since 1.0
  */
 @Unstable
-@Named("discussions")
+@Named(DiscussionsScriptService.ROLEHINT)
 @Component
 @Singleton
 public class DiscussionsScriptService implements ScriptService
 {
+    /**
+     * The role hint of this component.
+     */
+    public static final String ROLEHINT = "discussions";
+
     @Inject
     private DiscussionContextService discussionContextService;
 
@@ -65,21 +71,13 @@ public class DiscussionsScriptService implements ScriptService
     private QueryStringService queryStringService;
 
     @Inject
-    private DiscussionRightsScriptService discussionRightsScriptService;
-
-    @Inject
     private DiscussionsActorServiceResolver actorsServiceResolver;
 
     @Inject
-    private Logger logger;
+    private ScriptServiceManager scriptServiceManager;
 
-    /**
-     * @return the discussions rights script service
-     */
-    public DiscussionRightsScriptService getRights()
-    {
-        return this.discussionRightsScriptService;
-    }
+    @Inject
+    private Logger logger;
 
     /**
      * Creates a discussion context.
@@ -277,5 +275,16 @@ public class DiscussionsScriptService implements ScriptService
         return this.actorsServiceResolver.get(type)
             .flatMap(resolver -> resolver.resolve(reference))
             .orElse(null);
+    }
+
+    /**
+     * @param <S> the type of the {@link ScriptService}
+     * @param serviceName the name of the sub {@link ScriptService}
+     * @return the {@link ScriptService} or null of none could be found
+     */
+    @SuppressWarnings("unchecked")
+    public <S extends ScriptService> S get(String serviceName)
+    {
+        return (S) this.scriptServiceManager.get(ROLEHINT + '.' + serviceName);
     }
 }
