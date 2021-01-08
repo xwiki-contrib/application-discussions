@@ -109,13 +109,13 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
     @Override
     public boolean canWriteDiscussion(DocumentReference documentReference)
     {
-        return canWriteEntityReference(documentReference, this.writeDiscussionRight);
+        return hasRightOnDocumentReference(documentReference, this.writeDiscussionRight);
     }
 
     @Override
     public boolean canWriteDiscussionContext(DocumentReference documentReference)
     {
-        return canWriteEntityReference(documentReference, this.writeDiscussionRight);
+        return hasRightOnDocumentReference(documentReference, this.writeDiscussionRight);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
     @Override
     public boolean isAdminDiscussion(DocumentReference discussion)
     {
-        return canWriteEntityReference(discussion, this.adminDiscussionRight);
+        return hasRightOnDocumentReference(discussion, this.adminDiscussionRight);
     }
 
     @Override
@@ -163,10 +163,10 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
         return this.authorizationManager.hasAccess(Right.ADMIN, userReference, xWikiContext.getWikiReference());
     }
 
-    private boolean canWriteEntityReference(DocumentReference documentReference, Right writeDiscussionRight)
+    private boolean hasRightOnDocumentReference(DocumentReference documentReference, Right right)
     {
         XWikiContext xWikiContext = this.xcontextProvider.get();
         DocumentReference userReference = xWikiContext.getUserReference();
-        return this.authorizationManager.hasAccess(writeDiscussionRight, userReference, documentReference);
+        return this.authorizationManager.hasAccess(right, userReference, documentReference);
     }
 }

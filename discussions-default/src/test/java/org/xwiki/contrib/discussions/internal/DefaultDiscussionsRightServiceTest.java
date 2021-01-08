@@ -25,6 +25,8 @@ import javax.inject.Provider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
@@ -44,6 +46,7 @@ import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWikiContext;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -267,15 +270,15 @@ class DefaultDiscussionsRightServiceTest
         assertTrue(b);
     }
 
-    @Test
-    void isAdminDiscussion()
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void isAdminDiscussion(boolean isAllowed)
     {
-        // TODO
-    }
+        DocumentReference discussion = new DocumentReference("xwiki", "XWiki", "D1");
+        when(this.authorizationManager.hasAccess(this.adminDiscussionRight, USER_DOCUMENT_REFERENCE, discussion))
+            .thenReturn(isAllowed);
 
-    @Test
-    void isAdministrator()
-    {
-        // TODO
+        boolean adminDiscussion = this.defaultDiscussionsRightService.isAdminDiscussion(discussion);
+        assertEquals(isAllowed, adminDiscussion);
     }
 }

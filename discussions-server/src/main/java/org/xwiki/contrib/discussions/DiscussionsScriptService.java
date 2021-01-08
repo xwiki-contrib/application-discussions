@@ -235,7 +235,6 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
     {
-        // TODO: rights
         return this.discussionService.findByDiscussionContexts(discussionContextReferences);
     }
 
@@ -247,7 +246,6 @@ public class DiscussionsScriptService implements ScriptService
      */
     public void linkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
     {
-        // TODO: rights
         this.discussionContextService.link(discussionContext, discussion);
     }
 
@@ -259,7 +257,6 @@ public class DiscussionsScriptService implements ScriptService
      */
     public void unlinkDiscussionToDiscussionContext(Discussion discussion, DiscussionContext discussionContext)
     {
-        // TODO: rights
         this.discussionContextService.unlink(discussionContext, discussion);
     }
 

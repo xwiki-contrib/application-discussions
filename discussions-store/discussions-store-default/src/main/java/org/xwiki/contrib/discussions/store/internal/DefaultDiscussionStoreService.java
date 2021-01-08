@@ -146,7 +146,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     @Override
     public List<BaseObject> findByDiscussionContexts(List<String> discussionContextReferences)
     {
-        // TODO: this whole method can be simplified
         String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
         try {
             // Selects the discussions that are linked EXACTLY to the requested discussion contexts.
@@ -351,7 +350,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
 
     private XWikiDocument generateUniquePage(String title) throws XWikiException
     {
-        // TODO: Check if ok regarding concurrency.
         XWikiDocument document;
         synchronized (this) {
             document = generatePage(title);

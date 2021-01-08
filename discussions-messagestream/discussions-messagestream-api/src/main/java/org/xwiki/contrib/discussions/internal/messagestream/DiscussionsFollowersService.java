@@ -25,10 +25,13 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
+
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 
 /**
  * This service provides operations to find the followers of a user.
@@ -42,6 +45,9 @@ public class DiscussionsFollowersService
 {
     @Inject
     private QueryManager queryManager;
+
+    @Inject
+    private Logger logger;
 
     /**
      * Returns the list of followers of a user.
@@ -62,8 +68,7 @@ public class DiscussionsFollowersService
                 + " ", Query.HQL)
                 .bindValue("followed", followed).execute();
         } catch (QueryException e) {
-            e.printStackTrace();
-            // TODO log
+            this.logger.warn("Failed to get the followers of [{}]. Cause: [{}].", followed, getRootCauseMessage(e));
             return Arrays.asList();
         }
     }

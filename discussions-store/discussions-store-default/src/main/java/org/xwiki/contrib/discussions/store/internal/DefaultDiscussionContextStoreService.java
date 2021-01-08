@@ -266,7 +266,6 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
     private XWikiDocument generateUniquePage(String name) throws XWikiException
     {
-        // TODO: Check if ok regarding concurrency.
         XWikiDocument document;
         synchronized (this) {
             document = generatePage(name);
