@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.script.service.ScriptService;
@@ -70,6 +71,9 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
     private EntityReferenceSerializer<String> serializer;
 
     @Inject
+    private DiscussionsFollowersService discussionsFollowersService;
+
+    @Inject
     private Logger logger;
 
     /**
@@ -97,7 +101,11 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
-        // TODO don't know how to list the followers of a user.
+        String serializedAuthor = this.serializer.serialize(this.resolver.resolve(author));
+        for (String follower : this.discussionsFollowersService.getFollowers(serializedAuthor)) {
+            this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_USER, follower)
+                .ifPresent(discussionContexts::add);
+        }
         return discussionContexts;
     }
 

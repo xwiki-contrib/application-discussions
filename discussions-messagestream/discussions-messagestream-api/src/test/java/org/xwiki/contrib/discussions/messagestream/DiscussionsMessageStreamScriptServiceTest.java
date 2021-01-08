@@ -19,13 +19,17 @@
  */
 package org.xwiki.contrib.discussions.messagestream;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -62,6 +66,9 @@ class DiscussionsMessageStreamScriptServiceTest
     @MockComponent
     private EntityReferenceSerializer<String> serializer;
 
+    @MockComponent
+    private DiscussionsFollowersService discussionsFollowersService;
+
     @Test
     void initializeContextPublic()
     {
@@ -80,6 +87,36 @@ class DiscussionsMessageStreamScriptServiceTest
             .thenReturn(Optional.of(dc3));
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextPublic("Author");
+        assertEquals(3, discussionContexts.size());
+        assertEquals(dc1, discussionContexts.get(0));
+        assertEquals(dc2, discussionContexts.get(1));
+        assertEquals(dc3, discussionContexts.get(2));
+    }
+
+    @Test
+    void initializeContextFollowers()
+    {
+        DocumentReference authorDR = new DocumentReference("xwiki", "XWiki", "Author");
+        DiscussionContext dc1 = new DiscussionContext("", "", "",
+            new DiscussionContextEntityReference("messagestream-emitter", "Author"));
+        DiscussionContext dc2 = new DiscussionContext("", "", "",
+            new DiscussionContextEntityReference("messagestream-user", "Author"));
+        DiscussionContext dc3 = new DiscussionContext("", "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower"));
+
+        when(this.discussionContextService.getOrCreate("", "", "messagestream-emitter", "Author"))
+            .thenReturn(Optional.of(dc1));
+        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "Author"))
+            .thenReturn(Optional.of(dc2));
+        when(this.resolver.resolve("Author")).thenReturn(authorDR);
+        when(this.serializer.serialize(authorDR)).thenReturn("xwiki:XWiki.Author");
+        when(this.discussionsFollowersService.getFollowers("xwiki:XWiki.Author")).thenReturn(Arrays.asList(
+            "xwiki:XWiki.Follower"
+        ));
+        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.Follower"))
+            .thenReturn(Optional.of(dc3));
+
+        List<DiscussionContext> discussionContexts = this.target.initializeContextFollowers("Author");
         assertEquals(3, discussionContexts.size());
         assertEquals(dc1, discussionContexts.get(0));
         assertEquals(dc2, discussionContexts.get(1));
