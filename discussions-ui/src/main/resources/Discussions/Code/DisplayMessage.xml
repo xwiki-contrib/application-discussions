@@ -36,8 +36,8 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{template name="display_macros.vm" /}}
-{{velocity output='false'}}
+  <content>{{velocity output='false'}}
+#template('display_macros.vm')
 #macro (displayMessageContentField) 
   #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
   #set ($messageClass = $docMessageClass.getxWikiClass())
@@ -55,8 +55,7 @@
   #set ($macro.importStrings = $stringtool.join($macro.importStrings, ''))
   #set ($discard = $response.setHeader('X-XWIKI-HTML-HEAD', $macro.importStrings))
 #end
-{{/velocity}}{{velocity}}
-#if ($request.showContentField == 'show')
+{{/velocity}}{{velocity}}#if ($request.showContentField == 'show')
 {{html}}#displayMessageContentField(){{/html}}
 #end
 {{/velocity}}</content>

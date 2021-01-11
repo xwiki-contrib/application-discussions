@@ -350,25 +350,26 @@
     </property>
     <property>
       <code>{{include reference='Discussions.Code.DisplayMessage' /}}
+
 {{velocity}}
 #set ($reference = $wikimacro.parameters.reference)
 #set ($pageSize = $wikimacro.parameters.pageSize)
 #set ($namespace = $wikimacro.parameters.namespace)
 #if ($services.discussions.rights.canReadDiscussion($reference))
-#set ($discussion = $services.discussions.getDiscussion($reference))
-#set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
-#if ($request.getQueryString())
-  #set ($qs = "$escapetool.xml($request.getQueryString())")
-#else 
-  #set ($qs = '')
-#end
-#set($originalUrl = "$escapetool.xml($request.getRequestURL())?$qs")
-#set ($count = $services.discussions.countMessagesByDiscussion($discussion))
-#set ($totalNumberPages = $mathtool.ceil($numbertool.toNumber($count).doubleValue()/$numbertool.toNumber($pageSize).doubleValue()))
-#if (!$offset)
-  #set ($offset = $totalNumberPages - 1)
-#end
-#set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
+  #set ($discussion = $services.discussions.getDiscussion($reference))
+  #set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
+  #if ($request.getQueryString())
+    #set ($qs = "$escapetool.xml($request.getQueryString())")
+  #else 
+    #set ($qs = '')
+  #end
+  #set($originalUrl = "$escapetool.xml($request.getRequestURL())?$qs")
+  #set ($count = $services.discussions.countMessagesByDiscussion($discussion))
+  #set ($totalNumberPages = $mathtool.ceil($numbertool.toNumber($count).doubleValue()/$numbertool.toNumber($pageSize).doubleValue()))
+  #if (!$offset)
+    #set ($offset = $totalNumberPages - 1)
+  #end
+  #set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
 == $discussion.title ==
 
 $discussion.description

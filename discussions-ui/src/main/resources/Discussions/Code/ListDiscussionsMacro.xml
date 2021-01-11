@@ -578,7 +578,7 @@
       <defaultValue/>
     </property>
     <property>
-      <description>Template of the link to view a discussion. __REFERENCE__ in the url will be replaced with the reference of the discussion.</description>
+      <description>Template of the link to view a discussion. ##~_~_REFERENCE~_~_## in the url will be replaced with the reference of the discussion.</description>
     </property>
     <property>
       <mandatory>1</mandatory>
