@@ -199,7 +199,7 @@ $services.localization.render('discussions.home.description')
   #set($documentIndexRef = $services.model.createDocumentReference('', 'Discussions', 'WebHome'))
   #if ($hasAdmin)
     #template('drawer_macros.vm')
-    #drawerItem($xwiki.getURL($documentIndexRef), 'comments', $escapetool.xml($services.localization.render('discussions.messagestream.indexes.title')), 'discussionsIndex')
+    #drawerItem($xwiki.getURL($documentIndexRef), 'comments', $escapetool.xml($services.localization.render('discussions.indexes.title')), 'discussionsIndex')
   #end
 {{/html}}{{/velocity}}</content>
     </property>

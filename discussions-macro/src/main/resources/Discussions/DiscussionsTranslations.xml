@@ -61,7 +61,8 @@ discussions.home.discussionContextsTable.column.entityReference=Entity Reference
 discussions.home.discussionContextsTable.column.creationDate=Creation Date
 discussions.home.discussionContextsTable.column.discussions=Discussions
 discussions.home.discussionContextsTable.column.reference=Reference
-discussions.home.discussionContextsTable.column.emptyvalue=</content>
+discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=Discussions Indexes</content>
   <object>
     <name>Discussions.DiscussionsTranslations</name>
     <number>0</number>

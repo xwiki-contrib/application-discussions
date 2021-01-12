@@ -36,8 +36,7 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>discussions.messagestream.indexes.title=Discussions Indexes
-discussions.messagestream.isGuest.message=You must be logged-in to have access to the discussions.
+  <content>discussions.messagestream.isGuest.message=You must be logged-in to have access to the discussions.
 discussions.messagestream.discussions.back=Back to the discussions list</content>
   <object>
     <name>Discussions.MessageStream.MessageStreamTranslations</name>

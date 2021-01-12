@@ -30,15 +30,15 @@
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
-  <artifactId>discussions-ui</artifactId>
+  <artifactId>discussions-macro</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>xar</packaging>
 
-  <name>Discussions - UI</name>
-  <description>User Interface of the discussions application.</description>
+  <name>Discussions - Macro</name>
+  <description>User Interface macros for the discussions.</description>
 
   <properties>
-    <xwiki.extension.name>Discussions Application</xwiki.extension.name>
+    <xwiki.extension.name>Discussions Macro</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
   </properties>
 
