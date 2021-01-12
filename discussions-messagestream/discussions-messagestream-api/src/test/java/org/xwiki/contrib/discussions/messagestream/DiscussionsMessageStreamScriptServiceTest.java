@@ -197,7 +197,7 @@ class DiscussionsMessageStreamScriptServiceTest
         assertEquals(4, discussionContexts.size());
         assertEquals(dc1, discussionContexts.get(0));
         assertEquals(dc2, discussionContexts.get(1));
-        assertEquals(dc4, discussionContexts.get(2));
-        assertEquals(dc3, discussionContexts.get(3));
+        assertEquals(dc3, discussionContexts.get(2));
+        assertEquals(dc4, discussionContexts.get(3));
     }
 }
