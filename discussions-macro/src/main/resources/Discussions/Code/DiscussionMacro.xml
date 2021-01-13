@@ -469,7 +469,7 @@ $discussion.description
     ##$doc.displayEdit($contentField, '', $messageObj)
     #displayMessageContentField()
     &lt;/div&gt;
-    &lt;button type="submit" class='btn btn-default message-submit-button'&gt;Submit&lt;/button&gt;
+    &lt;button type="submit" class='btn btn-default btn-primary message-submit-button'&gt;Submit&lt;/button&gt;
     &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
     &lt;input type="hidden" value="$originalUrl" name="originalURL" /&gt;
     &lt;input type="hidden" value="$namespace" name="namespace" /&gt;
