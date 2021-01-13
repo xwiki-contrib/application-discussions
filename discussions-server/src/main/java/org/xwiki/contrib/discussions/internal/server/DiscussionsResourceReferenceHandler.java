@@ -42,6 +42,7 @@ import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
+import org.xwiki.csrf.CSRFToken;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
@@ -53,6 +54,7 @@ import org.xwiki.resource.annotations.Authenticate;
 import org.xwiki.wysiwyg.converter.HTMLConverter;
 
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
 
 /**
@@ -100,6 +102,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     @Inject
     private HTMLConverter htmlConverter;
+
+    @Inject
+    private CSRFToken csrfToken;
 
     @Override
     public List<ResourceType> getSupportedResourceReferences()
@@ -204,49 +209,59 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private void createMessage(HttpServletRequest request, HttpServletResponse response)
     {
-        this.discussionService
-            .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
-            .ifPresent(d -> {
-                String content = getContent(request);
-                Syntax syntax;
-                if (request.getParameter("content_syntax") != null) {
-                    try {
-                        syntax = Syntax.valueOf(request.getParameter("content_syntax"));
-                    } catch (ParseException e) {
+
+        if (!this.csrfToken.isTokenValid(request.getParameter("form_token"))) {
+            try {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token.");
+            } catch (IOException e) {
+                this.logger.warn("Failed to return a request error response. Cause: [{}]", getRootCauseMessage(e));
+            }
+        } else {
+            this.discussionService
+                .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
+                .ifPresent(d -> {
+                    String content = getContent(request);
+                    Syntax syntax;
+                    if (request.getParameter(CONTENT_SYNTAX_PARAMETER) != null) {
+                        try {
+                            syntax = Syntax.valueOf(request.getParameter(CONTENT_SYNTAX_PARAMETER));
+                        } catch (ParseException e) {
+                            syntax = XWIKI_2_0;
+                        }
+                    } else {
                         syntax = XWIKI_2_0;
                     }
-                } else {
-                    syntax = XWIKI_2_0;
-                }
-                this.messageService.create(content, syntax, d.getReference())
-                    .ifPresent(m -> {
-                        String parameter = request.getParameter(ORIGINAL_URL_PARAM);
-                        try {
-                            URIBuilder uriBuilder = new URIBuilder(parameter);
-                            List<NameValuePair> queryParams = uriBuilder
-                                .getQueryParams();
-                            String offsetName = request.getParameter("namespace") + "_offset";
-                            List<NameValuePair> collect =
-                                queryParams.stream().filter(it -> !it.getName().equals(offsetName))
-                                    .collect(Collectors.toList());
-                            URI namespace = uriBuilder.clearParameters().setParameters(collect)
-                                .build();
-                            redirect(response, namespace.toASCIIString());
-                        } catch (URISyntaxException e) {
-                            redirect(response, parameter);
-                        }
-                    });
-            });
+                    this.messageService.create(content, syntax, d.getReference())
+                        .ifPresent(m -> {
+                            String parameter = request.getParameter(ORIGINAL_URL_PARAM);
+                            try {
+                                URIBuilder uriBuilder = new URIBuilder(parameter);
+                                List<NameValuePair> queryParams = uriBuilder
+                                    .getQueryParams();
+                                String offsetName = request.getParameter("namespace") + "_offset";
+                                List<NameValuePair> collect =
+                                    queryParams.stream().filter(it -> !it.getName().equals(offsetName))
+                                        .collect(Collectors.toList());
+                                URI namespace = uriBuilder.clearParameters().setParameters(collect)
+                                    .build();
+                                redirect(response, namespace.toASCIIString());
+                            } catch (URISyntaxException e) {
+                                redirect(response, parameter);
+                            }
+                        });
+                });
+        }
     }
 
     private String getContent(HttpServletRequest request)
     {
         String content = request.getParameter(CONTENT_PARAMETER);
+        String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
+        String syntax = request.getParameter(CONTENT_SYNTAX_PARAMETER);
 
         String contentClean;
-        String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
         if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
-            contentClean = this.htmlConverter.fromHTML(content, request.getParameter(CONTENT_SYNTAX_PARAMETER));
+            contentClean = this.htmlConverter.fromHTML(content, syntax);
         } else {
             contentClean = content;
         }

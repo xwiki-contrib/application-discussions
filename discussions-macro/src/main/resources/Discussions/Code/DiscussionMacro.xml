@@ -473,6 +473,7 @@ $discussion.description
     &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;
     &lt;input type="hidden" value="$originalUrl" name="originalURL" /&gt;
     &lt;input type="hidden" value="$namespace" name="namespace" /&gt;
+    &lt;input name="form_token" value="$!services.csrf.getToken()" type="hidden" /&gt;
     &lt;/form&gt;
     #set ($discard = $xwiki.jsx.use('Discussions.Code.DiscussionMacro'))
     {{/html}}

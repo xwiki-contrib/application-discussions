@@ -37,7 +37,7 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#if ('POST' == $request.method)
+#if ('POST' == $request.method &amp;&amp; $services.csrf.isTokenValid($request.form_token))
 ## Replace by a pre-computation of all the actors related to the discussion (so at the end only 
 #set ($to = $request.to)
 ## Computes the discussion contexts according to the recipients and emitter.
@@ -133,7 +133,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
       $doc.displayEdit($contentField, '', $messageObj)
     &lt;/dd&gt;
   &lt;/dl&gt;
-  
+  &lt;input name="form_token" value="$!services.csrf.getToken()" type="hidden" /&gt;
   &lt;p&gt;
     &lt;span&gt;
       &lt;input class="button" type="submit" value="$services.localization.render('discussions.messagestream.createForm.submit')"/&gt;
