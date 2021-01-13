@@ -119,4 +119,12 @@ public interface MessageService
      * @param discussionReference the reference of the discussion of the message
      */
     void delete(String reference, String discussionReference);
+
+    /**
+     * Safely renders the content of a message.
+     *
+     * @param messageReference the reference of the message to render
+     * @return the result of the rendering in html
+     */
+    String renderContent(String messageReference);
 }

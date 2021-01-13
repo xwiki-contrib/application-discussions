@@ -397,20 +397,7 @@ $discussion.description
         )))
         **[[$actorDescriptor.name&gt;&gt;$actorDescriptor.link.toASCIIString()]]**
 
-       #if ($message.syntax.toIdString() == 'xhtml/1.0')
-         
-         {{html}}
-         $message.content
-         {{/html}}
-       #else
-         #set ($parsedMessage = $services.rendering.parse($message.content, $message.syntax.toIdString()))
-         
-         {{html}}
-         $services.rendering.render($parsedMessage, 'xhtml/1.0')
-         {{/html}}
-       #end
-
-      )))
+        {{html}}$services.discussions.renderMessageContent($message.reference){{/html}})))
       (% class='col-xs-12' %)(((
         {{html}}
           &lt;div class='text-right'&gt;

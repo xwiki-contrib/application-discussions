@@ -284,4 +284,15 @@ public class DiscussionsScriptService implements ScriptService
     {
         return (S) this.scriptServiceManager.get(ROLEHINT + '.' + serviceName);
     }
+
+    /**
+     * Safely renders the content of the message.
+     *
+     * @param messageReference the message reference
+     * @return the content of the message rendered in html
+     */
+    public String renderMessageContent(String messageReference)
+    {
+        return this.messageService.renderContent(messageReference);
+    }
 }

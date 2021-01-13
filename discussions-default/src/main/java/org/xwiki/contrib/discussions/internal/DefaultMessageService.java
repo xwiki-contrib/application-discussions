@@ -42,7 +42,6 @@ import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.observation.ObservationManager;
-import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 
 import com.xpn.xwiki.XWikiContext;
@@ -56,7 +55,6 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TY
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -129,7 +127,7 @@ public class DefaultMessageService implements MessageService
     @Override
     public Optional<Message> getByReference(String reference, String discussionReference)
     {
-        return this.messageStoreService.getByReference(reference, discussionReference)
+        return this.messageStoreService.getByReference(reference)
             .flatMap(messageObject -> this.discussionService.get(discussionReference)
                 .map(discussion -> convertToMessage(discussion).apply(messageObject)));
     }
@@ -156,9 +154,17 @@ public class DefaultMessageService implements MessageService
     {
         this.getByReference(reference, discussionReference)
             .ifPresent(message -> {
-                this.messageStoreService.delete(message.getReference(), message.getDiscussion().getReference());
+                this.messageStoreService.delete(message.getReference());
                 this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);
             });
+    }
+
+    @Override
+    public String renderContent(String messageReference)
+    {
+        return this.messageStoreService.getByReference(messageReference)
+            .map(it -> it.displayView(CONTENT_NAME, this.xcontextProvider.get()))
+            .orElse("");
     }
 
     @Override
@@ -172,22 +178,14 @@ public class DefaultMessageService implements MessageService
 
     private Function<BaseObject, Message> convertToMessage(Discussion discussion)
     {
-        return bo -> {
-            Syntax syntax;
-            try {
-                syntax = Syntax.valueOf(bo.getStringValue(SYNTAX_NAME));
-            } catch (ParseException e) {
-                syntax = Syntax.XWIKI_2_1;
-            }
-            return new Message(
-                bo.getStringValue(REFERENCE_NAME),
-                new MessageContent(bo.getLargeStringValue(CONTENT_NAME), syntax),
-                bo.getStringValue(AUTHOR_TYPE_NAME),
-                bo.getStringValue(AUTHOR_REFERENCE_NAME),
-                bo.getDateValue(CREATE_DATE_NAME),
-                bo.getDateValue(UPDATE_DATE_NAME),
-                discussion
-            );
-        };
+        return bo -> new Message(
+            bo.getStringValue(REFERENCE_NAME),
+            new MessageContent(bo.getLargeStringValue(CONTENT_NAME), bo.getOwnerDocument().getSyntax()),
+            bo.getStringValue(AUTHOR_TYPE_NAME),
+            bo.getStringValue(AUTHOR_REFERENCE_NAME),
+            bo.getDateValue(CREATE_DATE_NAME),
+            bo.getDateValue(UPDATE_DATE_NAME),
+            discussion
+        );
     }
 }

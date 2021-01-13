@@ -59,7 +59,7 @@
     $request.getParameterValues('new-discussion-groups')))
 #end
 ## Creates the discussion.
-#set ($discussion = $services.discussions.createDiscussion($request.title, $request.description))
+#set ($discussion = $services.discussions.createDiscussion($request.title, ''))
 ## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
   #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
@@ -92,31 +92,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
 #set ($contentField = $messageClass.get('content'))
 {{html}}
 &lt;form class="xform" action="." method="POST" id="new-discussion-form"&gt;
-  &lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="title"&gt;Title&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-      $doc.displayEdit($titleField, '', $discussionObj)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="description"&gt;Description&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-      $doc.displayEdit($descriptionField, '', $discussionObj)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="content"&gt;First message&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-      $doc.displayEdit($contentField, '', $messageObj)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl&gt;
+&lt;dl&gt;
     &lt;dt&gt;
       &lt;label for="new-discussion-to"&gt;Recipient&lt;/label&gt;
     &lt;/dt&gt;
@@ -149,6 +125,23 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
        #groupPicker(false, $suggestPickerParams)
     &lt;/dd&gt;
   &lt;/dl&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label for="title"&gt;Title&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+      $doc.displayEdit($titleField, '', $discussionObj)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label for="content"&gt;First message&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+      $doc.displayEdit($contentField, '', $messageObj)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  
   &lt;p&gt;
     &lt;span class="buttonwrapper"&gt;
       &lt;input class="button" type="submit" value="Create the discussion"/&gt;

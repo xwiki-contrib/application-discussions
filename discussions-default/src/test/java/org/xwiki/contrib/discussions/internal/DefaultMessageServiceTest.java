@@ -41,6 +41,7 @@ import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,11 +130,14 @@ class DefaultMessageServiceTest
         when(this.messageStoreService.create("content", XWIKI_2_1, "user", USER_REFERENCE, "reference"))
             .thenReturn(Optional.of("messageReference"));
         BaseObject messageBaseObject = mock(BaseObject.class);
-        when(this.messageStoreService.getByReference("messageReference", "reference"))
+        when(this.messageStoreService.getByReference("messageReference"))
             .thenReturn(Optional.of(messageBaseObject));
 
         when(messageBaseObject.getStringValue(REFERENCE_NAME)).thenReturn("messageReference");
         when(messageBaseObject.getLargeStringValue(CONTENT_NAME)).thenReturn("CONTENT_NAME");
+        XWikiDocument xWikiDocument = mock(XWikiDocument.class);
+        when(messageBaseObject.getOwnerDocument()).thenReturn(xWikiDocument);
+        when(xWikiDocument.getSyntax()).thenReturn(XWIKI_2_1);
         when(messageBaseObject.getStringValue(AUTHOR_TYPE_NAME)).thenReturn("AUTHOR_TYPE_NAME");
         when(messageBaseObject.getStringValue(AUTHOR_REFERENCE_NAME)).thenReturn("AUTHOR_REFERENCE_NAME");
         Date createDate = new Date();
@@ -149,6 +153,16 @@ class DefaultMessageServiceTest
                 "AUTHOR_REFERENCE_NAME",
                 createDate, updateDate, discussion)),
             message);
+    }
+
+    @Test
+    void renderContent()
+    {
+        BaseObject baseObject = mock(BaseObject.class);
+        when(this.messageStoreService.getByReference("message-ref")).thenReturn(Optional.of(baseObject));
+        when(baseObject.displayView(CONTENT_NAME, this.context)).thenReturn("html result");
+        String actual = this.defaultMessageService.renderContent("message-ref");
+        assertEquals("html result", actual);
     }
 
     private void setDiscussionWriteRight(DocumentReference discussionDocumentReference, boolean b)

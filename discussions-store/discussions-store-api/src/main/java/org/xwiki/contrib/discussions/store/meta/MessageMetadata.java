@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.XWikiContext;
@@ -70,16 +71,6 @@ public class MessageMetadata
      * Content field pretty name.
      */
     public static final String CONTENT_PRETTY_NAME = "Content";
-
-    /**
-     * Syntax field name.
-     */
-    public static final String SYNTAX_NAME = "syntax";
-
-    /**
-     * Syntax field pretty name.
-     */
-    public static final String SYNTAX_PRETTY_NAME = "Syntax";
 
     /**
      * Discussion reference field name.
@@ -186,4 +177,13 @@ public class MessageMetadata
     {
         return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
     }
+
+    /**
+     * @return the message storage space
+     */
+    public SpaceReference getMessageSpace()
+    {
+        return new SpaceReference(this.xcontextProvider.get().getMainXWiki(), asList(DISCUSSIONS_SPACE, "Message"));
+    }
+
 }

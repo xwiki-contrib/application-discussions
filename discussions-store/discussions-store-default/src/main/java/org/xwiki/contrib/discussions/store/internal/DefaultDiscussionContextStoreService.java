@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions.store.internal;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,12 +48,14 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.CREATION_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DISCUSSIONS_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.UPDATE_DATE_NAME;
 import static org.xwiki.query.Query.XWQL;
 
 /**
@@ -100,6 +103,8 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
             object.set(ENTITY_REFERENCE_NAME, entityReference, context);
             String pageName = document.getDocumentReference().getName();
             object.set(REFERENCE_NAME, pageName, context);
+            object.setDateValue(CREATION_DATE_NAME, new Date());
+            object.setDateValue(UPDATE_DATE_NAME, new Date());
             context.getWiki().saveDocument(document, context);
             reference = Optional.of(pageName);
         } catch (XWikiException e) {

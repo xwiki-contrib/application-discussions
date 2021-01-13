@@ -73,16 +73,14 @@ public interface MessageStoreService
      * Get a message by its unique reference.
      *
      * @param reference the message reference
-     * @param discussionReference the reference of the discussions of the message
      * @return the object of the message
      */
-    Optional<BaseObject> getByReference(String reference, String discussionReference);
+    Optional<BaseObject> getByReference(String reference);
 
     /**
      * Delete a message.
      *
      * @param reference the message reference
-     * @param discussionReference the reference of the discussion of the message
      */
-    void delete(String reference, String discussionReference);
+    void delete(String reference);
 }

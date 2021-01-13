@@ -40,6 +40,7 @@ import org.xwiki.user.group.GroupManager;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -195,9 +196,9 @@ class DiscussionsMessageStreamScriptServiceTest
         List<DiscussionContext> discussionContexts =
             this.target.initializeContextGroups("Author", asList("G1", "", "G2"));
         assertEquals(4, discussionContexts.size());
-        assertEquals(dc1, discussionContexts.get(0));
-        assertEquals(dc2, discussionContexts.get(1));
-        assertEquals(dc3, discussionContexts.get(2));
-        assertEquals(dc4, discussionContexts.get(3));
+        assertTrue(discussionContexts.contains(dc1));
+        assertTrue(discussionContexts.contains(dc2));
+        assertTrue(discussionContexts.contains(dc3));
+        assertTrue(discussionContexts.contains(dc4));
     }
 }

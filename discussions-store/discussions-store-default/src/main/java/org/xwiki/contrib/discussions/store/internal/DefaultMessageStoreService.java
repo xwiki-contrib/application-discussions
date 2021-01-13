@@ -19,10 +19,8 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,10 +30,12 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
+import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -44,11 +44,9 @@ import org.xwiki.rendering.syntax.Syntax;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseElement;
 import com.xpn.xwiki.objects.BaseObject;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
@@ -56,7 +54,6 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_N
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
-import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.SYNTAX_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -76,9 +73,6 @@ public class DefaultMessageStoreService implements MessageStoreService
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
-    private DiscussionStoreService discussionStoreService;
-
-    @Inject
     private MessageMetadata messageMetadata;
 
     @Inject
@@ -87,53 +81,46 @@ public class DefaultMessageStoreService implements MessageStoreService
     @Inject
     private RandomGeneratorService randomGeneratorService;
 
+    @Inject
+    private DocumentReferenceResolver<String> documentReferenceResolver;
+
     @Override
     public Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
         String discussionReference)
     {
         XWikiContext context = this.xcontextProvider.get();
-        Optional<BaseObject> discussionBaseObject = this.discussionStoreService.get(discussionReference);
-        if (!discussionBaseObject.isPresent()) {
-            this.logger.warn("Discussion [{}] not found when creating a Message.", discussionReference);
+        Optional<String> ret;
+        try {
+            XWikiDocument document = generateUniquePage();
+            DocumentReference authorReferenceDoc;
+            if (authorType.equals("user")) {
+                authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference);
+            } else {
+                authorReferenceDoc = this.documentReferenceResolver.resolve("XWiki.XWikiGuest");
+            }
+            document.setAuthorReference(authorReferenceDoc);
+            BaseObject messageBaseObject = document.newXObject(this.messageMetadata.getMessageXClass(), context);
+            String messageReference = document.getDocumentReference().getName();
+            messageBaseObject.set(REFERENCE_NAME, messageReference, context);
+            messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
+            messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference, context);
+            messageBaseObject.set(CONTENT_NAME, content, context);
+            document.setSyntax(syntax);
+            messageBaseObject.set(DISCUSSION_REFERENCE_NAME, discussionReference, context);
+            Date now = new Date();
+            messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
+            messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
+            // TODO replyTo
+            context.getWiki().saveDocument(document, context);
+            ret = Optional.of(messageReference);
+        } catch (XWikiException e) {
+            this.logger.warn(
+                "Failed to create a Message with content=[{}], authorType=[{}], authorReference=[{}], "
+                    + "discussionReference=[{}]. Cause: [{}].",
+                content, authorReference, authorReference, discussionReference, getRootCauseMessage(e));
+            ret = Optional.empty();
         }
-        return discussionBaseObject
-            .map(BaseElement::getDocumentReference)
-            .flatMap(dr -> {
-                try {
-                    return Optional.of(context.getWiki().getDocument(dr, context));
-                } catch (XWikiException e) {
-                    this.logger.warn("Failed to retrieve the document of the Discussion [{}]. Cause: [{}].", dr,
-                        getRootCauseMessage(e));
-                    return Optional.empty();
-                }
-            })
-            .flatMap(document -> {
-                Optional<String> ret;
-                try {
-                    BaseObject messageBaseObject =
-                        document.newXObject(this.messageMetadata.getMessageXClass(), context);
-                    String messageReference = generateUniqueReference(discussionReference, document);
-                    messageBaseObject.set(REFERENCE_NAME, messageReference, context);
-                    messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
-                    messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference, context);
-                    messageBaseObject.set(CONTENT_NAME, content, context);
-                    messageBaseObject.set(SYNTAX_NAME, syntax.toIdString(), context);
-                    messageBaseObject.set(DISCUSSION_REFERENCE_NAME, discussionReference, context);
-                    Date now = new Date();
-                    messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
-                    messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
-                    // TODO replyTo
-                    context.getWiki().saveDocument(document, context);
-                    ret = Optional.of(messageReference);
-                } catch (XWikiException e) {
-                    this.logger.warn(
-                        "Failed to create a Message with content=[{}], authorType=[{}], authorReference=[{}], "
-                            + "discussionReference=[{}]. Cause: [{}].",
-                        content, authorReference, authorReference, discussionReference, getRootCauseMessage(e));
-                    ret = Optional.empty();
-                }
-                return ret;
-            });
+        return ret;
     }
 
     @Override
@@ -142,28 +129,25 @@ public class DefaultMessageStoreService implements MessageStoreService
         try {
             String messageClass = this.messageMetadata.getMessageXClassFullName();
             List<String> messageReferences = this.queryManager.createQuery(String.format(
-                " select obj_reference.value "
+                " select doc.fullName "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
                     + "com.xpn.xwiki.objects.StringProperty as obj_discussionReference , "
-                    + "com.xpn.xwiki.objects.StringProperty as obj_reference, "
                     + "com.xpn.xwiki.objects.DateProperty as obj_updateDate "
                     + "where obj_discussionReference.value = :discussionReference "
                     + "and doc.fullName=obj.name and obj.className='%s' "
                     + "and obj_discussionReference.id.id=obj.id "
-                    + "and obj_reference.id.id=obj.id "
                     + "and obj_updateDate.id.id=obj.id "
                     + "and obj_discussionReference.id.name='%s' "
-                    + "and obj_reference.id.name='%s' "
                     + "and obj_updateDate.id.name='%s' "
                     + "order by obj_updateDate.value",
-                messageClass, DISCUSSION_REFERENCE_NAME, REFERENCE_NAME, UPDATE_DATE_NAME), Query.HQL)
+                messageClass, DISCUSSION_REFERENCE_NAME, UPDATE_DATE_NAME), Query.HQL)
                 .setOffset(offset)
                 .setLimit(limit)
                 .bindValue("discussionReference", discussionReference)
                 .execute();
 
-            return getBaseObjects(discussionReference, messageReferences);
+            return getBaseObjects(messageReferences);
         } catch (QueryException | XWikiException e) {
             this.logger.warn(
                 "Failed to get the list Message for discussionReference=[{}], offset=[{}], limit=[{}]. Cause: [{}].",
@@ -172,47 +156,49 @@ public class DefaultMessageStoreService implements MessageStoreService
         }
     }
 
-    private List<BaseObject> getBaseObjects(String discussionReference, List<String> messageReferences)
+    private List<BaseObject> getBaseObjects(List<String> messageReferences)
         throws XWikiException
     {
-        DocumentReference documentReference =
-            this.discussionStoreService.get(discussionReference).get().getDocumentReference();
-        XWikiContext context = this.xcontextProvider.get();
-        XWikiDocument document = context.getWiki().getDocument(documentReference, context);
 
-        return document.getXObjects(this.messageMetadata.getMessageXClass()).stream()
-            .filter(Objects::nonNull)
-            .filter(it -> messageReferences.contains(it.getStringValue(REFERENCE_NAME)))
-            .sorted(Comparator.comparing(o -> o.getDateValue(UPDATE_DATE_NAME)))
+        XWikiContext context = this.xcontextProvider.get();
+        return messageReferences.stream().map(it -> {
+            try {
+                return Optional.ofNullable(context.getWiki().getDocument(it, EntityType.DOCUMENT, context));
+            } catch (XWikiException e) {
+                return Optional.<XWikiDocument>empty();
+            }
+        }).filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(it -> it.getXObject(this.messageMetadata.getMessageXClass()))
             .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<BaseObject> getByReference(String reference, String discussionReference)
+    public Optional<BaseObject> getByReference(String reference)
     {
-        Optional<BaseObject> baseObject;
-
         try {
-            List<BaseObject> baseObjects = getBaseObjects(discussionReference, singletonList(reference));
-            if (baseObjects.isEmpty()) {
-                baseObject = Optional.empty();
-            } else {
+            String messageClass = this.messageMetadata.getMessageXClassFullName();
+            List<String> messageReferences = this.queryManager.createQuery(String.format(
+                " select doc.fullName "
+                    + "from XWikiDocument as doc , "
+                    + "BaseObject as obj , "
+                    + "com.xpn.xwiki.objects.StringProperty as obj_reference "
+                    + "where obj_reference.value = :reference "
+                    + "and doc.fullName=obj.name "
+                    + "and obj.className='%s' "
+                    + "and obj_reference.id.id=obj.id "
+                    + "and obj_reference.id.name='%s' ",
+                messageClass, REFERENCE_NAME), Query.HQL)
+                .bindValue("reference", reference)
+                .execute();
 
-                if (baseObjects.size() > 1) {
-                    this.logger
-                        .debug("Found too many messages, expected one. With reference=[{}], discussionReference=[{}]",
-                            reference, discussionReference);
-                }
-
-                baseObject = Optional.of(baseObjects.get(0));
-            }
-        } catch (XWikiException e) {
+            return getBaseObjects(messageReferences).stream().findFirst();
+        } catch (QueryException | XWikiException e) {
             this.logger.warn(
-                "Failed to get a message by reference with reference=[{}], discussionReference=[{}]. Cause: [{}].",
-                reference, discussionReference, getRootCauseMessage(e));
-            baseObject = Optional.empty();
+                "Failed to get the Message for reference=[{}]. Cause: [{}].",
+                reference, getRootCauseMessage(e));
+            return Optional.empty();
         }
-        return baseObject;
     }
 
     @Override
@@ -225,16 +211,12 @@ public class DefaultMessageStoreService implements MessageStoreService
                 " select count(*) "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
-                    + "com.xpn.xwiki.objects.StringProperty as discussionReferenceField , "
-                    + "com.xpn.xwiki.objects.StringProperty as messageReferenceField "
+                    + "com.xpn.xwiki.objects.StringProperty as discussionReferenceField "
                     + "where discussionReferenceField.value = :discussionReference "
-                    + "and doc.fullName=obj.name " 
+                    + "and doc.fullName=obj.name "
                     + "and obj.className='%s' "
                     + "and discussionReferenceField.id.id=obj.id "
-                    + "and messageReferenceField.id.id=obj.id "
-                    + "and discussionReferenceField.id.name='%s' "
-                    + "and messageReferenceField.id.name='%s'",
-                messageClass, DISCUSSION_REFERENCE_NAME, REFERENCE_NAME), Query.HQL)
+                    + "and discussionReferenceField.id.name='%s' ", messageClass, DISCUSSION_REFERENCE_NAME), Query.HQL)
                 .bindValue("discussionReference", discussionReference)
                 .<Long>execute()
                 .get(0);
@@ -248,47 +230,43 @@ public class DefaultMessageStoreService implements MessageStoreService
     }
 
     @Override
-    public void delete(String reference, String discussionReference)
+    public void delete(String reference)
     {
-        this.getByReference(reference, discussionReference)
+        this.getByReference(reference)
             .ifPresent(message -> {
-                DocumentReference documentReference =
-                    this.discussionStoreService.get(discussionReference).get().getDocumentReference();
-                XWikiContext context = this.xcontextProvider.get();
                 try {
-                    XWikiDocument document = context.getWiki().getDocument(documentReference, context);
-                    document.removeXObject(message);
-                    context.getWiki().saveDocument(document, context);
+                    this.xcontextProvider.get().getWiki().deleteDocument(message.getOwnerDocument(),
+                        this.xcontextProvider.get());
                 } catch (XWikiException e) {
-                    this.logger
-                        .warn("Failed to delete a message with reference=[{}], discussionReference=[{}]. Cause: [{}].",
-                            reference, discussionReference, getRootCauseMessage(e));
+                    this.logger.warn("Failed to delete a Message with reference [{}]. Cause: [{}]", reference,
+                        getRootCauseMessage(e));
                 }
             });
     }
 
-    private String generateUniqueReference(String discussionReference, XWikiDocument document)
+    private XWikiDocument generateUniquePage() throws XWikiException
     {
-        String reference = generateReference(discussionReference);
-        while (referenceExists(document, reference)) {
-            reference = generateReference(discussionReference);
+        XWikiDocument document;
+        synchronized (this) {
+            document = generatePage();
+
+            while (!document.isNew()) {
+                document = generatePage();
+            }
+            XWikiContext context = this.xcontextProvider.get();
+            context.getWiki().saveDocument(document, context);
         }
-        return reference;
+        return document;
     }
 
-    private boolean referenceExists(XWikiDocument document, String reference)
+    private XWikiDocument generatePage() throws XWikiException
     {
-        return document.getXObjects().entrySet().stream().anyMatch(
-            // Search for an existing message in the page with the same reference 
-            entry -> Objects.equals(entry.getKey(), this.messageMetadata.getMessageXClass()) && entry.getValue()
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(bo -> Objects.equals(bo.getStringValue(REFERENCE_NAME), reference)));
-    }
+        String generatedString = this.randomGeneratorService.randomString(10);
 
-    private String generateReference(String discussionReference)
-    {
-        String generatedString = this.randomGeneratorService.randomString();
-        return String.format("%s-%s", discussionReference, generatedString);
+        SpaceReference discussionContextSpace = this.messageMetadata.getMessageSpace();
+        DocumentReference documentReference = new DocumentReference(generatedString, discussionContextSpace);
+
+        XWikiContext context = this.xcontextProvider.get();
+        return context.getWiki().getDocument(documentReference, context);
     }
 }

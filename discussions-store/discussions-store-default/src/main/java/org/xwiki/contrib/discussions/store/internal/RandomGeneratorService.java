@@ -41,6 +41,15 @@ public class RandomGeneratorService
     public String randomString()
     {
         int length = 6;
+        return randomString(length);
+    }
+
+    /**
+     * @param length the random string length
+     * @return a randomly generated string of arbitrary length
+     */
+    public String randomString(int length)
+    {
         boolean useLetters = true;
         boolean useNumbers = true;
         return random(length, useLetters, useNumbers);
