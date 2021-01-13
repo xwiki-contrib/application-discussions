@@ -31,7 +31,7 @@
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <version>1.1</version>
-  <title>Discussions</title>
+  <title>$services.localization.render('discussions.messagestream.title')</title>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
@@ -40,9 +40,9 @@
 #if(!$isGuest)
 #set ($discussionDoc = $xwiki.getDocument('Discussions.MessageStream.Discussion'))
 #set ($url = "$discussionDoc.getURL('view')?reference=__REFERENCE__")
-[[Start a new discussion&gt;&gt;Discussions.MessageStream.CreateDiscussion]].
+[[$services.localization.render('discussions.messagestream.discussions.createDiscussion')&gt;&gt;Discussions.MessageStream.CreateDiscussion]]
 
-== Discussions List ==
+== $services.localization.render('discussions.messagestream.discussions.list') ==
 {{listDiscussions listId="messageStreamLivetable" type="messagestream-user" reference="$xcontext.userReference" linkTemplate="$url"/}}
 #else
 $services.localization.render('discussions.messagestream.isGuest.message')

@@ -37,7 +37,23 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>discussions.messagestream.isGuest.message=You must be logged-in to have access to the discussions.
-discussions.messagestream.discussions.back=Back to the discussions list</content>
+discussions.messagestream.discussions.back=Back to the discussions list
+discussions.messagestream.title=Discussions
+discussions.messagestream.discussions.list=Discussions List
+discussions.messagestream.discussions.createDiscussion=Start a new discussion.
+discussions.messagestream.createForm.title=Create a discussion
+discussions.messagestream.createForm.recipient.label=Recipient
+discussions.messagestream.createForm.recipient.hint=The list of recipients of the discussions is calculated when the first message is sent. For instance, if a user follows you after a message is sent, this user will not be able to see it.
+discussions.messagestream.createForm.recipient.value.everybody=Everybody
+discussions.messagestream.createForm.recipient.value.followers=Followers
+discussions.messagestream.createForm.recipient.value.users=Users
+discussions.messagestream.createForm.recipient.value.groups=Groups
+discussions.messagestream.createForm.users.label=Users
+discussions.messagestream.createForm.groups.label=Groups
+discussions.messagestream.createForm.title.label=Title
+discussions.messagestream.createForm.content.label=First message
+discussions.messagestream.createForm.submit=Create the discussion
+discussions.messagestream.createForm.cancel=Cancel</content>
   <object>
     <name>Discussions.MessageStream.MessageStreamTranslations</name>
     <number>0</number>

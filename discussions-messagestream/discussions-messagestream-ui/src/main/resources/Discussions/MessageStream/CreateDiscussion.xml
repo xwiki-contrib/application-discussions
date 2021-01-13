@@ -31,7 +31,7 @@
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <version>1.1</version>
-  <title>Create a discussion</title>
+  <title>$services.localization.render('discussions.messagestream.createForm.title')</title>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
@@ -85,21 +85,22 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
 &lt;form class="xform" action="$doc.getURL('view')" method="POST" id="new-discussion-form"&gt;
 &lt;dl&gt;
     &lt;dt&gt;
-      &lt;label for="new-discussion-to"&gt;Recipient&lt;/label&gt;
+      &lt;label for="new-discussion-to"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.label')&lt;/label&gt;
+      &lt;span class="xHint"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.hint')&lt;/span&gt;
     &lt;/dt&gt;
     &lt;dd&gt;
        &lt;select id="new-discussion-to" name="to"&gt;
-         &lt;option value="public"&gt;Everybody&lt;/option&gt;
-         &lt;option value="followers"&gt;Followers&lt;/option&gt;
-         &lt;option value="users"&gt;Users&lt;/option&gt;
-         &lt;option value="groups"&gt;Groups&lt;/option&gt;
+         &lt;option value="public"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.value.everybody')&lt;/option&gt;
+         &lt;option value="followers"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.value.followers')&lt;/option&gt;
+         &lt;option value="users"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.value.users')&lt;/option&gt;
+         &lt;option value="groups"&gt;$services.localization.render('discussions.messagestream.createForm.recipient.value.groups')&lt;/option&gt;
        &lt;/select&gt;
     &lt;/dd&gt;
   &lt;/dl&gt;
 
   &lt;dl class="hidden" id="new-discussion-users-field"&gt;
     &lt;dt&gt;
-      &lt;label for="new-discussion-users"&gt;Users&lt;/label&gt;
+      &lt;label for="new-discussion-users"&gt;$services.localization.render('discussions.messagestream.createForm.users.label')&lt;/label&gt;
     &lt;/dt&gt;
     &lt;dd&gt;
        #set ($suggestPickerParams = {'name': 'new-discussion-users', 'multiple': 'multiple'})
@@ -109,7 +110,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
 
   &lt;dl class="hidden" id="new-discussion-groups-field"&gt;
     &lt;dt&gt;
-      &lt;label for="new-discussion-groups"&gt;Groups&lt;/label&gt;
+      &lt;label for="new-discussion-groups"&gt;$services.localization.render('discussions.messagestream.createForm.groups.label')&lt;/label&gt;
     &lt;/dt&gt;
     &lt;dd&gt;
        #set ($suggestPickerParams = {'name': 'new-discussion-groups', 'multiple': 'multiple'})
@@ -118,7 +119,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
   &lt;/dl&gt;
   &lt;dl&gt;
     &lt;dt&gt;
-      &lt;label for="title"&gt;Title&lt;/label&gt;
+      &lt;label for="title"&gt;$services.localization.render('discussions.messagestream.createForm.title.label')&lt;/label&gt;
     &lt;/dt&gt;
     &lt;dd&gt;
       $doc.displayEdit($titleField, '', $discussionObj)
@@ -126,7 +127,7 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
   &lt;/dl&gt;
   &lt;dl&gt;
     &lt;dt&gt;
-      &lt;label for="content"&gt;First message&lt;/label&gt;
+      &lt;label for="content"&gt;$services.localization.render('discussions.messagestream.createForm.content.label')&lt;/label&gt;
     &lt;/dt&gt;
     &lt;dd&gt;
       $doc.displayEdit($contentField, '', $messageObj)
@@ -134,8 +135,9 @@ $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'vi
   &lt;/dl&gt;
   
   &lt;p&gt;
-    &lt;span class="buttonwrapper"&gt;
-      &lt;input class="button" type="submit" value="Create the discussion"/&gt;
+    &lt;span&gt;
+      &lt;input class="button" type="submit" value="$services.localization.render('discussions.messagestream.createForm.submit')"/&gt;
+      &lt;a href="$xwiki.getURL('Discussions.MessageStream.WebHome')" class="btn btn-default"&gt;$services.localization.render('discussions.messagestream.createForm.cancel')&lt;/a&gt;
     &lt;/span&gt;
   &lt;/p&gt;
 &lt;/form&gt;
