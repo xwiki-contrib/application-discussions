@@ -42,6 +42,8 @@ import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
+import org.xwiki.rendering.parser.ParseException;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
 import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
@@ -206,7 +208,17 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
             .ifPresent(d -> {
                 String content = getContent(request);
-                this.messageService.create(content, XWIKI_2_0, d.getReference())
+                Syntax syntax;
+                if (request.getParameter("content_syntax") != null) {
+                    try {
+                        syntax = Syntax.valueOf(request.getParameter("content_syntax"));
+                    } catch (ParseException e) {
+                        syntax = XWIKI_2_0;
+                    }
+                } else {
+                    syntax = XWIKI_2_0;
+                }
+                this.messageService.create(content, syntax, d.getReference())
                     .ifPresent(m -> {
                         String parameter = request.getParameter(ORIGINAL_URL_PARAM);
                         try {
