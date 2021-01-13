@@ -1,0 +1,267 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.MessageStream.CreateDiscussion" locale="">
+  <web>Discussions.MessageStream</web>
+  <name>CreateDiscussion</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>Create a discussion</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+#if ('POST' == $request.method)
+## Replace by a pre-computation of all the actors related to the discussion (so at the end only 
+#set ($to = $request.to)
+## Computes the discussion contexts according to the recipients and emitter.
+## Register the emitter as emitter as well as user in the discussion
+#set($discussionContexts = [
+  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-emitter', $xcontext.userReference),
+  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-user', $xcontext.userReference)
+])
+#if ($to == 'public')
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextPublic($xcontext.userReference))
+#elseif ($to == 'followers')
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextFollowers($xcontext.userReference))
+#elseif ($to == 'users')
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextUsers($xcontext.userReference, 
+    $request.getParameterValues('new-discussion-users')))
+#else 
+  #set($discussionContexts = $services.discussions-messagestream.initializeContextGroups($xcontext.userReference, 
+    $request.getParameterValues('new-discussion-groups')))
+#end
+## Creates the discussion.
+#set ($discussion = $services.discussions.createDiscussion($request.title, ''))
+## Attaches the discussion contexts to the discussion
+#foreach($discussionContext in $discussionContexts)
+  #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
+  #if ($discussionContext.entityReference.type == 'messagestream-user')
+     #set ($discard = $services.discussions.rights.setRead($discussion, $discussionContext.entityReference.reference))
+     #set ($discard = $services.discussions.rights.setWrite($discussion, $discussionContext.entityReference.reference))
+  #end
+#end
+## Add the first message.
+#set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
+## Redirect to the view page of the discussion.
+$response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$discussion.reference"))
+#elseif(!$isGuest)
+#set ($docDiscussionClass = $xwiki.getDocument('Discussions.Code.DiscussionClass'))
+#set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
+#set ($discussionClass = $docDiscussionClass.getxWikiClass())
+#set ($messageClass = $docMessageClass.getxWikiClass())
+#set ($discussionObj = $doc.newObject('Discussions.Code.DiscussionClass'))
+#set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
+#set ($titleField = $discussionClass.get('title'))
+#set ($descriptionField = $discussionClass.get('description'))
+#set ($contentField = $messageClass.get('content'))
+{{html}}
+&lt;form class="xform" action="$doc.getURL('view')" method="POST" id="new-discussion-form"&gt;
+&lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label for="new-discussion-to"&gt;Recipient&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+       &lt;select id="new-discussion-to" name="to"&gt;
+         &lt;option value="public"&gt;Everybody&lt;/option&gt;
+         &lt;option value="followers"&gt;Followers&lt;/option&gt;
+         &lt;option value="users"&gt;Users&lt;/option&gt;
+         &lt;option value="groups"&gt;Groups&lt;/option&gt;
+       &lt;/select&gt;
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+
+  &lt;dl class="hidden" id="new-discussion-users-field"&gt;
+    &lt;dt&gt;
+      &lt;label for="new-discussion-users"&gt;Users&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+       #set ($suggestPickerParams = {'name': 'new-discussion-users', 'multiple': 'multiple'})
+       #userPicker(false, $suggestPickerParams)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+
+  &lt;dl class="hidden" id="new-discussion-groups-field"&gt;
+    &lt;dt&gt;
+      &lt;label for="new-discussion-groups"&gt;Groups&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+       #set ($suggestPickerParams = {'name': 'new-discussion-groups', 'multiple': 'multiple'})
+       #groupPicker(false, $suggestPickerParams)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label for="title"&gt;Title&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+      $doc.displayEdit($titleField, '', $discussionObj)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label for="content"&gt;First message&lt;/label&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+      $doc.displayEdit($contentField, '', $messageObj)
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  
+  &lt;p&gt;
+    &lt;span class="buttonwrapper"&gt;
+      &lt;input class="button" type="submit" value="Create the discussion"/&gt;
+    &lt;/span&gt;
+  &lt;/p&gt;
+&lt;/form&gt;
+{{/html}}
+#set ($discard = $xwiki.jsx.use('Discussions.MessageStream.CreateDiscussion'))
+#else
+$services.localization.render('discussions.messagestream.isGuest.message')
+#end
+{{/velocity}}</content>
+  <object>
+    <name>Discussions.MessageStream.CreateDiscussion</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>b0511e95-1293-4e4b-ac4a-800f492f70b8</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery'], function($) {
+
+  $("#new-discussion-form").submit(function(e) {
+    $(document).trigger('xwiki:actions:beforeSave');
+    // TODO: Dangerous since if the user is editing another field in parallel, he will not be warned before submitting and will loose its changes.
+    $(document).trigger('xwiki:actions:cancel');
+  });
+
+  $('#new-discussion-to').on('change', function() {
+    const value = $(this).val();
+    const usersField = $('#new-discussion-users-field');
+    const groupsField = $('#new-discussion-groups-field');
+    usersField.addClass('hidden');
+    groupsField.addClass('hidden');
+    if(value === 'users') {
+      usersField.removeClass('hidden');
+    } else if (value == 'groups') {
+      groupsField.removeClass('hidden');
+    }
+  });
+});</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+</xwikidoc>

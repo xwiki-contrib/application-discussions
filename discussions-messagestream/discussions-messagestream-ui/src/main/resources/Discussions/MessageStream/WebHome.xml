@@ -37,119 +37,13 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#if ('POST' == $request.method)
-## Replace by a pre-computation of all the actors related to the discussion (so at the end only 
-#set ($to = $request.to)
-## Computes the discussion contexts according to the recipients and emitter.
-## Register the emitter as emitter as well as user in the discussion
-
-#set($discussionContexts = [
-  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-emitter', $xcontext.userReference),
-  $services.discussions.getOrCreateDiscussionContext('', '', 'messagestream-user', $xcontext.userReference)
-])
-#if ($to == 'public')
-  #set($discussionContexts = $services.discussions-messagestream.initializeContextPublic($xcontext.userReference))
-#elseif ($to == 'followers')
-  #set($discussionContexts = $services.discussions-messagestream.initializeContextFollowers($xcontext.userReference))
-#elseif ($to == 'users')
-  #set($discussionContexts = $services.discussions-messagestream.initializeContextUsers($xcontext.userReference, 
-    $request.getParameterValues('new-discussion-users')))
-#else 
-  #set($discussionContexts = $services.discussions-messagestream.initializeContextGroups($xcontext.userReference, 
-    $request.getParameterValues('new-discussion-groups')))
-#end
-## Creates the discussion.
-#set ($discussion = $services.discussions.createDiscussion($request.title, ''))
-## Attaches the discussion contexts to the discussion
-#foreach($discussionContext in $discussionContexts)
-  #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
-  #if ($discussionContext.entityReference.type == 'messagestream-user')
-     #set ($discard = $services.discussions.rights.setRead($discussion, $discussionContext.entityReference.reference))
-     #set ($discard = $services.discussions.rights.setWrite($discussion, $discussionContext.entityReference.reference))
-  #end
-#end
-## Add the first message.
-#set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
-## Redirect to the view page of the discussion.
-$response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$discussion.reference"))
-#elseif(!$isGuest)
-== Discussions List ==
-
+#if(!$isGuest)
 #set ($discussionDoc = $xwiki.getDocument('Discussions.MessageStream.Discussion'))
 #set ($url = "$discussionDoc.getURL('view')?reference=__REFERENCE__")
+[[Start a new discussion&gt;&gt;Discussions.MessageStream.CreateDiscussion]].
 
+== Discussions List ==
 {{listDiscussions listId="messageStreamLivetable" type="messagestream-user" reference="$xcontext.userReference" linkTemplate="$url"/}}
-
-== Create a Discussion ==
-#set ($docDiscussionClass = $xwiki.getDocument('Discussions.Code.DiscussionClass'))
-#set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
-#set ($discussionClass = $docDiscussionClass.getxWikiClass())
-#set ($messageClass = $docMessageClass.getxWikiClass())
-#set ($discussionObj = $doc.newObject('Discussions.Code.DiscussionClass'))
-#set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
-#set ($titleField = $discussionClass.get('title'))
-#set ($descriptionField = $discussionClass.get('description'))
-#set ($contentField = $messageClass.get('content'))
-{{html}}
-&lt;form class="xform" action="." method="POST" id="new-discussion-form"&gt;
-&lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="new-discussion-to"&gt;Recipient&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-       &lt;select id="new-discussion-to" name="to"&gt;
-         &lt;option value="public"&gt;Everybody&lt;/option&gt;
-         &lt;option value="followers"&gt;Followers&lt;/option&gt;
-         &lt;option value="users"&gt;Users&lt;/option&gt;
-         &lt;option value="groups"&gt;Groups&lt;/option&gt;
-       &lt;/select&gt;
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-
-  &lt;dl class="hidden" id="new-discussion-users-field"&gt;
-    &lt;dt&gt;
-      &lt;label for="new-discussion-users"&gt;Users&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-       #set ($suggestPickerParams = {'name': 'new-discussion-users', 'multiple': 'multiple'})
-       #userPicker(false, $suggestPickerParams)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-
-  &lt;dl class="hidden" id="new-discussion-groups-field"&gt;
-    &lt;dt&gt;
-      &lt;label for="new-discussion-groups"&gt;Groups&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-       #set ($suggestPickerParams = {'name': 'new-discussion-groups', 'multiple': 'multiple'})
-       #groupPicker(false, $suggestPickerParams)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="title"&gt;Title&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-      $doc.displayEdit($titleField, '', $discussionObj)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl&gt;
-    &lt;dt&gt;
-      &lt;label for="content"&gt;First message&lt;/label&gt;
-    &lt;/dt&gt;
-    &lt;dd&gt;
-      $doc.displayEdit($contentField, '', $messageObj)
-    &lt;/dd&gt;
-  &lt;/dl&gt;
-  
-  &lt;p&gt;
-    &lt;span class="buttonwrapper"&gt;
-      &lt;input class="button" type="submit" value="Create the discussion"/&gt;
-    &lt;/span&gt;
-  &lt;/p&gt;
-&lt;/form&gt;
-{{/html}}
-#set ($discard = $xwiki.jsx.use('Discussions.MessageStream.WebHome'))
 #else
 $services.localization.render('discussions.messagestream.isGuest.message')
 #end
@@ -241,27 +135,7 @@ $services.localization.render('discussions.messagestream.isGuest.message')
       <cache>long</cache>
     </property>
     <property>
-      <code>require(['jquery'], function($) {
-
-  $("#new-discussion-form").submit(function(e) {
-    $(document).trigger('xwiki:actions:beforeSave');
-    // TODO: Dangerous since if the user is editing another field in parallel, he will not be warned before submitting and will loose its changes.
-    $(document).trigger('xwiki:actions:cancel');
-  });
-
-  $('#new-discussion-to').on('change', function() {
-    const value = $(this).val();
-    const usersField = $('#new-discussion-users-field');
-    const groupsField = $('#new-discussion-groups-field');
-    usersField.addClass('hidden');
-    groupsField.addClass('hidden');
-    if(value === 'users') {
-      usersField.removeClass('hidden');
-    } else if (value == 'groups') {
-      groupsField.removeClass('hidden');
-    }
-  });
-});</code>
+      <code/>
     </property>
     <property>
       <name/>
