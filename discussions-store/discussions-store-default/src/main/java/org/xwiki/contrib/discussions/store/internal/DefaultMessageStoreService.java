@@ -96,7 +96,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             if (authorType.equals("user")) {
                 authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference);
             } else {
-                authorReferenceDoc = this.documentReferenceResolver.resolve("XWiki.XWikiGuest");
+                authorReferenceDoc = null;
             }
             document.setAuthorReference(authorReferenceDoc);
             BaseObject messageBaseObject = document.newXObject(this.messageMetadata.getMessageXClass(), context);
