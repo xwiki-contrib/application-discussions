@@ -37,5 +37,31 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>discussions.application.name=Discussions
+discussions.discussion.messages.title=Messages
+discussions.discussion.messages.empty=Pas de messages !
+discussions.discussion.notAllowed.view=Vous n'êtes pas autorisé à voir cette discussion.
+discussions.discussion.newMessage.form.title=Nouveau Message
+discussions.discussion.deleteMessage.form.title=Supprimer un message
+discussions.discussion.deleteMessage.form.confirmation=Êtes-vous sûr de vouloir supprimer ce message ?
+discussions.discussion.deleteMessage.form.cancel=Annuler
+discussions.discussion.deleteMessage.form.confirm=Confirmer
+discussions.discussions.table.header.title=Titre
+discussions.discussions.table.header.updateDate=Dernier changement
+discussions.discussions.table.header.messageCount=Nombre de messsages
+discussions.home.description=Cet espace contient le code de l'application Discussions.
+discussions.home.discussionsTable.column.title=Titre
+discussions.home.discussionsTable.column.creationDate=Date de création
+discussions.home.discussionsTable.column.updateDate=Date de mise à jour
+discussions.home.discussionsTable.column.discussionContexts=Contextes de discussion
+discussions.home.discussionsTable.column.reference=Référence
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=Nom
+discussions.home.discussionContextsTable.column.entityReferenceType=Type de référence d'entité
+discussions.home.discussionContextsTable.column.entityReference=Référence d'entité
+discussions.home.discussionContextsTable.column.creationDate=Date de création
+discussions.home.discussionContextsTable.column.discussions=Discussions
+discussions.home.discussionContextsTable.column.reference=Référence
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=Indexes des discussions
 </content>
   </xwikidoc>
