@@ -28,7 +28,7 @@ import org.xwiki.test.junit5.mockito.InjectMockComponents;
  * Test of {@link RandomGeneratorService}.
  *
  * @version $Id$
- * @since X.Y.X
+ * @since 1.0
  */
 @ComponentTest
 class RandomGeneratorServiceTest
