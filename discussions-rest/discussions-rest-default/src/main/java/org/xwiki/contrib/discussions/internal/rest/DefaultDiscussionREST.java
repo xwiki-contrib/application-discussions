@@ -120,7 +120,8 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
     {
         String title = discussion.getTitle();
         String description = discussion.getDescription();
-        return this.discussionService.create(title, description)
+        String mainDocument = discussion.getMainDocument();
+        return this.discussionService.create(title, description, mainDocument)
             .orElseThrow(() -> new XWikiRestException(
                 String.format("Fail to create a discussion with title=[%s], description=[%s]", title, description)));
     }

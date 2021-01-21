@@ -50,6 +50,7 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.CREATION_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
@@ -81,20 +82,21 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     private RandomGeneratorService randomGeneratorService;
 
     @Override
-    public Optional<String> create(String title, String description)
+    public Optional<String> create(String title, String description, String mainDocument)
     {
         Optional<String> reference;
         try {
             XWikiDocument document = generateUniquePage(title);
             XWikiContext context = this.getContext();
             BaseObject object = document.newXObject(this.discussionMetadata.getDiscussionXClass(), context);
-            object.set(TITLE_NAME, title, context);
-            object.set(DESCRIPTION_NAME, description, context);
+            object.setStringValue(TITLE_NAME, title);
+            object.setStringValue(DESCRIPTION_NAME, description);
             String pageName = document.getDocumentReference().getName();
-            object.set(REFERENCE_NAME, pageName, context);
+            object.setStringValue(REFERENCE_NAME, pageName);
             Date value = new Date();
             object.setDateValue(UPDATE_DATE_NAME, value);
             object.setDateValue(CREATION_DATE_NAME, value);
+            object.setStringValue(MAIN_DOCUMENT_NAME, mainDocument);
             context.getWiki().saveDocument(document, context);
             reference = Optional.of(pageName);
         } catch (XWikiException e) {

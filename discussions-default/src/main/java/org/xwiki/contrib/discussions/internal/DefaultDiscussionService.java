@@ -41,6 +41,7 @@ import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
 import static org.xwiki.contrib.discussions.events.ActionType.UPDATE;
 import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
@@ -65,9 +66,10 @@ public class DefaultDiscussionService implements DiscussionService
     private DiscussionsRightService discussionsRightService;
 
     @Override
-    public Optional<Discussion> create(String title, String description)
+    public Optional<Discussion> create(String title, String description, String mainDocument)
     {
-        Optional<Discussion> discussion = this.discussionStoreService.create(title, description).flatMap(this::get);
+        Optional<Discussion> discussion =
+            this.discussionStoreService.create(title, description, mainDocument).flatMap(this::get);
         discussion.ifPresent(d -> this.observationManager.notify(new DiscussionEvent(CREATE), EVENT_SOURCE, d));
         return discussion;
     }
@@ -78,7 +80,7 @@ public class DefaultDiscussionService implements DiscussionService
         List<BaseObject> byDiscussionContexts =
             this.discussionStoreService.findByDiscussionContexts(discussionContexts);
         if (byDiscussionContexts.isEmpty()) {
-            Optional<String> discussionReferenceOpt = this.discussionStoreService.create(title, description);
+            Optional<String> discussionReferenceOpt = this.discussionStoreService.create(title, description, null);
             discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
                 discussionContextReference -> this.discussionStoreService
                     .link(discussionReference, discussionContextReference)));
@@ -166,7 +168,8 @@ public class DefaultDiscussionService implements DiscussionService
             baseObject.getStringValue(REFERENCE_NAME),
             baseObject.getStringValue(TITLE_NAME),
             baseObject.getStringValue(DESCRIPTION_NAME),
-            baseObject.getDateValue(UPDATE_DATE_NAME)
+            baseObject.getDateValue(UPDATE_DATE_NAME),
+            baseObject.getStringValue(MAIN_DOCUMENT_NAME)
         );
     }
 }

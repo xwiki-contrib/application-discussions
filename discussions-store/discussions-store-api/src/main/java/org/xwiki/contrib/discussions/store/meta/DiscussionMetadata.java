@@ -132,6 +132,16 @@ public class DiscussionMetadata
      */
     public static final String DISCUSSION_CONTEXTS_PRETTY_NAME = "Discussion Contexts";
 
+    /**
+     * Main Document property name.
+     */
+    public static final String MAIN_DOCUMENT_NAME = "mainDocument";
+
+    /**
+     * Main Document property pretty name.
+     */
+    public static final String MAIN_DOCUMENT_PRETTY_NAME = "Main Document";
+
     private static final String DISCUSSIONS_SPACE = "Discussions";
 
     private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_SPACE, "Code");

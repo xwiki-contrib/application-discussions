@@ -119,7 +119,7 @@ class DefaultMessageStoreServiceTest
 
         Optional<String> reference =
             this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
-                "discussionReference");
+                "discussionReference", "TODO");
 
         assertEquals(Optional.of("randomString"), reference);
         assertEquals(0, this.logCapture.size());

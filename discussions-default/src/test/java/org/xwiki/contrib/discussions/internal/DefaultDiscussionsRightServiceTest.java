@@ -66,7 +66,7 @@ class DefaultDiscussionsRightServiceTest
     private static final DocumentReference DISCUSSION_REFERENCE = new DocumentReference("xwiki", "XWiki", "Discussion");
 
     public static final Discussion DISCUSSION =
-        new Discussion("referenceDiscussion", "title", "description", new Date());
+        new Discussion("referenceDiscussion", "title", "description", new Date(), null);
 
     public static final String USER_REFERENCE = "xwiki:XWiki.User";
 

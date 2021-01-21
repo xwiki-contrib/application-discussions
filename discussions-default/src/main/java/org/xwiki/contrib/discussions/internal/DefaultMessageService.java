@@ -55,6 +55,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_RE
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
@@ -112,11 +113,12 @@ public class DefaultMessageService implements MessageService
         String discussionReference, String authorType,
         String authorReference, boolean notify)
     {
+        String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
         return this.messageStoreService
-            .create(content, syntax, authorType, authorReference, discussionReference)
+            .create(content, syntax, authorType, authorReference, discussionReference, title)
             .flatMap(reference -> {
                 this.discussionService.touch(discussionReference);
-                Optional<Message> messageOpt = getByReference(reference, discussionReference);
+                Optional<Message> messageOpt = getByReference(reference);
                 if (notify) {
                     messageOpt
                         .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
@@ -126,11 +128,12 @@ public class DefaultMessageService implements MessageService
     }
 
     @Override
-    public Optional<Message> getByReference(String reference, String discussionReference)
+    public Optional<Message> getByReference(String reference)
     {
         return this.messageStoreService.getByReference(reference)
-            .flatMap(messageObject -> this.discussionService.get(discussionReference)
-                .map(discussion -> convertToMessage(discussion).apply(messageObject)));
+            .flatMap(
+                messageObject -> this.discussionService.get(messageObject.getStringValue(DISCUSSION_REFERENCE_NAME))
+                    .map(discussion -> convertToMessage(discussion).apply(messageObject)));
     }
 
     @Override
@@ -153,7 +156,7 @@ public class DefaultMessageService implements MessageService
     @Override
     public void delete(String reference, String discussionReference)
     {
-        this.getByReference(reference, discussionReference)
+        this.getByReference(reference)
             .ifPresent(message -> {
                 this.messageStoreService.delete(message.getReference());
                 this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);

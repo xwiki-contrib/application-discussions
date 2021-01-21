@@ -37,13 +37,14 @@ import org.xwiki.stability.Unstable;
 public interface DiscussionService
 {
     /**
-     * Creates a discussion.
+     * Creates a discussion with a main document.
      *
      * @param title the discussion title
      * @param description the discussion description
+     * @param mainDocument the main document to view the discussion
      * @return the created discussion
      */
-    Optional<Discussion> create(String title, String description);
+    Optional<Discussion> create(String title, String description, String mainDocument);
 
     /**
      * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly

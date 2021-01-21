@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.rest.XWikiRestException;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -39,6 +40,7 @@ import org.xwiki.test.junit5.mockito.MockComponent;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +65,7 @@ class DefaultDiscussionRESTTest
     @Test
     void get() throws Exception
     {
-        Discussion discussion = new Discussion("r", "ttl", "desc", new Date());
+        Discussion discussion = new Discussion("r", "ttl", "desc", new Date(), null);
         when(this.discussionService.get("ref")).thenReturn(Optional.of(discussion));
         Discussion actual = this.target.get("ref");
         assertEquals(discussion, actual);
@@ -97,9 +99,9 @@ class DefaultDiscussionRESTTest
         calendar.setTimeZone(TimeZone.getTimeZone("UTC+1"));
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref"))).thenReturn(12L);
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref", "*"))).thenReturn(123L);
-        Discussion discussion1 = new Discussion("d1-ref", "d1-ttl", "d1-desc", calendar.getTime());
-        Discussion discussion2 = new Discussion("d2-ref", "d2-ttl", "d2-desc", calendar.getTime());
-        Discussion discussion3 = new Discussion("d3-ref", "d3-ttl", "d3-desc", calendar.getTime());
+        Discussion discussion1 = new Discussion("d1-ref", "d1-ttl", "d1-desc", calendar.getTime(), null);
+        Discussion discussion2 = new Discussion("d2-ref", "d2-ttl", "d2-desc", calendar.getTime(), null);
+        Discussion discussion3 = new Discussion("d3-ref", "d3-ttl", "d3-desc", calendar.getTime(), null);
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref"), 0, 10))
             .thenReturn(asList(discussion1, discussion2));
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref", "*"), 0, 10))
@@ -111,5 +113,33 @@ class DefaultDiscussionRESTTest
             joker);
         assertEquals(200, response.getStatus());
         assertEquals(expected, response.getEntity());
+    }
+
+    @Test
+    void create() throws Exception
+    {
+        CreateDiscussion createDiscussion = new CreateDiscussion()
+            .setTitle("title")
+            .setDescription("description")
+            .setMainDocument("XWiki.Doc");
+        Discussion discussion = new Discussion();
+        when(this.discussionService.create("title", "description", "XWiki.Doc")).thenReturn(Optional.of(
+            discussion));
+        Discussion actual = this.target.create(createDiscussion);
+        assertSame(discussion, actual);
+    }
+    
+    @Test
+    void createException()
+    {
+        CreateDiscussion createDiscussion = new CreateDiscussion()
+            .setTitle("title")
+            .setDescription("description")
+            .setMainDocument("XWiki.Doc");
+        Discussion discussion = new Discussion();
+        when(this.discussionService.create("title", "description", "XWiki.Doc")).thenReturn(Optional.empty());
+        XWikiRestException throwable = assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
+        assertEquals("Fail to create a discussion with title=[title], description=[description]", throwable.getMessage());
+        
     }
 }

@@ -117,17 +117,18 @@ public class DiscussionsScriptService implements ScriptService
             return null;
         }
     }
-
+    
     /**
-     * Creates a discussion.
+     * Creates a discussion with an URL to the main discussion view page.
      *
      * @param title the discussion title
      * @param description the discussion description
+     * @param mainDocument the main document to view the discussion
      * @return the created discussion
      */
-    public Discussion createDiscussion(String title, String description)
+    public Discussion createDiscussion(String title, String description, String mainDocument)
     {
-        return this.discussionService.create(title, description).orElse(null);
+        return this.discussionService.create(title, description, mainDocument).orElse(null);
     }
 
     /**

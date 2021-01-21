@@ -46,6 +46,7 @@ import com.xpn.xwiki.objects.classes.UsersClass;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.security.internal.XWikiConstants.ALLOW_FIELD_NAME;
+import static org.xwiki.security.internal.XWikiConstants.GROUPS_FIELD_NAME;
 import static org.xwiki.security.internal.XWikiConstants.LEVELS_FIELD_NAME;
 import static org.xwiki.security.internal.XWikiConstants.LOCAL_CLASSNAME;
 import static org.xwiki.security.internal.XWikiConstants.USERS_FIELD_NAME;
@@ -85,37 +86,66 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                 EntityReference rightsClassReference = new LocalDocumentReference(XWIKI_SPACE, LOCAL_CLASSNAME);
                 List<BaseObject> xObjects =
                     document.getXObjects(rightsClassReference);
-                String userReference = this.serializer.serialize(user);
-                Optional<BaseObject> userRightObject =
-                    xObjects.stream()
+                String userReference;
+                String groupReference;
+                Optional<BaseObject> rightsObject;
+                if (!user.getName().equals("*")) {
+                    userReference = this.serializer.serialize(user);
+                    groupReference = null;
+                    rightsObject = xObjects.stream()
                         .filter(obj -> UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME))
-                        .stream()
-                        .anyMatch(userId -> Objects.equals(userId, userReference)))
+                            .stream()
+                            .anyMatch(userId -> Objects.equals(userId, userReference)))
                         .findAny();
-                if (userRightObject.isPresent()) {
-                    // add the the existing base object
-                    BaseObject obj = userRightObject.get();
-                    List<String> levels =
-                        LevelsClass.getListFromString(obj.getStringValue(LEVELS_FIELD_NAME));
-                    if (!levels.contains(rightName)) {
-                        levels.add(rightName);
-                    }
-                    obj.setStringValue(LEVELS_FIELD_NAME, LevelsClass.getStringFromList(levels, ","));
-                    obj.setIntValue(ALLOW_FIELD_NAME, 1);
-                    wiki.saveDocument(document, context);
                 } else {
-                    // create and add a new base object
-                    BaseObject obj = document.newXObject(rightsClassReference, context);
-                    obj.setStringValue(LEVELS_FIELD_NAME, rightName);
-                    obj.setStringValue(USERS_FIELD_NAME, userReference);
-                    obj.setIntValue(ALLOW_FIELD_NAME, 1);
-                    wiki.saveDocument(document, context);
+                    userReference = null;
+                    groupReference = "XWiki.XWikiAllGroup";
+                    rightsObject = xObjects.stream()
+                        .filter(obj -> UsersClass.getListFromString(obj.getStringValue(GROUPS_FIELD_NAME))
+                            .stream()
+                            .anyMatch(groupId -> Objects.equals(groupId, groupReference)))
+                        .findAny();
                 }
+
+                setDiscussionRightToUser(rightName, document, rightsClassReference, userReference, groupReference,
+                    rightsObject);
             } catch (XWikiException e) {
                 this.logger
                     .warn("Failed to set right [{}] to user [{}] on document [{}]. Cause: [{}].", rightName, user,
                         discussionReference, getRootCauseMessage(e));
             }
         });
+    }
+
+    private void setDiscussionRightToUser(String rightName, XWikiDocument document,
+        EntityReference rightsClassReference, String userReference, String groupReference,
+        Optional<BaseObject> rightsObject) throws XWikiException
+    {
+        XWikiContext context = this.xWikiContextProvider.get();
+        XWiki wiki = context.getWiki();
+        if (rightsObject.isPresent()) {
+            // add the the existing base object
+            BaseObject obj = rightsObject.get();
+            List<String> levels =
+                LevelsClass.getListFromString(obj.getStringValue(LEVELS_FIELD_NAME));
+            if (!levels.contains(rightName)) {
+                levels.add(rightName);
+            }
+            obj.setStringValue(LEVELS_FIELD_NAME, LevelsClass.getStringFromList(levels, ","));
+            obj.setIntValue(ALLOW_FIELD_NAME, 1);
+            wiki.saveDocument(document, context);
+        } else {
+            // create and add a new base object
+            BaseObject obj = document.newXObject(rightsClassReference, context);
+            obj.setStringValue(LEVELS_FIELD_NAME, rightName);
+            if (userReference != null) {
+                obj.setStringValue(USERS_FIELD_NAME, userReference);
+            }
+            if (groupReference != null) {
+                obj.setStringValue(GROUPS_FIELD_NAME, groupReference);
+            }
+            obj.setIntValue(ALLOW_FIELD_NAME, 1);
+            wiki.saveDocument(document, context);
+        }
     }
 }

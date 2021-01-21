@@ -58,7 +58,7 @@
     $request.getParameterValues('new-discussion-groups')))
 #end
 ## Creates the discussion.
-#set ($discussion = $services.discussions.createDiscussion($request.title, ''))
+#set ($discussion = $services.discussions.createDiscussion($request.title, '', 'Discussions.MessageStream.Discussion'))
 ## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
   #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))

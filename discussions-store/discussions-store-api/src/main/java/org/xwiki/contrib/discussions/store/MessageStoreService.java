@@ -46,10 +46,11 @@ public interface MessageStoreService
      * @param authorType the author type
      * @param authorReference the author reference
      * @param discussionReference the discussion reference
+     * @param title the title of the discussion of the message
      * @return the unique reference of the created message
      */
     Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
-        String discussionReference);
+        String discussionReference, String title);
 
     /**
      * Returns a paginate list of messages of a discussion.

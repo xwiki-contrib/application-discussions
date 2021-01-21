@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
-import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -37,11 +36,13 @@ import com.xpn.xwiki.objects.BaseObject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.*;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.TITLE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
 
 /**
  * Test of {@link DefaultDiscussionService}.
@@ -65,11 +66,11 @@ class DefaultDiscussionServiceTest
     void createCreateFail()
     {
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
-        when(this.discussionStoreService.create("title", "description"))
+        when(this.discussionStoreService.create("title", "description", null))
             .thenReturn(Optional.empty());
 
         Optional<Discussion> discussion =
-            this.defaultDiscussionService.create("title", "description");
+            this.defaultDiscussionService.create("title", "description", "XWiki.Doc");
 
         assertEquals(Optional.empty(), discussion);
     }
@@ -78,7 +79,7 @@ class DefaultDiscussionServiceTest
     void create()
     {
         Date updateDate = new Date();
-        Discussion discussion = new Discussion("reference", "title", "description", updateDate);
+        Discussion discussion = new Discussion("reference", "title", "description", updateDate, "XWiki.Doc");
         BaseObject baseObject = mock(BaseObject.class);
 
         DocumentReference value = new DocumentReference("xwiki", "a", "b");
@@ -87,14 +88,15 @@ class DefaultDiscussionServiceTest
         when(baseObject.getStringValue(TITLE_NAME)).thenReturn("title");
         when(baseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
         when(baseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
+        when(baseObject.getStringValue(MAIN_DOCUMENT_NAME)).thenReturn("XWiki.Doc");
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
         when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
-        when(this.discussionStoreService.create("title", "description"))
+        when(this.discussionStoreService.create("title", "description", "XWiki.Doc"))
             .thenReturn(Optional.of("reference"));
         when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
 
         Optional<Discussion> discussionOpt =
-            this.defaultDiscussionService.create("title", "description");
+            this.defaultDiscussionService.create("title", "description", "XWiki.Doc");
 
         assertEquals(Optional.of(discussion), discussionOpt);
     }
@@ -106,7 +108,7 @@ class DefaultDiscussionServiceTest
         Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
         assertEquals(Optional.empty(), discussion);
     }
-    
+
     @Test
     void get()
     {
@@ -124,7 +126,7 @@ class DefaultDiscussionServiceTest
 
         Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
 
-        assertEquals(Optional.of(new Discussion("reference", "title", "description", updateDate)), discussion);
+        assertEquals(Optional.of(new Discussion("reference", "title", "description", updateDate, null)), discussion);
     }
 
     @Test

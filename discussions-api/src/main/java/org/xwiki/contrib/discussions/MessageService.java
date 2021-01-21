@@ -81,10 +81,9 @@ public interface MessageService
      * Get a message by its unique reference.
      *
      * @param reference the reference
-     * @param discussionReference the discussion reference
      * @return the message
      */
-    Optional<Message> getByReference(String reference, String discussionReference);
+    Optional<Message> getByReference(String reference);
 
     /**
      * Returns the paginated list of messages of the discussion.

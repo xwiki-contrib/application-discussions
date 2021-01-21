@@ -86,12 +86,20 @@ public class DefaultMessageStoreService implements MessageStoreService
 
     @Override
     public Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
-        String discussionReference)
+        String discussionReference, String title)
     {
         XWikiContext context = this.xcontextProvider.get();
         Optional<String> ret;
         try {
             XWikiDocument document = generateUniquePage();
+            // The title of the page
+            document.setTitle(title);
+            document.setContent("{{velocity}}\n"
+                + "#set ($message = $doc.getObject('Discussions.Code.MessageClass'))\n"
+                + "#set ($discussion = $services.discussions.getDiscussion($message.discussionReference))\n"
+                + "$response.sendRedirect($xwiki.getURL($discussion.mainDocument, 'view', "
+                + "\"reference=$message.discussionReference\"))\n"
+                + "{{/velocity}}");
             DocumentReference authorReferenceDoc;
             if (authorType.equals("user")) {
                 authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference);

@@ -40,6 +40,8 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRI
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_PRETTY_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.PINED_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.PINED_PRETTY_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.REFERENCE_NAME;
@@ -89,6 +91,7 @@ public class DiscussionXClassInitializer implements MandatoryDocumentInitializer
         xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
         xClass.addStaticListField(DISCUSSION_CONTEXTS_NAME, DISCUSSION_CONTEXTS_PRETTY_NAME, 1, true, true, "",
             DISPLAYTYPE_INPUT, STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+        xClass.addTextField(MAIN_DOCUMENT_NAME, MAIN_DOCUMENT_PRETTY_NAME, textSize);
         return true;
     }
 }

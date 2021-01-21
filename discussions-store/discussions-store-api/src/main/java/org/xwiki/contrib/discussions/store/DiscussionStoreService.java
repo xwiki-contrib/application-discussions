@@ -42,9 +42,10 @@ public interface DiscussionStoreService
      *
      * @param title the title
      * @param description the description
+     * @param mainDocument the main document to view the discussion
      * @return the unique reference to the created discussion
      */
-    Optional<String> create(String title, String description);
+    Optional<String> create(String title, String description, String mainDocument);
 
     /**
      * Resolve a discussion by its reference.

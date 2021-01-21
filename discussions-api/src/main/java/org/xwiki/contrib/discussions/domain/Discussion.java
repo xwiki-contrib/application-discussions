@@ -43,6 +43,8 @@ public class Discussion
 
     private Date updateDate;
 
+    private String mainDocument;
+
     /**
      * Default constructor.
      *
@@ -50,13 +52,15 @@ public class Discussion
      * @param title the title
      * @param description the description
      * @param updateDate the date of the last update of the discussion
+     * @param mainDocument the main URI to view the discussions
      */
-    public Discussion(String reference, String title, String description, Date updateDate)
+    public Discussion(String reference, String title, String description, Date updateDate, String mainDocument)
     {
         this.reference = reference;
         this.title = title;
         this.description = description;
         this.updateDate = updateDate;
+        this.mainDocument = mainDocument;
     }
 
     /**
@@ -130,6 +134,22 @@ public class Discussion
         this.updateDate = updateDate;
     }
 
+    /**
+     * @return the main uri to view the discussion
+     */
+    public String getMainDocument()
+    {
+        return this.mainDocument;
+    }
+
+    /**
+     * @param mainDocument the main uri to view the discussion
+     */
+    public void setMainDocument(String mainDocument)
+    {
+        this.mainDocument = mainDocument;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -148,6 +168,7 @@ public class Discussion
             .append(this.title, that.title)
             .append(this.description, that.description)
             .append(this.updateDate, that.updateDate)
+            .append(this.mainDocument, that.mainDocument)
             .isEquals();
     }
 
@@ -159,6 +180,7 @@ public class Discussion
             .append(this.title)
             .append(this.description)
             .append(this.updateDate)
+            .append(this.mainDocument)
             .toHashCode();
     }
 
@@ -170,6 +192,7 @@ public class Discussion
             .append("title", this.getTitle())
             .append("description", this.getDescription())
             .append("updateDate", this.getUpdateDate())
+            .append("mainDocument", this.getMainDocument())
             .build();
     }
 }

@@ -34,6 +34,8 @@ public class CreateDiscussion
 
     private String description;
 
+    private String mainDocument;
+
     /**
      * @return the title
      */
@@ -67,6 +69,24 @@ public class CreateDiscussion
     public CreateDiscussion setDescription(String description)
     {
         this.description = description;
+        return this;
+    }
+
+    /**
+     * @return the main document to view the discussion
+     */
+    public String getMainDocument()
+    {
+        return this.mainDocument;
+    }
+
+    /**
+     * @param mainDocument the main document to view the discussion
+     * @return the current object
+     */
+    public CreateDiscussion setMainDocument(String mainDocument)
+    {
+        this.mainDocument = mainDocument;
         return this;
     }
 }
