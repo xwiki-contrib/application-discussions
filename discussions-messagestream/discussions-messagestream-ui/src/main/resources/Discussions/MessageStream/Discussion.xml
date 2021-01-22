@@ -39,6 +39,6 @@
   <content>{{velocity}}
 [[$services.localization.render('discussions.messagestream.discussions.back')&gt;&gt;doc:WebHome]]
 
-{{discussion reference="$request.reference" namespace="MessageStreamDiscussion"/}}
+{{discussion reference="$request.reference" namespace='MessageStreamDiscussion' type='user' listUsers=true/}}
 {{/velocity}}</content>
 </xwikidoc>

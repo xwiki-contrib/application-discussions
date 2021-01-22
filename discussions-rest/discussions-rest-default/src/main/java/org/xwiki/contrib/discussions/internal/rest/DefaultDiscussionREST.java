@@ -22,8 +22,11 @@ package org.xwiki.contrib.discussions.internal.rest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,12 +37,19 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsActorService;
+import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.rest.DiscussionLiveTableRow;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
+import org.xwiki.contrib.discussions.rest.DiscussionUserRow;
 import org.xwiki.contrib.discussions.rest.LiveTableResult;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rest.XWikiRestComponent;
 import org.xwiki.rest.XWikiRestException;
 
@@ -59,11 +69,23 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
 @Singleton
 public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
 {
+    private static final String CAUSE_ERROR_RESPONSE = "Cause: [%s]";
+
     @Inject
     private DiscussionService discussionService;
 
     @Inject
     private MessageService messageService;
+
+    @Inject
+    private DiscussionsActorServiceResolver discussionsActorServiceResolver;
+
+    @Inject
+    @Named("url")
+    private EntityReferenceSerializer<String> urlSerializer;
+
+    @Inject
+    private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Inject
     private Logger logger;
@@ -111,7 +133,42 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
             return Response.ok(new ObjectMapper().writeValueAsString(ltr), MediaType.APPLICATION_JSON).build();
         } catch (JsonProcessingException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity("Cause: [" + getRootCauseMessage(e) + "]").build();
+                .entity(String.format(CAUSE_ERROR_RESPONSE, getRootCauseMessage(e))).build();
+        }
+    }
+
+    @Override
+    public Response listusers(String type, String reference, Integer offset, Integer limit,
+        Integer reqNo)
+    {
+        LiveTableResult<DiscussionUserRow> ltr = new LiveTableResult<>();
+        ltr.setReqNo(reqNo);
+        Optional<DiscussionsActorService> discussionsActorService = this.discussionsActorServiceResolver.get(type);
+        if (discussionsActorService.isPresent()) {
+            DiscussionsActorService discussionsActorService1 = discussionsActorService.get();
+            Stream<ActorDescriptor> users = discussionsActorService1.listUsers(reference);
+            Stream<ActorDescriptor> collect = users.sorted(Comparator.comparing(ActorDescriptor::getName));
+            if (offset != null) {
+                ltr.setOffset(offset);
+                collect = collect.skip(offset - 1);
+            }
+            if (limit != null) {
+                collect = collect.limit(limit);
+            }
+            ltr.setTotalrows(discussionsActorService1.countUsers(reference));
+            ltr.setRows(collect.map(it -> {
+                EntityReference resolve = this.documentReferenceResolver.resolve(it.getLink().toASCIIString());
+                String serialize = this.urlSerializer.serialize(resolve);
+                return new DiscussionUserRow(it.getName(), serialize);
+            }).collect(Collectors.toList()));
+        } else {
+            // TODO error
+        }
+        try {
+            return Response.ok(new ObjectMapper().writeValueAsString(ltr), MediaType.APPLICATION_JSON).build();
+        } catch (JsonProcessingException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(String.format(CAUSE_ERROR_RESPONSE, getRootCauseMessage(e))).build();
         }
     }
 

@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.internal;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,8 +29,10 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
+import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 
@@ -53,8 +56,19 @@ public class UserDiscussionsActorsService implements DiscussionsActorService
     @Inject
     private Provider<XWikiContext> xcontextProvider;
 
+    @Inject
+    private DiscussionContextService discussionContextService;
+
     @Override
     public Optional<ActorDescriptor> resolve(String reference)
+    {
+        return Optional.of(internalResolve(reference));
+    }
+
+    /**
+     * Same as {@link #resolve(String)}, without the wrapping in an {@link Optional}.
+     */
+    private ActorDescriptor internalResolve(String reference)
     {
         DocumentReference userDocumentReference = this.documentReferenceResolver.resolve(reference);
         ActorDescriptor actorDescriptor = new ActorDescriptor();
@@ -62,6 +76,27 @@ public class UserDiscussionsActorsService implements DiscussionsActorService
         XWiki wiki = context.getWiki();
         actorDescriptor.setName(wiki.getPlainUserName(userDocumentReference, context));
         actorDescriptor.setLink(URI.create(reference));
-        return Optional.of(actorDescriptor);
+        return actorDescriptor;
+    }
+
+    @Override
+    public Stream<ActorDescriptor> listUsers(String discussionReference)
+    {
+        return discussionUserStream(discussionReference)
+            .map(it -> internalResolve(it.getEntityReference().getReference()));
+    }
+
+    @Override
+    public long countUsers(String discussionReference)
+    {
+        return discussionUserStream(discussionReference).count();
+    }
+
+    private Stream<DiscussionContext> discussionUserStream(String discussionReference)
+    {
+        return this.discussionContextService.findByDiscussionReference(discussionReference)
+            .stream()
+            .filter(it -> it.getEntityReference().getType().equals("messagestream-user"))
+            .filter(it -> !it.getEntityReference().getType().equals("*"));
     }
 }

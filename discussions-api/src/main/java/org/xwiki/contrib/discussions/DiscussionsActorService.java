@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
@@ -42,4 +43,21 @@ public interface DiscussionsActorService
      * @return the actor description, or {@link Optional#empty()} in case of error during the resolution
      */
     Optional<ActorDescriptor> resolve(String reference);
+
+    /**
+     * Returns the list of actors involved in a discussion. The definition of this involvement is up to interpretation
+     * and can be implemented freely by services that implement this role.
+     *
+     * @param discussionReference the discussion reference
+     * @return the list of actors involved in a discuission
+     */
+    Stream<ActorDescriptor> listUsers(String discussionReference);
+
+    /**
+     * Returns the number of users involved in a discussion.
+     *
+     * @param discussionReference the discussion reference
+     * @return the number of users involved in the request discussion
+     */
+    long countUsers(String discussionReference);
 }

@@ -92,7 +92,7 @@ class DiscussionsIT
     {
         setup.gotoPage(new DocumentReference("xwiki", "XWiki", "Main"));
         this.discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussion.getReference(),
-            "discussionsns", 3);
+            "discussionsns", 3, "testtype");
 
         assertEquals("title", this.discussionPage.getTitle());
         assertEquals("description", this.discussionPage.getDescription());

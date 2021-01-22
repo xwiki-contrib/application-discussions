@@ -39,6 +39,7 @@ import org.xwiki.script.service.ScriptService;
 import org.xwiki.script.service.ScriptServiceManager;
 import org.xwiki.stability.Unstable;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 
 /**
@@ -117,7 +118,7 @@ public class DiscussionsScriptService implements ScriptService
             return null;
         }
     }
-    
+
     /**
      * Creates a discussion with an URL to the main discussion view page.
      *
@@ -295,5 +296,21 @@ public class DiscussionsScriptService implements ScriptService
     public String renderMessageContent(String messageReference)
     {
         return this.messageService.renderContent(messageReference);
+    }
+
+    /**
+     * Checks if the provided discussion reference is linked to the request entity type and entity reference.
+     *
+     * @param discussionReference a discussion reference
+     * @param entityType an entity type
+     * @param entityReference an entity reference
+     * @return {@code true} if the discussion is linked to an discussion context with the required entity type and
+     *     entity reference
+     */
+    public boolean hasDiscussionContext(String discussionReference, String entityType, String entityReference)
+    {
+        return this.discussionService.findByEntityReferences(entityType, singletonList(entityReference), null, null)
+            .stream()
+            .anyMatch(it -> it.getReference().equals(discussionReference));
     }
 }

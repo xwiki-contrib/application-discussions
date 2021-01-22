@@ -93,7 +93,7 @@ public interface DiscussionStoreService
     boolean unlink(String discussionReference, String discussionContextReference);
 
     /**
-     * Count the number of of discussions linked to discussion contexts of a given type.
+     * Count the number of discussions linked to discussion contexts of a given type.
      *
      * @param type the type
      * @param references the discussion references

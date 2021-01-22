@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions.internal;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -46,5 +47,17 @@ public class DefaultDiscussionsActorsService implements DiscussionsActorService
         actorDescriptor.setLink(null);
         actorDescriptor.setName(reference);
         return Optional.of(actorDescriptor);
+    }
+
+    @Override
+    public Stream<ActorDescriptor> listUsers(String discussionReference)
+    {
+        return Stream.empty();
+    }
+
+    @Override
+    public long countUsers(String discussionReference)
+    {
+        return 0;
     }
 }

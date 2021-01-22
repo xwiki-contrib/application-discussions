@@ -48,6 +48,7 @@ discussions.discussion.deleteMessage.form.confirm=Confirm
 discussions.discussions.table.header.title=Title
 discussions.discussions.table.header.updateDate=Last update
 discussions.discussions.table.header.messageCount=Message count
+discussions.discussions.userstable.header.name=Name
 discussions.home.description=This space contains the code of the Discussions application.
 discussions.home.discussionsTable.column.title=Title
 discussions.home.discussionsTable.column.creationDate=Creation Date
@@ -62,7 +63,9 @@ discussions.home.discussionContextsTable.column.creationDate=Creation Date
 discussions.home.discussionContextsTable.column.discussions=Discussions
 discussions.home.discussionContextsTable.column.reference=Reference
 discussions.home.discussionContextsTable.column.emptyvalue=
-discussions.indexes.title=Discussions Indexes</content>
+discussions.indexes.title=Discussions Indexes
+discussions.discussion.usersList.title=Users List
+discussions.discussion.usersList.public=This discussion is public.</content>
   <object>
     <name>Discussions.DiscussionsTranslations</name>
     <number>0</number>

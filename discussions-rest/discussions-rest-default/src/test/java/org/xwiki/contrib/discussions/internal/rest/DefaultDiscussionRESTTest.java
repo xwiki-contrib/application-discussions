@@ -19,20 +19,31 @@
  */
 package org.xwiki.contrib.discussions.internal.rest;
 
+import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Stream;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsActorService;
+import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.rest.DiscussionUserRow;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rest.XWikiRestException;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -42,6 +53,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -61,6 +73,16 @@ class DefaultDiscussionRESTTest
 
     @MockComponent
     private MessageService messageService;
+
+    @MockComponent
+    private DiscussionsActorServiceResolver discussionsActorServiceResolver;
+
+    @MockComponent
+    @Named("url")
+    private EntityReferenceSerializer<String> urlSerializer;
+
+    @MockComponent
+    private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Test
     void get() throws Exception
@@ -116,6 +138,32 @@ class DefaultDiscussionRESTTest
     }
 
     @Test
+    void listusers()
+    {
+        DiscussionsActorService discussionsActorService = mock(DiscussionsActorService.class);
+        DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "U1");
+        ActorDescriptor actorDescriptor = new ActorDescriptor();
+        actorDescriptor.setName("testname");
+        actorDescriptor.setLink(URI.create("xwiki:XWiki.U1"));
+
+        when(this.discussionsActorServiceResolver.get("testtype")).thenReturn(Optional.of(discussionsActorService));
+        when(discussionsActorService.listUsers("testreference")).thenReturn(Stream.of(
+            actorDescriptor
+        ));
+        when(discussionsActorService.countUsers("testreference")).thenReturn(1L);
+        when(this.documentReferenceResolver.resolve("xwiki:XWiki.U1"))
+            .thenReturn(documentReference);
+        when(this.urlSerializer.serialize(documentReference)).thenReturn("https://xwiki.org/U1");
+
+        Response response = this.target.listusers("testtype", "testreference", null, null, 1);
+        assertEquals(200, response.getStatus());
+        String expected =
+            "{\"reqNo\":1,\"totalrows\":1,\"rows\":[{\"name\":\"testname\",\"name_url\":\"https://xwiki.org/U1\","
+                + "\"doc_viewable\":true}],\"offset\":0,\"returnedrows\":1}";
+        assertEquals(expected, response.getEntity());
+    }
+
+    @Test
     void create() throws Exception
     {
         CreateDiscussion createDiscussion = new CreateDiscussion()
@@ -128,7 +176,7 @@ class DefaultDiscussionRESTTest
         Discussion actual = this.target.create(createDiscussion);
         assertSame(discussion, actual);
     }
-    
+
     @Test
     void createException()
     {
@@ -136,10 +184,10 @@ class DefaultDiscussionRESTTest
             .setTitle("title")
             .setDescription("description")
             .setMainDocument("XWiki.Doc");
-        Discussion discussion = new Discussion();
         when(this.discussionService.create("title", "description", "XWiki.Doc")).thenReturn(Optional.empty());
-        XWikiRestException throwable = assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
-        assertEquals("Fail to create a discussion with title=[title], description=[description]", throwable.getMessage());
-        
+        XWikiRestException throwable =
+            assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
+        assertEquals("Fail to create a discussion with title=[title], description=[description]",
+            throwable.getMessage());
     }
 }

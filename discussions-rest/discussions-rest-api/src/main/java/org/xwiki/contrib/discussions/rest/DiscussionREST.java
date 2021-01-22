@@ -75,6 +75,24 @@ public interface DiscussionREST
         @QueryParam("jokerAllowed") Boolean jokerAllowed);
 
     /**
+     * Returns of list of users of a discussion, paginated. The list of users is retrieved based on the type of the
+     * discussion and a discussion reference.
+     *
+     * @param type the type of the discussion
+     * @param reference the reference of a discussion
+     * @param offset the pagination offset
+     * @param limit the pagination limit
+     * @param reqNo the request number
+     * @return a paginate list of users of a discussion, in the form of the string of a json object
+     */
+    @Path("/listusers")
+    @GET
+    Response listusers(@QueryParam("type") String type, @QueryParam("reference") String reference,
+        @QueryParam("offset") Integer offset,
+        @QueryParam("limit") Integer limit,
+        @QueryParam("reqNo") Integer reqNo);
+
+    /**
      * Creates a discussion.
      *
      * @param discussion the create discussion object

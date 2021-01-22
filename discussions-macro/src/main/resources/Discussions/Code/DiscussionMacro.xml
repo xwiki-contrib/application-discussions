@@ -355,6 +355,8 @@
 #set ($reference = $wikimacro.parameters.reference)
 #set ($pageSize = $wikimacro.parameters.pageSize)
 #set ($namespace = $wikimacro.parameters.namespace)
+#set ($type = $wikimacro.parameters.type)
+#set ($listUsers = $wikimacro.parameters.listUsers)
 #if ($services.discussions.rights.canReadDiscussion($reference))
   #set ($discussion = $services.discussions.getDiscussion($reference))
   #set ($offset = $numbertool.toNumber($request.getParameter("${namespace}_offset")).intValue())
@@ -372,7 +374,27 @@
   #set ($messages = $services.discussions.getMessagesByDiscussion($discussion, $offset, $pageSize))
 == $discussion.title ==
 
+#if ($discussion.description)
 $discussion.description
+#end
+
+#if ($listUsers)
+=== $services.localization.render('discussions.discussion.usersList.title') ===
+
+#if ($services.discussions.hasDiscussionContext($reference, 'messagestream-user', '*'))
+$services.localization.render('discussions.discussion.usersList.public')
+#else
+#set ($columns = ['name'])
+#set ($columnsProperties = {
+  'name': { 'type': 'none', 'link': 'auto' }
+})
+#set($options = {
+  'url': "${request.getContextPath()}/rest/discussions/listusers?type=$escapetool.url($type)&amp;reference=$escapetool.url($reference)",
+  'translationPrefix': 'discussions.discussions.userstable.header.'
+})
+#livetable($listId $columns $columnsProperties $options)
+#end
+#end
 
 === $services.localization.render('discussions.discussion.messages.title') ===
 
@@ -771,6 +793,162 @@ $discussion.description
     </property>
     <property>
       <type>java.lang.String</type>
+    </property>
+  </object>
+  <object>
+    <name>Discussions.Code.DiscussionMacro</name>
+    <number>3</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>53a3ec78-8f6b-4ff6-8f83-d69827058088</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <type>
+        <disabled>0</disabled>
+        <name>type</name>
+        <number>5</number>
+        <prettyName>Parameter type</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </type>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>The identifier of the type of discussions.</description>
+    </property>
+    <property>
+      <mandatory>1</mandatory>
+    </property>
+    <property>
+      <name>type</name>
+    </property>
+    <property>
+      <type>java.lang.String</type>
+    </property>
+  </object>
+  <object>
+    <name>Discussions.Code.DiscussionMacro</name>
+    <number>4</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>a619ea38-182d-48da-a474-1f719237b53b</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <type>
+        <disabled>0</disabled>
+        <name>type</name>
+        <number>5</number>
+        <prettyName>Parameter type</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </type>
+    </class>
+    <property>
+      <defaultValue>false</defaultValue>
+    </property>
+    <property>
+      <description>If true, the list of the users of the discussion is showed at the top of the discussion.</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>listUsers</name>
+    </property>
+    <property>
+      <type>java.lang.Boolean</type>
     </property>
   </object>
 </xwikidoc>

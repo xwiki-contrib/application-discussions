@@ -57,16 +57,17 @@ public final class DiscussionPage extends ViewPage
 
     /**
      * Default constructor.
-     *
-     * @param reference the reference of the page of the discussion
+     *  @param reference the reference of the page of the discussion
      * @param discussionReference the discussion reference
      * @param namespace the discussion macro namespace
+     * @param type the type of the discussion
      */
-    private DiscussionPage(DocumentReference reference, String discussionReference, String namespace, long pageSize)
+    private DiscussionPage(DocumentReference reference, String discussionReference, String namespace, long pageSize,
+        String type)
     {
         getUtil().createPage(reference,
-            String.format("{{discussion reference=\"%s\" namespace=\"%s\" pageSize=\"%s\"/}}", discussionReference,
-                namespace, pageSize),
+            String.format("{{discussion reference=\"%s\" namespace=\"%s\" pageSize=\"%s\" type=\"%s\"/}}", discussionReference,
+                namespace, pageSize, type),
             "view discussion");
     }
 
@@ -77,12 +78,13 @@ public final class DiscussionPage extends ViewPage
      * @param discussionReference reference of the discussion
      * @param namespace namespace of the discussion macro
      * @param pageSize the number of messages on a page
+     * @param type the type of the discussion
      * @return the resulting page object
      */
     public static DiscussionPage createDiscussionPage(DocumentReference reference, String discussionReference,
-        String namespace, long pageSize)
+        String namespace, long pageSize, String type)
     {
-        return new DiscussionPage(reference, discussionReference, namespace, pageSize);
+        return new DiscussionPage(reference, discussionReference, namespace, pageSize, type);
     }
 
     /**
