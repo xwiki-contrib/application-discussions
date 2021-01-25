@@ -66,7 +66,8 @@ public final class DiscussionPage extends ViewPage
         String type)
     {
         getUtil().createPage(reference,
-            String.format("{{discussion reference=\"%s\" namespace=\"%s\" pageSize=\"%s\" type=\"%s\"/}}", discussionReference,
+            String.format("{{discussion reference=\"%s\" namespace=\"%s\" pageSize=\"%s\" type=\"%s\"/}}",
+                discussionReference,
                 namespace, pageSize, type),
             "view discussion");
     }
