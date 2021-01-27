@@ -40,7 +40,7 @@
 #if(!$isGuest)
 #set ($discussionDoc = $xwiki.getDocument('Discussions.MessageStream.Discussion'))
 #set ($url = "$discussionDoc.getURL('view')?reference=__REFERENCE__")
-(% class='btn btn-primary' %)[[$services.localization.render('discussions.messagestream.discussions.createDiscussion')&gt;&gt;Discussions.MessageStream.CreateDiscussion]]
+[[$services.localization.render('discussions.messagestream.discussions.createDiscussion')&gt;&gt;Discussions.MessageStream.CreateDiscussion||class='btn btn-primary']]
 
 == $services.localization.render('discussions.messagestream.discussions.list') ==
 {{listDiscussions listId="messageStreamLivetable" type="messagestream-user" reference="$xcontext.userReference" linkTemplate="$url"/}}
