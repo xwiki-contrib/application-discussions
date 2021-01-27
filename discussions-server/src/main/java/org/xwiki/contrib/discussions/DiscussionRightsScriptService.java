@@ -28,9 +28,9 @@ import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
+import org.xwiki.security.authorization.ContextualAuthorizationManager;
+import org.xwiki.security.authorization.Right;
 import org.xwiki.stability.Unstable;
-
-import com.xpn.xwiki.util.Programming;
 
 /**
  * Script service dedicated to the discussions rights.
@@ -52,6 +52,9 @@ public class DiscussionRightsScriptService implements ScriptService
 
     @Inject
     private DiscussionsRightService discussionsRightService;
+
+    @Inject
+    private ContextualAuthorizationManager authorizationManager;
 
     /**
      * @param discussionReference the discussion reference
@@ -81,26 +84,28 @@ public class DiscussionRightsScriptService implements ScriptService
     }
 
     /**
-     * Allows a user to read a discussion.
+     * Allows a user to read a discussion. This operation requires the programming right.
      *
      * @param discussion a discussion
      * @param user a user
      */
-    @Programming
     public void setRead(Discussion discussion, DocumentReference user)
     {
-        this.discussionsRightService.setRead(discussion, user);
+        if (this.authorizationManager.hasAccess(Right.PROGRAM)) {
+            this.discussionsRightService.setRead(discussion, user);
+        }
     }
 
     /**
-     * Allows a user to write on a discussion.
+     * Allows a user to write on a discussion. This operation requires the programming right.
      *
      * @param discussion a discussion
      * @param user a user
      */
-    @Programming
     public void setWrite(Discussion discussion, DocumentReference user)
     {
-        this.discussionsRightService.setWrite(discussion, user);
+        if (this.authorizationManager.hasAccess(Right.PROGRAM)) {
+            this.discussionsRightService.setWrite(discussion, user);
+        }
     }
 }
