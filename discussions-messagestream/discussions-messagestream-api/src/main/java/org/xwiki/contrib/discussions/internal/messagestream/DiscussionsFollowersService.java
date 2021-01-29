@@ -63,7 +63,7 @@ public class DiscussionsFollowersService
             return this.queryManager.createQuery("select nfp.owner from DefaultNotificationFilterPreference nfp "
                 + "where nfp.active=true "
                 + "and nfp.enabled=true "
-                + "and nfp.name='eventUserNotificationFilter' "
+                + "and nfp.filterName='eventUserNotificationFilter' "
                 + "and user=:followed"
                 + " ", Query.HQL)
                 .bindValue("followed", followed).execute();
