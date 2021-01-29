@@ -37,7 +37,8 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-[[$services.localization.render('discussions.messagestream.discussions.back')&gt;&gt;doc:WebHome]]
+[[$services.localization.render('discussions.messagestream.discussions.back')&gt;&gt;doc:WebHome||class="btn 
+  btn-primary"]]
 
 {{discussion reference="$request.reference" namespace='MessageStreamDiscussion' type='user' listUsers=true/}}
 {{/velocity}}</content>
