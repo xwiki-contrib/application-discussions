@@ -478,8 +478,8 @@ $services.localization.render('discussions.discussion.usersList.public')
   &lt;/div&gt;
   #end
   {{/html}}
-
-
+  
+  #set ($reference = $wikimacro.parameters.reference)
   #if ($services.discussions.rights.canWriteDiscussion($reference))
     === $services.localization.render('discussions.discussion.newMessage.form.title') ===
 
