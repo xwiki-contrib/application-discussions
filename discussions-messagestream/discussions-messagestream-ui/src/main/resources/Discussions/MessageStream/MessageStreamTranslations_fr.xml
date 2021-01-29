@@ -1,1 +1,58 @@
+<?xml version="1.1" encoding="UTF-8"?>
 
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.MessageStream.MessageStreamTranslations" locale="fr">
+  <web>Discussions.MessageStream</web>
+  <name>MessageStreamTranslations</name>
+  <language>fr</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Main.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>MessageStreamTranslations</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.messagestream.isGuest.message=Vous devez être authentifié pour avoir accès aux discussions.
+discussions.messagestream.discussions.back=Retour à la liste de discussions
+discussions.messagestream.title=Discussions
+discussions.messagestream.discussions.list=Liste de discussions
+discussions.messagestream.discussions.createDiscussion=Démarrer une nouvelle discussion.
+discussions.messagestream.createForm.title=Créer une discussion
+discussions.messagestream.createForm.recipient.label=Destinataire
+discussions.messagestream.createForm.recipient.hint=La liste des destinataires de la discussion est déterminée lorsque le premier message est envoyé. Par exemple, si un utilisateur vous suit après qu'un message est envoyé, cet utilisateur ne pourra pas le voir.
+discussions.messagestream.createForm.recipient.value.everybody=Tout le monde
+### Missing: discussions.messagestream.createForm.recipient.value.followers=Followers
+discussions.messagestream.createForm.recipient.value.users=Utilisateurs
+discussions.messagestream.createForm.recipient.value.groups=Groupes
+discussions.messagestream.createForm.users.label=Utilisateurs
+discussions.messagestream.createForm.groups.label=Groupes
+discussions.messagestream.createForm.title.label=Titre
+discussions.messagestream.createForm.content.label=Premier message
+discussions.messagestream.createForm.submit=Créer la discussion
+discussions.messagestream.createForm.cancel=Annuler
+</content>
+  </xwikidoc>
