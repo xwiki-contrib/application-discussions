@@ -48,6 +48,7 @@ discussions.discussion.deleteMessage.form.confirm=Confirmer
 discussions.discussions.table.header.title=Titre
 discussions.discussions.table.header.updateDate=Dernier changement
 discussions.discussions.table.header.messageCount=Nombre de messsages
+discussions.discussions.userstable.header.name=Nom
 discussions.home.description=Cet espace contient le code de l'application Discussions.
 discussions.home.discussionsTable.column.title=Titre
 discussions.home.discussionsTable.column.creationDate=Date de création
@@ -63,5 +64,7 @@ discussions.home.discussionContextsTable.column.discussions=Discussions
 discussions.home.discussionContextsTable.column.reference=Référence
 ### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
 discussions.indexes.title=Indexes des discussions
+discussions.discussion.usersList.title=Liste des utilisateurs
+discussions.discussion.usersList.public=Cette discussion est publique.
 </content>
   </xwikidoc>
