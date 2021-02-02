@@ -41,6 +41,7 @@ import org.xwiki.contrib.discussions.events.MessageEvent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.observation.ObservationManager;
 import org.xwiki.rendering.syntax.Syntax;
@@ -184,6 +185,14 @@ public class DefaultMessageService implements MessageService
         return this.discussionStoreService.get(discussionReference).map(
             baseObject -> this.discussionsRightService.canDeleteMessage(message, baseObject.getDocumentReference()))
             .orElse(false);
+    }
+
+    @Override
+    public Optional<Message> getByEntity(EntityReference entityReference)
+    {
+        return this.messageStoreService.getByEntityReference(entityReference)
+            .flatMap(bo -> this.discussionService.get(bo.getStringValue(DISCUSSION_REFERENCE_NAME))
+                .map(it -> convertToMessage(it).apply(bo)));
     }
 
     private Function<BaseObject, Message> convertToMessage(Discussion discussion)

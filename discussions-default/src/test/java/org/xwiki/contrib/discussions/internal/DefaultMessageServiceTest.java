@@ -36,6 +36,8 @@ import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.model.reference.ObjectReference;
+import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
@@ -168,6 +170,40 @@ class DefaultMessageServiceTest
         when(baseObject.displayView(CONTENT_NAME, this.context)).thenReturn("html result");
         String actual = this.defaultMessageService.renderContent("message-ref");
         assertEquals("html result", actual);
+    }
+
+    @Test
+    void getByEntityReference()
+    {
+        Discussion discussion =
+            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(),
+                "discussionMainDocument");
+        Date createDate = new Date();
+        Date updateDate = new Date();
+        Message message = new Message("messageReference", new MessageContent("messageContent", Syntax.XHTML_1_0),
+            "messageActorType", "messageActorReference", createDate, updateDate,
+            discussion);
+        ObjectReference entityReference = new ObjectReference("Discussion.Message.MessageObject",
+            new DocumentReference("xwiki", "XWiki", "MessageTest"));
+        BaseObject bo = mock(BaseObject.class);
+        XWikiDocument xWikiDocument = mock(XWikiDocument.class);
+
+        when(this.messageStoreService.getByEntityReference(entityReference))
+            .thenReturn(Optional.of(bo));
+        when(bo.getStringValue(DISCUSSION_REFERENCE_NAME)).thenReturn("discussionReference");
+        when(bo.getStringValue(REFERENCE_NAME)).thenReturn("messageReference");
+        when(bo.getLargeStringValue(CONTENT_NAME)).thenReturn("messageContent");
+        when(bo.getOwnerDocument()).thenReturn(xWikiDocument);
+        when(xWikiDocument.getSyntax()).thenReturn(Syntax.XHTML_1_0);
+        when(bo.getStringValue(AUTHOR_TYPE_NAME)).thenReturn("messageActorType");
+        when(bo.getStringValue(AUTHOR_REFERENCE_NAME)).thenReturn("messageActorReference");
+        when(bo.getDateValue(CREATE_DATE_NAME)).thenReturn(createDate);
+        when(bo.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
+        when(this.discussionService.get("discussionReference")).thenReturn(Optional.of(discussion));
+
+        Optional<Message> actual =
+            this.defaultMessageService.getByEntity(entityReference);
+        assertEquals(Optional.of(message), actual);
     }
 
     private void setDiscussionWriteRight(DocumentReference discussionDocumentReference, boolean b)

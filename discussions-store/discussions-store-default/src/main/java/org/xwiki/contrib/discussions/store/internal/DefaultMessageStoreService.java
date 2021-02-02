@@ -35,6 +35,7 @@ import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
@@ -94,6 +95,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             XWikiDocument document = generateUniquePage();
             // The title of the page
             document.setTitle(title);
+            document.setHidden(true);
             document.setContent("{{velocity}}\n"
                 + "#set ($message = $doc.getObject('Discussions.Code.MessageClass'))\n"
                 + "#set ($discussion = $services.discussions.getDiscussion($message.discussionReference))\n"
@@ -205,6 +207,21 @@ public class DefaultMessageStoreService implements MessageStoreService
             this.logger.warn(
                 "Failed to get the Message for reference=[{}]. Cause: [{}].",
                 reference, getRootCauseMessage(e));
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<BaseObject> getByEntityReference(EntityReference entityReference)
+    {
+        try {
+            XWikiDocument document =
+                this.xcontextProvider.get().getWiki().getDocument(entityReference, this.xcontextProvider.get());
+            return Optional.of(document.getXObject(this.messageMetadata.getMessageXClass()));
+        } catch (XWikiException e) {
+            this.logger.warn(
+                "Failed to get the Message for entityReference=[{}]. Cause: [{}].",
+                entityReference, getRootCauseMessage(e));
             return Optional.empty();
         }
     }

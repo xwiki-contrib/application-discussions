@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 
@@ -77,6 +78,14 @@ public interface MessageStoreService
      * @return the object of the message
      */
     Optional<BaseObject> getByReference(String reference);
+
+    /**
+     * Get a message by the entity reference of the its message object.
+     *
+     * @param entityReference the message object entity reference
+     * @return the message base object
+     */
+    Optional<BaseObject> getByEntityReference(EntityReference entityReference);
 
     /**
      * Delete a message.

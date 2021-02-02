@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 
@@ -126,4 +127,12 @@ public interface MessageService
      * @return the result of the rendering in html
      */
     String renderContent(String messageReference);
+
+    /**
+     * Load a message object by its entity reference.
+     *
+     * @param entityReference the entity reference of the message object
+     * @return the message object
+     */
+    Optional<Message> getByEntity(EntityReference entityReference);
 }
