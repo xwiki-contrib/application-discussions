@@ -97,6 +97,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             object.setDateValue(UPDATE_DATE_NAME, value);
             object.setDateValue(CREATION_DATE_NAME, value);
             object.setStringValue(MAIN_DOCUMENT_NAME, mainDocument);
+            document.setHidden(true);
             context.getWiki().saveDocument(document, context);
             reference = Optional.of(pageName);
         } catch (XWikiException e) {
