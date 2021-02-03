@@ -27,7 +27,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.model.reference.EntityReference;
 
-import com.xpn.xwiki.doc.MandatoryDocumentInitializer;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
 
@@ -64,7 +63,7 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
 @Component
 @Singleton
 @Named("Discussions.Code.DiscussionContextClass")
-public class DiscussionContextXClassInitializer implements MandatoryDocumentInitializer
+public class DiscussionContextXClassInitializer extends AbstractDiscussionContextXClassInitializer
 {
     private static final String STATIC_LISTS_SEPARATOR = ",";
 
@@ -80,21 +79,34 @@ public class DiscussionContextXClassInitializer implements MandatoryDocumentInit
     @Override
     public boolean updateDocument(XWikiDocument document)
     {
-        document.setHidden(true);
-        BaseClass xClass = document.getXClass();
-        int textSize = Integer.MAX_VALUE;
-        xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
-        xClass.addTextField(ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_TYPE_PRETTY_NAME, textSize);
-        xClass.addTextField(ENTITY_REFERENCE_NAME, ENTITY_REFERENCE_PRETTY_NAME, textSize);
-        xClass.addTextField(NAME_NAME, NAME_PRETTY_NAME, textSize);
-        xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
-        xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
-        xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
-        xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
-            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
-        xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
-        xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
-            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
-        return true;
+        boolean needsUpdate = false;
+        if (document.isNew()) {
+            document.setHidden(true);
+            BaseClass xClass = document.getXClass();
+            int textSize = Integer.MAX_VALUE;
+            xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
+            xClass.addTextField(ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_TYPE_PRETTY_NAME, textSize);
+            xClass.addTextField(ENTITY_REFERENCE_NAME, ENTITY_REFERENCE_PRETTY_NAME, textSize);
+            xClass.addTextField(NAME_NAME, NAME_PRETTY_NAME, textSize);
+            xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
+            xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
+            xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
+            xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+                STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+            xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
+            xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+                STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+            needsUpdate = true;
+        }
+
+        if (initAuthorReference(document)) {
+            needsUpdate = true;
+        }
+
+        if (initCreatorReference(document)) {
+            needsUpdate = true;
+        }
+
+        return needsUpdate;
     }
 }
