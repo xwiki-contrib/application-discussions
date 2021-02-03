@@ -313,4 +313,28 @@ public class DiscussionsScriptService implements ScriptService
             .stream()
             .anyMatch(it -> it.getReference().equals(discussionReference));
     }
+
+    /**
+     * Returns the first discussion found which is link to a discussion context with the provided entity type and entity
+     * reference.
+     *
+     * @param entityType the discussion context entity type
+     * @param entityReference the discussion context entity reference
+     * @return a discussion linked to the request discussion context
+     * @since 1.1
+     */
+    @Unstable
+    public Discussion getDiscussionByDiscussionContext(String entityType, String entityReference)
+    {
+        List<Discussion> discussions =
+            this.discussionService.findByEntityReferences(entityType, singletonList(entityReference), 0, 1);
+        Discussion discussion;
+        if (discussions.isEmpty()) {
+            discussion = null;
+        } else {
+            discussion = discussions.get(0);
+        }
+
+        return discussion;
+    }
 }
