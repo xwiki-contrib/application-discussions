@@ -36,6 +36,35 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>### Missing: discussions.application.name=
+  <content>discussions.application.name=Diskussionen
+discussions.discussion.messages.title=Nachrichten
+discussions.discussion.messages.empty=Keine Nachrichten!
+discussions.discussion.notAllowed.view=Es ist Ihnen nicht erlaubt, diese Diskussion anzuzeigen.
+discussions.discussion.newMessage.form.title=Neue Nachricht
+discussions.discussion.deleteMessage.form.title=Eine Nachricht löschen
+discussions.discussion.deleteMessage.form.confirmation=Sind sie sicher, dass sie diese Nachricht löschen wollen?
+discussions.discussion.deleteMessage.form.cancel=Abbrechen
+discussions.discussion.deleteMessage.form.confirm=Bestätigen
+discussions.discussions.table.header.title=Titel
+discussions.discussions.table.header.updateDate=Letztes Update
+discussions.discussions.table.header.messageCount=Anzahl Nachrichten
+discussions.discussions.userstable.header.name=Name
+discussions.home.description=Dieser Bereich enthält den Code der Diskussions-Anwendung.
+discussions.home.discussionsTable.column.title=Titel
+discussions.home.discussionsTable.column.creationDate=Erstellungsdatum
+discussions.home.discussionsTable.column.updateDate=Änderungsdatum
+discussions.home.discussionsTable.column.discussionContexts=Diskussionsinhalt
+discussions.home.discussionsTable.column.reference=Referenz
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=Name
+discussions.home.discussionContextsTable.column.entityReferenceType=Entitäts-Referenztyp
+discussions.home.discussionContextsTable.column.entityReference=Entitätsreferenz
+discussions.home.discussionContextsTable.column.creationDate=Erstellungsdatum
+discussions.home.discussionContextsTable.column.discussions=Diskussionen
+discussions.home.discussionContextsTable.column.reference=Referenz
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=Diskussionsindizes
+discussions.discussion.usersList.title=Benutzerliste
+discussions.discussion.usersList.public=Die Diskussion ist öffentlich.
 </content>
   </xwikidoc>
