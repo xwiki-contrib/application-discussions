@@ -1,1 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
 
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.DiscussionsTranslations" locale="es">
+  <web>Discussions</web>
+  <name>DiscussionsTranslations</name>
+  <language>es</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Discussions.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.application.name=Debates
+discussions.discussion.messages.title=Mensajes
+discussions.discussion.messages.empty=No hay ningún mensaje.
+discussions.discussion.notAllowed.view=No tiene permitido ver este debate.
+discussions.discussion.newMessage.form.title=Mensaje nuevo
+discussions.discussion.deleteMessage.form.title=Eliminar un mensaje
+discussions.discussion.deleteMessage.form.confirmation=¿Confirma que quiere eliminar este mensaje?
+discussions.discussion.deleteMessage.form.cancel=Cancelar
+discussions.discussion.deleteMessage.form.confirm=Confirmar
+discussions.discussions.table.header.title=Título
+discussions.discussions.table.header.updateDate=Última actualización
+discussions.discussions.table.header.messageCount=Recuento de mensajes
+discussions.discussions.userstable.header.name=Nombre
+discussions.home.description=Este espacio contiene el código de la aplicación Debates.
+discussions.home.discussionsTable.column.title=Título
+discussions.home.discussionsTable.column.creationDate=Fecha de creación
+discussions.home.discussionsTable.column.updateDate=Fecha de actualización
+discussions.home.discussionsTable.column.discussionContexts=Contextos de debate
+discussions.home.discussionsTable.column.reference=Referencia
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=Nombre
+discussions.home.discussionContextsTable.column.entityReferenceType=Tipo de referencia a entidad
+discussions.home.discussionContextsTable.column.entityReference=Referencia a entidad
+discussions.home.discussionContextsTable.column.creationDate=Fecha de creación
+discussions.home.discussionContextsTable.column.discussions=Debates
+discussions.home.discussionContextsTable.column.reference=Referencia
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=Índices de los debates
+discussions.discussion.usersList.title=Lista de usuarios
+discussions.discussion.usersList.public=Este debate es público.
+</content>
+  </xwikidoc>
