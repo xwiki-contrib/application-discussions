@@ -1,1 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
 
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.DiscussionsTranslations" locale="ru">
+  <web>Discussions</web>
+  <name>DiscussionsTranslations</name>
+  <language>ru</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Discussions.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.application.name=Обсуждения
+discussions.discussion.messages.title=Сообщения
+### Missing: discussions.discussion.messages.empty=No messages!
+### Missing: discussions.discussion.notAllowed.view=You are not allowed to view this discussion.
+### Missing: discussions.discussion.newMessage.form.title=New Message
+### Missing: discussions.discussion.deleteMessage.form.title=Delete a message
+### Missing: discussions.discussion.deleteMessage.form.confirmation=Are you sure you want to delete this message?
+### Missing: discussions.discussion.deleteMessage.form.cancel=Cancel
+### Missing: discussions.discussion.deleteMessage.form.confirm=Confirm
+### Missing: discussions.discussions.table.header.title=Title
+### Missing: discussions.discussions.table.header.updateDate=Last update
+### Missing: discussions.discussions.table.header.messageCount=Message count
+### Missing: discussions.discussions.userstable.header.name=Name
+### Missing: discussions.home.description=This space contains the code of the Discussions application.
+### Missing: discussions.home.discussionsTable.column.title=Title
+### Missing: discussions.home.discussionsTable.column.creationDate=Creation Date
+### Missing: discussions.home.discussionsTable.column.updateDate=Update Date
+### Missing: discussions.home.discussionsTable.column.discussionContexts=Discussion Contexts
+### Missing: discussions.home.discussionsTable.column.reference=Reference
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+### Missing: discussions.home.discussionContextsTable.column.name=Name
+### Missing: discussions.home.discussionContextsTable.column.entityReferenceType=Entity Reference Type
+### Missing: discussions.home.discussionContextsTable.column.entityReference=Entity Reference
+### Missing: discussions.home.discussionContextsTable.column.creationDate=Creation Date
+### Missing: discussions.home.discussionContextsTable.column.discussions=Discussions
+### Missing: discussions.home.discussionContextsTable.column.reference=Reference
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+### Missing: discussions.indexes.title=Discussions Indexes
+### Missing: discussions.discussion.usersList.title=Users List
+### Missing: discussions.discussion.usersList.public=This discussion is public.
+</content>
+  </xwikidoc>
