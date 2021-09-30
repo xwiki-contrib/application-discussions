@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>discussions-rest</artifactId>
   </parent>
   <artifactId>discussions-rest-api</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
 
   <name>Discussions - Rest - API</name>
   <description>Rest API of the Discussions application.</description>
