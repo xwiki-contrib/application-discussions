@@ -28,7 +28,6 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.XWikiContext;
@@ -170,15 +169,6 @@ public class DiscussionContextMetadata
     {
         return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
             XCLASS_NAME);
-    }
-
-    /**
-     * @return the discussion context storage space
-     */
-    public SpaceReference getDiscussionContextSpace()
-    {
-        return new SpaceReference(this.xcontextProvider.get().getMainXWiki(),
-            asList(DISCUSSIONS_STR, "DiscussionContext"));
     }
 
     /**

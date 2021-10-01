@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService;
 import org.xwiki.model.reference.DocumentReference;
@@ -75,7 +76,8 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
     private Logger logger;
 
     @Override
-    public void setDiscussionRightToUser(String discussionReference, DocumentReference user, String rightName)
+    public void setDiscussionRightToUser(DiscussionReference discussionReference, DocumentReference user,
+        String rightName)
     {
         this.discussionStoreService.get(discussionReference).ifPresent(d -> {
             XWikiContext context = this.xWikiContextProvider.get();
@@ -99,6 +101,7 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                         .findAny();
                 } else {
                     userReference = null;
+                    // FIXME: not good
                     groupReference = "XWiki.XWikiAllGroup";
                     rightsObject = xObjects.stream()
                         .filter(obj -> UsersClass.getListFromString(obj.getStringValue(GROUPS_FIELD_NAME))

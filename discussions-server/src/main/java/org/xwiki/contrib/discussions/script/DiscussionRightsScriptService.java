@@ -17,15 +17,20 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
+package org.xwiki.contrib.discussions.script;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsRightService;
+import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.security.authorization.ContextualAuthorizationManager;
@@ -56,13 +61,18 @@ public class DiscussionRightsScriptService implements ScriptService
     @Inject
     private ContextualAuthorizationManager authorizationManager;
 
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     /**
      * @param discussionReference the discussion reference
      * @return {@code true} if the current user can read the discussion, {@code false} otherwise
      */
     public boolean canReadDiscussion(String discussionReference)
     {
-        return this.discussionService.canRead(discussionReference);
+        DiscussionReference reference =
+            this.discussionReferencesResolver.resolve(discussionReference, DiscussionReference.class);
+        return this.discussionService.canRead(reference);
     }
 
     /**
@@ -71,7 +81,9 @@ public class DiscussionRightsScriptService implements ScriptService
      */
     public boolean canWriteDiscussion(String discussionReference)
     {
-        return this.discussionService.canWrite(discussionReference);
+        DiscussionReference reference =
+            this.discussionReferencesResolver.resolve(discussionReference, DiscussionReference.class);
+        return this.discussionService.canWrite(reference);
     }
 
     /**

@@ -28,6 +28,7 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -80,11 +81,14 @@ class DefaultDiscussionsRightStoreServiceTest
     @Mock
     private XWikiDocument xwikiDocument;
 
+    private DiscussionReference discussionReference;
+
     @BeforeEach
     void setUp()
     {
         when(this.xWikiContextProvider.get()).thenReturn(this.xwikiContext);
         when(this.xwikiContext.getWiki()).thenReturn(this.xwiki);
+        this.discussionReference = new DiscussionReference("hint", "ref");
     }
 
     @Test
@@ -95,14 +99,14 @@ class DefaultDiscussionsRightStoreServiceTest
         BaseObject newRightBaseObject = mock(BaseObject.class);
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
-        when(this.discussionStoreService.get("ref")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(baseObject));
         when(baseObject.getDocumentReference()).thenReturn(d1DR);
         when(this.xwiki.getDocument(d1DR, this.xwikiContext)).thenReturn(this.xwikiDocument);
         when(this.xwikiDocument.getXObjects(RIGHTS_CLASS_REFERENCE)).thenReturn(asList());
         when(this.xwikiDocument.newXObject(RIGHTS_CLASS_REFERENCE, this.xwikiContext)).thenReturn(newRightBaseObject);
         when(this.serializer.serialize(user)).thenReturn("U1");
 
-        this.target.setDiscussionRightToUser("ref", user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
 
         verify(newRightBaseObject).setStringValue(LEVELS_FIELD_NAME, "R1");
         verify(newRightBaseObject).setStringValue(USERS_FIELD_NAME, "U1");
@@ -119,7 +123,7 @@ class DefaultDiscussionsRightStoreServiceTest
         BaseObject existingRightBaseObject = mock(BaseObject.class);
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
-        when(this.discussionStoreService.get("ref")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(discussionBaseObject));
         when(discussionBaseObject.getDocumentReference()).thenReturn(d1DR);
         when(this.xwiki.getDocument(d1DR, this.xwikiContext)).thenReturn(this.xwikiDocument);
         when(this.xwikiDocument.getXObjects(RIGHTS_CLASS_REFERENCE)).thenReturn(asList(existingRightBaseObject));
@@ -127,7 +131,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.xwikiDocument.newXObject(RIGHTS_CLASS_REFERENCE, this.xwikiContext)).thenReturn(newRightBaseObject);
         when(this.serializer.serialize(user)).thenReturn("U1");
 
-        this.target.setDiscussionRightToUser("ref", user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
 
         verify(newRightBaseObject).setStringValue(LEVELS_FIELD_NAME, "R1");
         verify(newRightBaseObject).setStringValue(USERS_FIELD_NAME, "U1");
@@ -143,7 +147,7 @@ class DefaultDiscussionsRightStoreServiceTest
         BaseObject existingRightBaseObject = mock(BaseObject.class);
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
-        when(this.discussionStoreService.get("ref")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(discussionBaseObject));
         when(discussionBaseObject.getDocumentReference()).thenReturn(d1DR);
         when(this.xwiki.getDocument(d1DR, this.xwikiContext)).thenReturn(this.xwikiDocument);
         when(this.xwikiDocument.getXObjects(RIGHTS_CLASS_REFERENCE)).thenReturn(asList(existingRightBaseObject));
@@ -151,7 +155,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.serializer.serialize(user)).thenReturn("U1");
         when(existingRightBaseObject.getStringValue(LEVELS_FIELD_NAME)).thenReturn("R2");
 
-        this.target.setDiscussionRightToUser("ref", user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
 
         verify(existingRightBaseObject).setStringValue(LEVELS_FIELD_NAME,
             LevelsClass.getStringFromList(Arrays.asList("R2", "R1"), ","));
@@ -167,7 +171,7 @@ class DefaultDiscussionsRightStoreServiceTest
         BaseObject existingRightBaseObject = mock(BaseObject.class);
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
-        when(this.discussionStoreService.get("ref")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(discussionBaseObject));
         when(discussionBaseObject.getDocumentReference()).thenReturn(d1DR);
         when(this.xwiki.getDocument(d1DR, this.xwikiContext)).thenReturn(this.xwikiDocument);
         when(this.xwikiDocument.getXObjects(RIGHTS_CLASS_REFERENCE)).thenReturn(asList(existingRightBaseObject));
@@ -175,7 +179,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.serializer.serialize(user)).thenReturn("U1");
         when(existingRightBaseObject.getStringValue(LEVELS_FIELD_NAME)).thenReturn("R1,R2");
 
-        this.target.setDiscussionRightToUser("ref", user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
 
         verify(existingRightBaseObject).setStringValue(LEVELS_FIELD_NAME,
             LevelsClass.getStringFromList(Arrays.asList("R1", "R2"), ","));

@@ -25,6 +25,9 @@ import java.util.Optional;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -40,27 +43,28 @@ public interface DiscussionContextService
     /**
      * Creates a discussion context.
      *
+     * @param applicationHint the hint of the application used to create the context
      * @param name the discussion context name
      * @param description the discussion context description
-     * @param referenceType the type of the entity referenced by the discussion context
      * @param entityReference the reference of the entity referenced by the discussion context
      * @return the initialized discussion context
      */
-    Optional<DiscussionContext> create(String name, String description, String referenceType, String entityReference);
+    Optional<DiscussionContext> create(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference);
 
     /**
      * If a discussion context already exist with the given reference type and entity reference, it is returned. If it
      * does not the discussion context is created with the name and description passed in parameter, and it then
      * returned.
      *
+     * @param applicationHint the hint of the application used to create the context
      * @param name the name
      * @param description the description
-     * @param referenceType the reference type
      * @param entityReference the entity reference
      * @return the found or created discussion context
      */
-    Optional<DiscussionContext> getOrCreate(String name, String description, String referenceType,
-        String entityReference);
+    Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference);
 
     /**
      * Link a discussion context and a discussion.
@@ -84,7 +88,7 @@ public interface DiscussionContextService
      * @param reference the discussion context reference
      * @return the discussion context
      */
-    Optional<DiscussionContext> get(String reference);
+    Optional<DiscussionContext> get(DiscussionContextReference reference);
 
     /**
      * Returns the list of discussion contexts linked to the discussion reference.
@@ -92,7 +96,7 @@ public interface DiscussionContextService
      * @param reference the discussion reference
      * @return the list of discussion contexts
      */
-    List<DiscussionContext> findByDiscussionReference(String reference);
+    List<DiscussionContext> findByDiscussionReference(DiscussionReference reference);
 
     /**
      * @return {@code true} if the current actor can create a discussion context, {@code false} otherwise
@@ -100,8 +104,8 @@ public interface DiscussionContextService
     boolean canCreateDiscussionContext();
 
     /**
-     * @param reference the reference of the discussion content
+     * @param reference the reference of the discussion context
      * @return {@code true} if the current user can view the discussion context, {@code false} otherwise
      */
-    boolean canViewDiscussionContext(String reference);
+    boolean canViewDiscussionContext(DiscussionContextReference reference);
 }

@@ -19,26 +19,29 @@
  */
 package org.xwiki.contrib.discussions;
 
-import java.util.Optional;
-
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
 import org.xwiki.stability.Unstable;
 
 /**
- * Resolve a {@link DiscussionsActorService} according to the requested actor type.
+ * Resolve a serialized reference to a given {@link AbstractDiscussionReference}.
  *
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
-@Role
 @Unstable
-public interface DiscussionsActorServiceResolver
+@Role
+public interface DiscussionReferencesResolver
 {
     /**
-     * Returns an actor service for the requested type.
+     * Perform the resolution of a given serialized reference to the given {@link AbstractDiscussionReference} concrete
+     * type. Note that the serialization might not contain any information about the actual type, so it might not be
+     * possible to check that the type is correct for this reference.
      *
-     * @param type the type
-     * @return the actor service, {@link Optional#empty()} if the resolution failed
+     * @param serializedReference a serialization of an {@link AbstractDiscussionReference}.
+     * @param type the concrete type to obtain
+     * @param <T> the actual given concrete type
+     * @return an instance of the given type with the information of the reference.
      */
-    DiscussionsActorService get(String type);
+    <T extends AbstractDiscussionReference> T resolve(String serializedReference, Class<T> type);
 }

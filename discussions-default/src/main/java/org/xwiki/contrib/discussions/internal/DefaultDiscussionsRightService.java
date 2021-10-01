@@ -84,6 +84,7 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
         }
     }
 
+
     @Override
     public boolean canCreateDiscussion()
     {

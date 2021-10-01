@@ -23,6 +23,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
@@ -36,7 +37,7 @@ import org.xwiki.text.XWikiToStringBuilder;
 @Unstable
 public class Message
 {
-    private final String reference;
+    private final MessageReference reference;
 
     private final String actorReference;
 
@@ -61,7 +62,8 @@ public class Message
      * @param updateDate date of the last update of the message
      * @param discussion the discussion of the message
      */
-    public Message(String reference, MessageContent messageContent, String actorType, String actorReference,
+    public Message(MessageReference reference, MessageContent messageContent, String actorType,
+        String actorReference,
         Date createDate,
         Date updateDate, Discussion discussion)
     {
@@ -77,7 +79,7 @@ public class Message
     /**
      * @return the reference
      */
-    public String getReference()
+    public MessageReference getReference()
     {
         return this.reference;
     }

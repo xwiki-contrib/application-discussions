@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions.store;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.stability.Unstable;
 
@@ -40,5 +41,5 @@ public interface DiscussionsRightsStoreService
      * @param user the user
      * @param rightName the name of the right to add
      */
-    void setDiscussionRightToUser(String discussionReference, DocumentReference user, String rightName);
+    void setDiscussionRightToUser(DiscussionReference discussionReference, DocumentReference user, String rightName);
 }

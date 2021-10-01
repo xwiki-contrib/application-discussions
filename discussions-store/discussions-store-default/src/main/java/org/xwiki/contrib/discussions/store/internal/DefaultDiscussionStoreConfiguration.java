@@ -17,18 +17,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.events;
+package org.xwiki.contrib.discussions.store.internal;
 
-import org.xwiki.observation.event.Event;
-import org.xwiki.stability.Unstable;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.xwiki.component.annotation.Component;
+import org.xwiki.model.reference.SpaceReference;
+
+import com.xpn.xwiki.XWikiContext;
 
 /**
- * Interface for the discussions events.
+ * Default implementation of {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration}.
+ * This implementation stores every elements under the same space {@code Discussions}, each elements being stored in
+ * its own subspace.
  *
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
-@Unstable
-public interface DiscussionsEvent extends Event
+@Component
+@Singleton
+public class DefaultDiscussionStoreConfiguration extends AbstractDiscussionStoreConfiguration
 {
+    @Inject
+    private Provider<XWikiContext> contextProvider;
+
+    @Override
+    public SpaceReference getRootSpaceStorageLocation()
+    {
+        return new SpaceReference(this.contextProvider.get().getMainXWiki(), "Discussions");
+    }
 }

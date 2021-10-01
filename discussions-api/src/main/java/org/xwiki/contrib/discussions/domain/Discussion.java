@@ -23,6 +23,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
@@ -35,7 +36,7 @@ import org.xwiki.text.XWikiToStringBuilder;
 @Unstable
 public class Discussion
 {
-    private String reference;
+    private DiscussionReference reference;
 
     private String title;
 
@@ -54,7 +55,8 @@ public class Discussion
      * @param updateDate the date of the last update of the discussion
      * @param mainDocument the main URI to view the discussions
      */
-    public Discussion(String reference, String title, String description, Date updateDate, String mainDocument)
+    public Discussion(DiscussionReference reference, String title, String description, Date updateDate,
+        String mainDocument)
     {
         this.reference = reference;
         this.title = title;
@@ -73,7 +75,7 @@ public class Discussion
     /**
      * @return the reference
      */
-    public String getReference()
+    public DiscussionReference getReference()
     {
         return this.reference;
     }
@@ -97,7 +99,7 @@ public class Discussion
     /**
      * @param reference the reference
      */
-    public void setReference(String reference)
+    public void setReference(DiscussionReference reference)
     {
         this.reference = reference;
     }

@@ -19,20 +19,14 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
-import java.util.Optional;
+import javax.inject.Named;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
-import org.xwiki.test.LogLevel;
-import org.xwiki.test.junit5.LogCaptureExtension;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
-
-import ch.qos.logback.classic.Level;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -51,34 +45,28 @@ class DefaultDiscussionsActorsServiceResolverTest
     private DefaultDiscussionsActorsServiceResolver defaultDiscussionsActorsServiceResolver;
 
     @MockComponent
+    @Named("context")
     private ComponentManager componentManager;
 
     @MockComponent
     private DiscussionsActorService defaultDiscussionsActorService;
 
-    @RegisterExtension
-    LogCaptureExtension logCapture = new LogCaptureExtension(LogLevel.DEBUG);
-
     @Test
     void get() throws Exception
     {
         DiscussionsActorService expected = mock(DiscussionsActorService.class);
+        when(this.componentManager.hasComponent(DiscussionsActorService.class, "knownType")).thenReturn(true);
         when(this.componentManager.getInstance(DiscussionsActorService.class, "knownType")).thenReturn(
             expected);
-        Optional<DiscussionsActorService> actual = this.defaultDiscussionsActorsServiceResolver.get("knownType");
-        assertEquals(Optional.of(expected), actual);
+        assertEquals(expected, this.defaultDiscussionsActorsServiceResolver.get("knownType"));
     }
 
     @Test
-    void getUnknown() throws Exception
+    void getUnknown()
     {
-        when(this.componentManager.getInstance(DiscussionsActorService.class, "unknownType"))
-            .thenThrow(ComponentLookupException.class);
-        Optional<DiscussionsActorService> actual = this.defaultDiscussionsActorsServiceResolver.get("unknownType");
-        assertEquals(Optional.of(this.defaultDiscussionsActorService), actual);
-        assertEquals(1, this.logCapture.size());
-        assertEquals("Failed to find an actor service for type [unknownType]. Cause: [ComponentLookupException: ]",
-            this.logCapture.getMessage(0));
-        assertEquals(Level.DEBUG, this.logCapture.getLogEvent(0).getLevel());
+        when(this.componentManager.hasComponent(DiscussionsActorService.class, "unknownType"))
+            .thenReturn(false);
+        DiscussionsActorService actual = this.defaultDiscussionsActorsServiceResolver.get("unknownType");
+        assertEquals(this.defaultDiscussionsActorService, actual);
     }
 }

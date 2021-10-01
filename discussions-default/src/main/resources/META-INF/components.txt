@@ -5,3 +5,5 @@ org.xwiki.contrib.discussions.internal.DefaultMessageService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionsActorsService
 org.xwiki.contrib.discussions.internal.DefaultDiscussionsActorsServiceResolver
 org.xwiki.contrib.discussions.internal.UserDiscussionsActorsService
+org.xwiki.contrib.discussions.internal.DefaultDiscussionReferencesResolver
+org.xwiki.contrib.discussions.internal.DefaultDiscussionReferencesSerializer

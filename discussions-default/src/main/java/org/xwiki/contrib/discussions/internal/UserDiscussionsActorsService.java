@@ -33,6 +33,7 @@ import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 
@@ -80,19 +81,19 @@ public class UserDiscussionsActorsService implements DiscussionsActorService
     }
 
     @Override
-    public Stream<ActorDescriptor> listUsers(String discussionReference)
+    public Stream<ActorDescriptor> listUsers(DiscussionReference discussionReference)
     {
         return discussionUserStream(discussionReference)
             .map(it -> internalResolve(it.getEntityReference().getReference()));
     }
 
     @Override
-    public long countUsers(String discussionReference)
+    public long countUsers(DiscussionReference discussionReference)
     {
         return discussionUserStream(discussionReference).count();
     }
 
-    private Stream<DiscussionContext> discussionUserStream(String discussionReference)
+    private Stream<DiscussionContext> discussionUserStream(DiscussionReference discussionReference)
     {
         return this.discussionContextService.findByDiscussionReference(discussionReference)
             .stream()

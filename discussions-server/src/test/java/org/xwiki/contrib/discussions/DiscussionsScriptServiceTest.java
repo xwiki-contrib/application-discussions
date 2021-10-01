@@ -19,23 +19,18 @@
  */
 package org.xwiki.contrib.discussions;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-
-import javax.inject.Inject;
 
 import static java.util.Collections.*;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.internal.QueryStringService;
+import org.xwiki.contrib.discussions.script.DiscussionsScriptService;
 import org.xwiki.script.service.ScriptServiceManager;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -74,9 +69,8 @@ class DiscussionsScriptServiceTest
     @Test
     void getDiscussionByDiscussionContext()
     {
-        Discussion expected =
-            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(),
-                "discussionMainDocument");
+        Discussion expected = new Discussion(new DiscussionReference("hint", "discussionReference"),
+            "discussionTitle", "discussionDescription", new Date(), "discussionMainDocument");
 
         when(
             this.discussionService.findByEntityReferences("testEntityType", singletonList("typeEntityReference"), 0, 1))

@@ -17,10 +17,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
+package org.xwiki.contrib.discussions.script;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,10 +29,19 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
+import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.QueryStringService;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
@@ -80,20 +90,25 @@ public class DiscussionsScriptService implements ScriptService
     @Inject
     private Logger logger;
 
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     /**
      * Creates a discussion context.
      *
+     * @param applicationHint the application in which the discussion has been created.
      * @param name the name
      * @param description the description
      * @param referenceType the entity reference type
      * @param entityReference the entity reference
      * @return the created discussion context
      */
-    public DiscussionContext createDiscussionContext(String name, String description, String referenceType,
-        String entityReference)
+    public DiscussionContext createDiscussionContext(String applicationHint, String name, String description,
+        String referenceType, String entityReference)
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
-            return this.discussionContextService.create(name, description, referenceType, entityReference).orElse(null);
+            return this.discussionContextService.create(applicationHint, name, description,
+                new DiscussionContextEntityReference(referenceType, entityReference)).orElse(null);
         } else {
             return null;
         }
@@ -102,17 +117,19 @@ public class DiscussionsScriptService implements ScriptService
     /**
      * Get a discussion context. Creates it if it does not already exist.
      *
+     * @param applicationHint the application in which the discussion context has been created.
      * @param name the discussion context name
      * @param description the discussion context description
      * @param referenceType the entity reference type
      * @param entityReference the entity reference
      * @return the request discussion context
      */
-    public DiscussionContext getOrCreateDiscussionContext(String name, String description, String referenceType,
-        String entityReference)
+    public DiscussionContext getOrCreateDiscussionContext(String applicationHint, String name, String description,
+        String referenceType, String entityReference)
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
-            return this.discussionContextService.getOrCreate(name, description, referenceType, entityReference)
+            return this.discussionContextService.getOrCreate(applicationHint, name, description,
+                    new DiscussionContextEntityReference(referenceType, entityReference))
                 .orElse(null);
         } else {
             return null;
@@ -122,14 +139,15 @@ public class DiscussionsScriptService implements ScriptService
     /**
      * Creates a discussion with an URL to the main discussion view page.
      *
+     * @param applicationHint the application in which the discussion has been created.
      * @param title the discussion title
      * @param description the discussion description
      * @param mainDocument the main document to view the discussion
      * @return the created discussion
      */
-    public Discussion createDiscussion(String title, String description, String mainDocument)
+    public Discussion createDiscussion(String applicationHint, String title, String description, String mainDocument)
     {
-        return this.discussionService.create(title, description, mainDocument).orElse(null);
+        return this.discussionService.create(applicationHint, title, description, mainDocument).orElse(null);
     }
 
     /**
@@ -140,8 +158,10 @@ public class DiscussionsScriptService implements ScriptService
      */
     public Discussion getDiscussion(String reference)
     {
-        if (this.discussionService.canViewDiscussion(reference)) {
-            return this.discussionService.get(reference).orElse(null);
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(reference, DiscussionReference.class);
+        if (this.discussionService.canViewDiscussion(discussionReference)) {
+            return this.discussionService.get(discussionReference).orElse(null);
         } else {
             return null;
         }
@@ -155,8 +175,10 @@ public class DiscussionsScriptService implements ScriptService
      */
     public DiscussionContext getDiscussionContext(String reference)
     {
-        if (this.discussionContextService.canViewDiscussionContext(reference)) {
-            return this.discussionContextService.get(reference).orElse(null);
+        DiscussionContextReference discussionContextReference =
+            this.discussionReferencesResolver.resolve(reference, DiscussionContextReference.class);
+        if (this.discussionContextService.canViewDiscussionContext(discussionContextReference)) {
+            return this.discussionContextService.get(discussionContextReference).orElse(null);
         } else {
             return null;
         }
@@ -237,7 +259,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences)
     {
-        return this.discussionService.findByDiscussionContexts(discussionContextReferences);
+        return this.discussionService.findByDiscussionContexts(
+            discussionContextReferences
+                .stream()
+                .map(ref -> this.discussionReferencesResolver.resolve(ref, DiscussionContextReference.class))
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -271,9 +297,7 @@ public class DiscussionsScriptService implements ScriptService
      */
     public ActorDescriptor getActorDescriptor(String type, String reference)
     {
-        return this.actorsServiceResolver.get(type)
-            .flatMap(resolver -> resolver.resolve(reference))
-            .orElse(null);
+        return this.actorsServiceResolver.get(type).resolve(reference).orElse(null);
     }
 
     /**
@@ -295,7 +319,9 @@ public class DiscussionsScriptService implements ScriptService
      */
     public String renderMessageContent(String messageReference)
     {
-        return this.messageService.renderContent(messageReference);
+        MessageReference reference =
+            this.discussionReferencesResolver.resolve(messageReference, MessageReference.class);
+        return this.messageService.renderContent(reference);
     }
 
     /**
@@ -309,9 +335,11 @@ public class DiscussionsScriptService implements ScriptService
      */
     public boolean hasDiscussionContext(String discussionReference, String entityType, String entityReference)
     {
+        DiscussionReference reference =
+            this.discussionReferencesResolver.resolve(discussionReference, DiscussionReference.class);
         return this.discussionService.findByEntityReferences(entityType, singletonList(entityReference), null, null)
             .stream()
-            .anyMatch(it -> it.getReference().equals(discussionReference));
+            .anyMatch(it -> it.getReference().equals(reference));
     }
 
     /**

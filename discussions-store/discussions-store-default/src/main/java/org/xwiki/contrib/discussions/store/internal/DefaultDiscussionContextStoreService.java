@@ -19,7 +19,7 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +31,13 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
+import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.EntityType;
@@ -68,8 +74,6 @@ import static org.xwiki.query.Query.XWQL;
 @Singleton
 public class DefaultDiscussionContextStoreService implements DiscussionContextStoreService
 {
-    private static final String REFERENCE_QUERY_PARAM = "reference";
-
     @Inject
     private Logger logger;
 
@@ -85,13 +89,22 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     @Inject
     private QueryManager queryManager;
 
+    @Inject
+    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     @Override
-    public Optional<String> create(String name, String description, String referenceType,
-        String entityReference)
+    public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference)
     {
-        Optional<String> reference;
+        Optional<DiscussionContextReference> result = Optional.empty();
         try {
-            XWikiDocument document = generateUniquePage(name);
+            XWikiDocument document = generateUniquePage(applicationHint, name);
             XWikiContext context = this.getContext();
             EntityReference discussionContextXClass = this.discussionContextMetadata.getDiscussionContextXClass();
             BaseObject object = document.newXObject(discussionContextXClass, context);
@@ -99,38 +112,43 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
             object.set(NAME_NAME, name, context);
             object.set(DESCRIPTION_NAME, description, context);
-            object.set(ENTITY_REFERENCE_TYPE_NAME, referenceType, context);
-            object.set(ENTITY_REFERENCE_NAME, entityReference, context);
+            object.set(ENTITY_REFERENCE_TYPE_NAME, entityReference.getType(), context);
+            object.set(ENTITY_REFERENCE_NAME, entityReference.getReference(), context);
             String pageName = document.getDocumentReference().getName();
-            object.set(REFERENCE_NAME, pageName, context);
+
+            DiscussionContextReference reference = new DiscussionContextReference(applicationHint, pageName);
+            String serializedReference = this.discussionReferencesSerializer.serialize(reference);
+            object.set(REFERENCE_NAME, serializedReference, context);
             object.setDateValue(CREATION_DATE_NAME, new Date());
             object.setDateValue(UPDATE_DATE_NAME, new Date());
             document.setHidden(true);
             context.getWiki().saveDocument(document, context);
-            reference = Optional.of(pageName);
+
+            result = Optional.of(reference);
         } catch (XWikiException e) {
             this.logger.warn(
-                "Failed to create a Discussion Context with name=[{}], description=[{}], referenceType=[{}], "
-                    + "entityReference=[{}]. Cause: [{}].",
-                name, description, referenceType, entityReference, getRootCauseMessage(e));
-            reference = Optional.empty();
+                "Failed to create a Discussion Context with name=[{}], description=[{}],  entityReference=[{}]. "
+                    + "Cause: [{}].", name, description, entityReference, getRootCauseMessage(e));
         }
 
-        return reference;
+        return result;
     }
 
     @Override
-    public Optional<BaseObject> get(String reference)
+    public Optional<BaseObject> get(DiscussionContextReference reference)
     {
         try {
             String discussionClass = this.discussionContextMetadata.getDiscussionContextXClassFullName();
             List<String> execute =
                 this.queryManager
                     .createQuery(
-                        String.format("FROM doc.object(%s) obj where obj.%s = :reference", discussionClass,
+                        String.format("FROM doc.object(%s) obj where obj.%s = :%s",
+                            discussionClass,
+                            DiscussionMetadata.REFERENCE_NAME,
                             DiscussionMetadata.REFERENCE_NAME),
                         XWQL)
-                    .bindValue(REFERENCE_QUERY_PARAM, reference)
+                    .bindValue(DiscussionMetadata.REFERENCE_NAME,
+                        this.discussionReferencesSerializer.serialize(reference))
                     .execute();
             if (execute == null || execute.isEmpty()) {
                 return Optional.empty();
@@ -156,13 +174,14 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     }
 
     @Override
-    public boolean link(String discussionContextReference, String discussionReference)
+    public boolean link(DiscussionContextReference discussionContextReference, DiscussionReference discussionReference)
     {
         return get(discussionContextReference)
             .map(discussionContext -> {
                 List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
-                if (!listValue.contains(discussionReference)) {
-                    listValue.add(discussionReference);
+                String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
+                if (!listValue.contains(serializedReference)) {
+                    listValue.add(serializedReference);
                     save(discussionContext);
                     return true;
                 }
@@ -171,13 +190,15 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     }
 
     @Override
-    public boolean unlink(String discussionContextReference, String discussionReference)
+    public boolean unlink(DiscussionContextReference discussionContextReference,
+        DiscussionReference discussionReference)
     {
         return get(discussionContextReference)
             .map(discussionContext -> {
                 List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
-                if (listValue.contains(discussionReference)) {
-                    listValue.remove(discussionReference);
+                String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
+                if (listValue.contains(serializedReference)) {
+                    listValue.remove(serializedReference);
                     save(discussionContext);
                     return true;
                 }
@@ -186,7 +207,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     }
 
     @Override
-    public Optional<BaseObject> findByReference(String referenceType, String entityReference)
+    public Optional<BaseObject> findByReference(DiscussionContextEntityReference entityReference)
     {
         try {
             List<String> execute = this.queryManager.createQuery(String.format(
@@ -205,12 +226,12 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                     + "and entity_reference_field.id.id=obj.id "
                     + "and entity_reference_field.id.name = '%s' "
                     + "and type_field.value = :type "
-                    + "and entity_reference_field.value = :reference ",
+                    + "and entity_reference_field.value = :entityReference ",
                 this.discussionContextMetadata.getDiscussionContextXClassFullName(), REFERENCE_NAME,
                 ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_NAME),
                 Query.HQL)
-                .bindValue("type", referenceType)
-                .bindValue(REFERENCE_QUERY_PARAM, entityReference)
+                .bindValue("type", entityReference.getType())
+                .bindValue(ENTITY_REFERENCE_NAME, entityReference.getReference())
                 .execute();
 
             if (execute == null || execute.isEmpty()) {
@@ -218,24 +239,21 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
             }
             if (execute.size() > 1) {
                 this.logger
-                    .debug("More than one discussion context found for referenceType=[{}] and entityReference=[{}]",
-                        referenceType, entityReference);
+                    .debug("More than one discussion context found for entityReference=[{}]", entityReference);
             }
             String result = execute.get(0);
 
             return mapToBaseObject(result);
         } catch (QueryException | XWikiException e) {
             this.logger.warn(
-                "Failed to get the search a discussion context with referenceType=[{}] "
-                    + "and entityReference=[{}]. Cause: [{}]",
-                referenceType, entityReference,
-                getRootCauseMessage(e));
+                "Failed to get the search a discussion context with  entityReference=[{}]. Cause: [{}]",
+                entityReference, getRootCauseMessage(e));
         }
         return Optional.empty();
     }
 
     @Override
-    public List<BaseObject> findByDiscussionReference(String reference)
+    public List<BaseObject> findByDiscussionReference(DiscussionReference reference)
     {
         try {
             String className =
@@ -250,7 +268,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                     + "and discussions.name = '%s' "
                     + "and :reference in elements(discussions.list) ",
                 className, DISCUSSIONS_NAME), Query.HQL)
-                .bindValue("reference", reference)
+                .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                 .<String>execute()
                 .stream()
                 .map(ref -> {
@@ -266,18 +284,18 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         } catch (QueryException e) {
             this.logger.warn("Failed to query a discussion by reference [{}]. Cause: [{}].", reference,
                 getRootCauseMessage(e));
-            return Arrays.asList();
+            return Collections.emptyList();
         }
     }
 
-    private XWikiDocument generateUniquePage(String name) throws XWikiException
+    private XWikiDocument generateUniquePage(String applicationHint, String name) throws XWikiException
     {
         XWikiDocument document;
         synchronized (this) {
-            document = generatePage(name);
+            document = generatePage(applicationHint, name);
 
             while (!document.isNew()) {
-                document = generatePage(name);
+                document = generatePage(applicationHint, name);
             }
             XWikiContext context = getContext();
             context.getWiki().saveDocument(document, context);
@@ -290,11 +308,13 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         return this.xcontextProvider.get();
     }
 
-    private XWikiDocument generatePage(String name) throws XWikiException
+    private XWikiDocument generatePage(String applicationHint, String name) throws XWikiException
     {
         String generatedString = this.randomGeneratorService.randomString();
 
-        SpaceReference discussionContextSpace = this.discussionContextMetadata.getDiscussionContextSpace();
+        DiscussionStoreConfiguration discussionStoreConfiguration =
+            this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration(applicationHint);
+        SpaceReference discussionContextSpace = discussionStoreConfiguration.getDiscussionContextSpaceStorageLocation();
         DocumentReference documentReference =
             new DocumentReference(String.format("%s-%s", name, generatedString), discussionContextSpace);
 

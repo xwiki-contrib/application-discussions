@@ -17,48 +17,42 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.internal;
+package org.xwiki.contrib.discussions.internal.messagestream;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionsActorService;
-import org.xwiki.contrib.discussions.domain.ActorDescriptor;
-import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
+import org.xwiki.model.reference.SpaceReference;
+
+import com.xpn.xwiki.XWikiContext;
 
 /**
- * Resolve an actor descriptor from a local wiki user reference.
+ * Dedicated {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration} for the message stream
+ * application.
  *
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
 @Component
-@Named("default")
+@Named(DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT)
 @Singleton
-public class DefaultDiscussionsActorsService implements DiscussionsActorService
+public class DiscussionMessageStreamConfiguration extends AbstractDiscussionStoreConfiguration
 {
-    @Override
-    public Optional<ActorDescriptor> resolve(String reference)
-    {
-        ActorDescriptor actorDescriptor = new ActorDescriptor();
-        actorDescriptor.setLink(null);
-        actorDescriptor.setName(reference);
-        return Optional.of(actorDescriptor);
-    }
+    /**
+     * Application hint to be used for message stream discussions.
+     */
+    public static final String DISCUSSION_MESSAGESTREAM_HINT = "messagestream";
+
+    @Inject
+    private Provider<XWikiContext> contextProvider;
 
     @Override
-    public Stream<ActorDescriptor> listUsers(DiscussionReference discussionReference)
+    public SpaceReference getRootSpaceStorageLocation()
     {
-        return Stream.empty();
-    }
-
-    @Override
-    public long countUsers(DiscussionReference discussionReference)
-    {
-        return 0;
+        return new SpaceReference(this.contextProvider.get().getMainXWiki(), "MessageStream");
     }
 }

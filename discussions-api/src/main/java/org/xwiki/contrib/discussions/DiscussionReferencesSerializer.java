@@ -17,18 +17,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.events;
+package org.xwiki.contrib.discussions;
 
-import org.xwiki.observation.event.Event;
+import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
 import org.xwiki.stability.Unstable;
 
 /**
- * Interface for the discussions events.
+ * Perform a serialization of any {@link AbstractDiscussionReference}.
  *
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
 @Unstable
-public interface DiscussionsEvent extends Event
+@Role
+public interface DiscussionReferencesSerializer
 {
+    /**
+     * Serialize the given reference to store it as a string.
+     *
+     * @param discussionReference the reference to serialize.
+     * @return a serialization of the reference.
+     */
+    String serialize(AbstractDiscussionReference discussionReference);
 }

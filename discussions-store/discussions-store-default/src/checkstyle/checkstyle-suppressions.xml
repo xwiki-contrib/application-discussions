@@ -25,6 +25,10 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
 
 <suppressions>
+  <suppress checks="ClassFanOutComplexity" files="DefaultDiscussionContextStoreService.java"/>
+  <suppress checks="ClassFanOutComplexity" files="DefaultDiscussionStoreService.java"/>
+  <suppress checks="ClassFanOutComplexity" files="DefaultMessageStoreService.java"/>
+
   <suppress checks="MultipleStringLiterals" files="DefaultDiscussionContextStoreService.java"/>
   <suppress checks="MultipleStringLiterals" files="DefaultDiscussionStoreService.java"/>
   <suppress checks="MultipleStringLiterals" files="DefaultMessageStoreService.java"/>

@@ -17,18 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.events;
+package org.xwiki.contrib.discussions.domain.references;
 
-import org.xwiki.observation.event.Event;
 import org.xwiki.stability.Unstable;
 
 /**
- * Interface for the discussions events.
+ * Represents the reference of a {@link org.xwiki.contrib.discussions.domain.DiscussionContext}.
  *
+ * @see org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
 @Unstable
-public interface DiscussionsEvent extends Event
+public class DiscussionContextReference extends AbstractDiscussionReference
 {
+    /**
+     * Default constructor.
+     *
+     * @param applicationHint the application in which the context is used.
+     * @param reference the actual reference of the context.
+     */
+    public DiscussionContextReference(String applicationHint, String reference)
+    {
+        super(applicationHint, reference);
+    }
 }

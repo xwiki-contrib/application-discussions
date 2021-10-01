@@ -31,6 +31,11 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.EntityType;
@@ -81,47 +86,58 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     @Inject
     private RandomGeneratorService randomGeneratorService;
 
+    @Inject
+    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     @Override
-    public Optional<String> create(String title, String description, String mainDocument)
+    public Optional<DiscussionReference> create(String applicationHint, String title, String description,
+        String mainDocument)
     {
-        Optional<String> reference;
+        Optional<DiscussionReference> result = Optional.empty();
         try {
-            XWikiDocument document = generateUniquePage(title);
+            XWikiDocument document = generateUniquePage(applicationHint, title);
             XWikiContext context = this.getContext();
             BaseObject object = document.newXObject(this.discussionMetadata.getDiscussionXClass(), context);
             object.setStringValue(TITLE_NAME, title);
             object.setStringValue(DESCRIPTION_NAME, description);
             String pageName = document.getDocumentReference().getName();
-            object.setStringValue(REFERENCE_NAME, pageName);
+            DiscussionReference reference = new DiscussionReference(applicationHint, pageName);
+            String serializedReference = this.discussionReferencesSerializer.serialize(reference);
+            object.setStringValue(REFERENCE_NAME, serializedReference);
             Date value = new Date();
             object.setDateValue(UPDATE_DATE_NAME, value);
             object.setDateValue(CREATION_DATE_NAME, value);
             object.setStringValue(MAIN_DOCUMENT_NAME, mainDocument);
             document.setHidden(true);
             context.getWiki().saveDocument(document, context);
-            reference = Optional.of(pageName);
+            result = Optional.of(reference);
         } catch (XWikiException e) {
             this.logger.warn("Failed to create a Discussion with title=[{}], description=[{}]. Cause: [{}]", title,
                 description,
                 getRootCauseMessage(e));
-            reference = Optional.empty();
         }
 
-        return reference;
+        return result;
     }
 
     @Override
-    public Optional<BaseObject> get(String reference)
+    public Optional<BaseObject> get(DiscussionReference reference)
     {
         try {
             String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
             List<String> execute =
                 this.queryManager
                     .createQuery(
-                        String.format("FROM doc.object(%s) obj where obj.%s = :reference", discussionClass,
-                            REFERENCE_NAME),
+                        String.format("FROM doc.object(%s) obj where obj.%s = :reference",
+                            discussionClass, REFERENCE_NAME),
                         XWQL)
-                    .bindValue("reference", reference)
+                    .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                     .execute();
             if (execute == null || execute.isEmpty()) {
                 return Optional.empty();
@@ -147,14 +163,15 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public List<BaseObject> findByDiscussionContexts(List<String> discussionContextReferences)
+    public List<BaseObject> findByDiscussionContexts(List<DiscussionContextReference> discussionContextReferences)
     {
         String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
         try {
             // Selects the discussions that are linked EXACTLY to the requested discussion contexts.
             List<List<String>> subResults = new ArrayList<>();
-            for (String discussionContextReference : discussionContextReferences) {
+            for (DiscussionContextReference discussionContextReference : discussionContextReferences) {
                 // Selects the discussions that are linked to the request contexts individually.
+                // FIXME: change the query to use the application hint too.
                 subResults.add(this.queryManager.createQuery(String.format(
                     "select str_field.value "
                         + "from XWikiDocument as doc , "
@@ -190,6 +207,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 .bindValue("contextsListSize", (long) discussionContextReferences.size()).execute());
 
             return intersection(subResults).stream()
+                .map(result -> this.discussionReferencesResolver.resolve(result, DiscussionReference.class))
                 .map(this::get)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -312,7 +330,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public void touch(String discussionReference)
+    public void touch(DiscussionReference discussionReference)
     {
         get(discussionReference).ifPresent(discussion -> {
             discussion.setDateValue(UPDATE_DATE_NAME, new Date());
@@ -321,13 +339,14 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public boolean link(String discussionReference, String discussionContextReference)
+    public boolean link(DiscussionReference discussionReference, DiscussionContextReference discussionContextReference)
     {
         return get(discussionReference)
             .map(discussion -> {
                 List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
-                if (!listValue.contains(discussionContextReference)) {
-                    listValue.add(discussionContextReference);
+                String serializedReference = this.discussionReferencesSerializer.serialize(discussionContextReference);
+                if (!listValue.contains(serializedReference)) {
+                    listValue.add(serializedReference);
                     save(discussion);
                     return true;
                 }
@@ -336,14 +355,17 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     }
 
     @Override
-    public boolean unlink(String discussionReference, String discussionContextReference)
+    public boolean unlink(DiscussionReference discussionReference,
+        DiscussionContextReference discussionContextReference)
     {
         return get(discussionReference)
             .map(
                 discussion -> {
                     List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
-                    if (listValue.contains(discussionContextReference)) {
-                        listValue.remove(discussionContextReference);
+                    String serializedReference = this.discussionReferencesSerializer
+                        .serialize(discussionContextReference);
+                    if (listValue.contains(serializedReference)) {
+                        listValue.remove(serializedReference);
                         save(discussion);
                         return true;
                     }
@@ -351,14 +373,14 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 }).orElse(false);
     }
 
-    private XWikiDocument generateUniquePage(String title) throws XWikiException
+    private XWikiDocument generateUniquePage(String applicationHint, String title) throws XWikiException
     {
         XWikiDocument document;
         synchronized (this) {
-            document = generatePage(title);
+            document = generatePage(applicationHint, title);
 
             while (!document.isNew()) {
-                document = generatePage(title);
+                document = generatePage(applicationHint, title);
             }
             XWikiContext context = getContext();
             context.getWiki().saveDocument(document, context);
@@ -371,13 +393,14 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         return this.xcontextProvider.get();
     }
 
-    private XWikiDocument generatePage(String title) throws XWikiException
+    private XWikiDocument generatePage(String applicationHint, String title) throws XWikiException
     {
         String generatedString = this.randomGeneratorService.randomString();
-
-        SpaceReference discussionContextSpace = this.discussionMetadata.getDiscussionSpace();
+        DiscussionStoreConfiguration discussionStoreConfiguration =
+            this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration(applicationHint);
+        SpaceReference discussionSpace = discussionStoreConfiguration.getDiscussionSpaceStorageLocation();
         DocumentReference documentReference =
-            new DocumentReference(String.format("%s-%s", title, generatedString), discussionContextSpace);
+            new DocumentReference(String.format("%s-%s", title, generatedString), discussionSpace);
 
         XWikiContext context = getContext();
         return context.getWiki().getDocument(documentReference, context);

@@ -17,28 +17,38 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
-
-import java.util.Optional;
+package org.xwiki.contrib.discussions.store;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
+import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.stability.Unstable;
 
 /**
- * Resolve a {@link DiscussionsActorService} according to the requested actor type.
+ * Represents the configuration of a discussion store that can be implemented for any application using the discussion.
+ * This allows applications using discussion to chose where to store the various elements of discussion: the
+ * configuration implementations must then use the same hint as given in the APIs.
  *
+ * @see AbstractDiscussionStoreConfiguration
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
-@Role
 @Unstable
-public interface DiscussionsActorServiceResolver
+@Role
+public interface DiscussionStoreConfiguration
 {
     /**
-     * Returns an actor service for the requested type.
-     *
-     * @param type the type
-     * @return the actor service, {@link Optional#empty()} if the resolution failed
+     * @return the space where to store the discussion contexts.
      */
-    DiscussionsActorService get(String type);
+    SpaceReference getDiscussionContextSpaceStorageLocation();
+
+    /**
+     * @return the space where to store the discussions.
+     */
+    SpaceReference getDiscussionSpaceStorageLocation();
+
+    /**
+     * @return the space where to store the messages.
+     */
+    SpaceReference getMessageSpaceStorageLocation();
 }

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
@@ -50,8 +52,8 @@ public interface MessageStoreService
      * @param title the title of the discussion of the message
      * @return the unique reference of the created message
      */
-    Optional<String> create(String content, Syntax syntax, String authorType, String authorReference,
-        String discussionReference, String title);
+    Optional<MessageReference> create(String content, Syntax syntax, String authorType,
+        String authorReference, DiscussionReference discussionReference, String title);
 
     /**
      * Returns a paginate list of messages of a discussion.
@@ -61,7 +63,7 @@ public interface MessageStoreService
      * @param limit the limit
      * @return the list of messages
      */
-    List<BaseObject> getByDiscussion(String discussionReference, int offset, int limit);
+    List<BaseObject> getByDiscussion(DiscussionReference discussionReference, int offset, int limit);
 
     /**
      * Returns the number of messages of a discussion.
@@ -69,7 +71,7 @@ public interface MessageStoreService
      * @param discussionReference the discussion reference
      * @return the count of messages of a discussion
      */
-    long countByDiscussion(String discussionReference);
+    long countByDiscussion(DiscussionReference discussionReference);
 
     /**
      * Get a message by its unique reference.
@@ -77,10 +79,10 @@ public interface MessageStoreService
      * @param reference the message reference
      * @return the object of the message
      */
-    Optional<BaseObject> getByReference(String reference);
+    Optional<BaseObject> getByReference(MessageReference reference);
 
     /**
-     * Get a message by the entity reference of the its message object.
+     * Get a message by the entity reference of its message object.
      *
      * @param entityReference the message object entity reference
      * @return the message base object
@@ -92,5 +94,5 @@ public interface MessageStoreService
      *
      * @param reference the message reference
      */
-    void delete(String reference);
+    void delete(MessageReference reference);
 }

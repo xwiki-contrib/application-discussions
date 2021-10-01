@@ -20,6 +20,7 @@
 
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
+import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
@@ -86,6 +92,15 @@ class DefaultMessageStoreServiceTest
     @MockComponent
     private RandomGeneratorService randomGeneratorService;
 
+    @MockComponent
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @MockComponent
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @MockComponent
+    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
+
     @Mock
     private XWikiContext xWikiContext;
 
@@ -102,32 +117,41 @@ class DefaultMessageStoreServiceTest
     @Test
     void create() throws Exception
     {
+        DiscussionReference discussionReference = new DiscussionReference("hint", "discussionReference");
+        DiscussionStoreConfiguration discussionStoreConfiguration = mock(DiscussionStoreConfiguration.class);
+        when(this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration("hint"))
+            .thenReturn(discussionStoreConfiguration);
+
         BaseObject messageBaseObject = mock(BaseObject.class);
         DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "randomString");
         DocumentReference messageXClassDocumentReference = new DocumentReference("xwiki", "XWiki", "MessageClass");
         XWikiDocument document = mock(XWikiDocument.class);
         SpaceReference value = new SpaceReference("xwiki", "Discussions", "Message");
+        when(discussionStoreConfiguration.getMessageSpaceStorageLocation()).thenReturn(value);
 
         when(document.getDocumentReference()).thenReturn(discussionDocumentReference);
         when(document.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
         when(this.randomGeneratorService.randomString(10)).thenReturn("randomString", "randomString2");
         when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
-        when(this.messageMetadata.getMessageSpace()).thenReturn(value);
         when(this.xWiki.getDocument(new DocumentReference("randomString", value), this.xWikiContext))
             .thenReturn(document);
         when(document.isNew()).thenReturn(true);
 
-        Optional<String> reference =
-            this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
-                "discussionReference", "TODO");
+        MessageReference messageReference = new MessageReference("hint", "randomString");
+        when(this.discussionReferencesSerializer.serialize(messageReference)).thenReturn("randomString;hint=hint");
+        when(this.discussionReferencesSerializer.serialize(discussionReference))
+            .thenReturn("discussionReference;hint=hint");
 
-        assertEquals(Optional.of("randomString"), reference);
+        Optional<MessageReference> reference =
+            this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
+                discussionReference, "TODO");
+        assertEquals(Optional.of(messageReference), reference);
         assertEquals(0, this.logCapture.size());
-        verify(messageBaseObject).set(REFERENCE_NAME, "randomString", this.xWikiContext);
+        verify(messageBaseObject).set(REFERENCE_NAME, "randomString;hint=hint", this.xWikiContext);
         verify(messageBaseObject).set(AUTHOR_TYPE_NAME, "authorType", this.xWikiContext);
         verify(messageBaseObject).set(AUTHOR_REFERENCE_NAME, "authorReference", this.xWikiContext);
         verify(messageBaseObject).set(CONTENT_NAME, "content", this.xWikiContext);
-        verify(messageBaseObject).set(DISCUSSION_REFERENCE_NAME, "discussionReference", this.xWikiContext);
+        verify(messageBaseObject).set(DISCUSSION_REFERENCE_NAME, "discussionReference;hint=hint", this.xWikiContext);
     }
 
     @Test
@@ -155,8 +179,8 @@ class DefaultMessageStoreServiceTest
         when(xWikiDocumentR1.getXObject((EntityReference) messageXClass)).thenReturn(r1MessageObject);
         when(xWikiDocumentR2.getXObject((EntityReference) messageXClass)).thenReturn(r2MessageObject);
 
-        List<BaseObject> actual =
-            this.defaultMessageStoreService.getByDiscussion("discussionReference", 0, 10);
+        List<BaseObject> actual = this.defaultMessageStoreService
+            .getByDiscussion(new DiscussionReference("hint", "discussionReference"), 0, 10);
 
         assertEquals(asList(r1MessageObject, r2MessageObject), actual);
     }
@@ -164,6 +188,8 @@ class DefaultMessageStoreServiceTest
     @Test
     void getByReference() throws Exception
     {
+        MessageReference messageReference = new MessageReference("hint", "docRef1");
+        when(this.discussionReferencesSerializer.serialize(messageReference)).thenReturn("reference");
         BaseObject messageBaseObject1 = mock(BaseObject.class);
         when(this.messageMetadata.getMessageXClassFullName()).thenReturn("Discussions.Code.MessageClass");
         DocumentReference messageXClass = new DocumentReference("xwiki", "XWiki", "MessageClass");
@@ -171,14 +197,15 @@ class DefaultMessageStoreServiceTest
         Query query = mock(Query.class);
         when(this.queryManager.createQuery(any(), any())).thenReturn(query);
         when(query.bindValue("reference", "reference")).thenReturn(query);
-        when(query.execute()).thenReturn(asList("docRef1"));
+        when(query.execute()).thenReturn(Collections.singletonList("docRef1"));
 
         XWikiDocument xWikiDocument = mock(XWikiDocument.class);
         when(this.xWiki.getDocument("docRef1", EntityType.DOCUMENT, this.xWikiContext))
             .thenReturn(xWikiDocument);
         when(xWikiDocument.getXObject((EntityReference) messageXClass)).thenReturn(messageBaseObject1);
 
-        Optional<BaseObject> actual = this.defaultMessageStoreService.getByReference("reference");
+        when(this.discussionReferencesResolver.resolve("docRef1", MessageReference.class)).thenReturn(messageReference);
+        Optional<BaseObject> actual = this.defaultMessageStoreService.getByReference(messageReference);
         assertEquals(Optional.of(messageBaseObject1), actual);
     }
 }

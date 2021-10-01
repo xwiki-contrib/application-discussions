@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.domain;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
@@ -33,7 +34,7 @@ import org.xwiki.text.XWikiToStringBuilder;
 @Unstable
 public class DiscussionContext
 {
-    private final String reference;
+    private final DiscussionContextReference reference;
 
     private final String name;
 
@@ -49,7 +50,7 @@ public class DiscussionContext
      * @param description the discussion context description
      * @param entityReference the entity reference
      */
-    public DiscussionContext(String reference, String name, String description,
+    public DiscussionContext(DiscussionContextReference reference, String name, String description,
         DiscussionContextEntityReference entityReference)
     {
         this.reference = reference;
@@ -61,7 +62,7 @@ public class DiscussionContext
     /**
      * @return the discussion context unique reference
      */
-    public String getReference()
+    public DiscussionContextReference getReference()
     {
         return this.reference;
     }

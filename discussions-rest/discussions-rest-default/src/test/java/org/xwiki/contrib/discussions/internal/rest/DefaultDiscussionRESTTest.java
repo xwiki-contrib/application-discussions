@@ -26,20 +26,21 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
-import org.xwiki.contrib.discussions.rest.DiscussionUserRow;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
@@ -84,11 +85,23 @@ class DefaultDiscussionRESTTest
     @MockComponent
     private DocumentReferenceResolver<String> documentReferenceResolver;
 
+    @MockComponent
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
+    private DiscussionReference discussionReference = new DiscussionReference("hint", "ref");
+
+    @BeforeEach
+    void setup()
+    {
+        when(this.discussionReferencesResolver.resolve("ref", DiscussionReference.class))
+            .thenReturn(this.discussionReference);
+    }
+
     @Test
     void get() throws Exception
     {
-        Discussion discussion = new Discussion("r", "ttl", "desc", new Date(), null);
-        when(this.discussionService.get("ref")).thenReturn(Optional.of(discussion));
+        Discussion discussion = new Discussion(discussionReference, "ttl", "desc", new Date(), null);
+        when(this.discussionService.get(discussionReference)).thenReturn(Optional.of(discussion));
         Discussion actual = this.target.get("ref");
         assertEquals(discussion, actual);
     }
@@ -96,7 +109,7 @@ class DefaultDiscussionRESTTest
     @Test
     void getNotFound()
     {
-        when(this.discussionService.get("ref")).thenReturn(Optional.empty());
+        when(this.discussionService.get(this.discussionReference)).thenReturn(Optional.empty());
         Throwable ref = assertThrows(XWikiRestException.class, () -> this.target.get("ref"));
         assertEquals("Discussion with reference=[ref] not found.", ref.getMessage());
     }
@@ -121,9 +134,12 @@ class DefaultDiscussionRESTTest
         calendar.setTimeZone(TimeZone.getTimeZone("UTC+1"));
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref"))).thenReturn(12L);
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref", "*"))).thenReturn(123L);
-        Discussion discussion1 = new Discussion("d1-ref", "d1-ttl", "d1-desc", calendar.getTime(), null);
-        Discussion discussion2 = new Discussion("d2-ref", "d2-ttl", "d2-desc", calendar.getTime(), null);
-        Discussion discussion3 = new Discussion("d3-ref", "d3-ttl", "d3-desc", calendar.getTime(), null);
+        Discussion discussion1 =
+            new Discussion(new DiscussionReference("hint", "d1-ref"), "d1-ttl", "d1-desc", calendar.getTime(), null);
+        Discussion discussion2 =
+            new Discussion(new DiscussionReference("hint", "d2-ref"), "d2-ttl", "d2-desc", calendar.getTime(), null);
+        Discussion discussion3 =
+            new Discussion(new DiscussionReference("hint", "d3-ref"), "d3-ttl", "d3-desc", calendar.getTime(), null);
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref"), 0, 10))
             .thenReturn(asList(discussion1, discussion2));
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref", "*"), 0, 10))
@@ -146,16 +162,16 @@ class DefaultDiscussionRESTTest
         actorDescriptor.setName("testname");
         actorDescriptor.setLink(URI.create("xwiki:XWiki.U1"));
 
-        when(this.discussionsActorServiceResolver.get("testtype")).thenReturn(Optional.of(discussionsActorService));
-        when(discussionsActorService.listUsers("testreference")).thenReturn(Stream.of(
+        when(this.discussionsActorServiceResolver.get("testtype")).thenReturn(discussionsActorService);
+        when(discussionsActorService.listUsers(this.discussionReference)).thenReturn(Stream.of(
             actorDescriptor
         ));
-        when(discussionsActorService.countUsers("testreference")).thenReturn(1L);
+        when(discussionsActorService.countUsers(this.discussionReference)).thenReturn(1L);
         when(this.documentReferenceResolver.resolve("xwiki:XWiki.U1"))
             .thenReturn(documentReference);
         when(this.urlSerializer.serialize(documentReference)).thenReturn("https://xwiki.org/U1");
 
-        Response response = this.target.listusers("testtype", "testreference", null, null, 1);
+        Response response = this.target.listusers("testtype", "ref", null, null, 1);
         assertEquals(200, response.getStatus());
         String expected =
             "{\"reqNo\":1,\"totalrows\":1,\"rows\":[{\"name\":\"testname\",\"name_url\":\"https://xwiki.org/U1\","
@@ -169,9 +185,10 @@ class DefaultDiscussionRESTTest
         CreateDiscussion createDiscussion = new CreateDiscussion()
             .setTitle("title")
             .setDescription("description")
-            .setMainDocument("XWiki.Doc");
+            .setMainDocument("XWiki.Doc")
+            .setApplicationHint("hint");
         Discussion discussion = new Discussion();
-        when(this.discussionService.create("title", "description", "XWiki.Doc")).thenReturn(Optional.of(
+        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc")).thenReturn(Optional.of(
             discussion));
         Discussion actual = this.target.create(createDiscussion);
         assertSame(discussion, actual);
@@ -183,8 +200,9 @@ class DefaultDiscussionRESTTest
         CreateDiscussion createDiscussion = new CreateDiscussion()
             .setTitle("title")
             .setDescription("description")
-            .setMainDocument("XWiki.Doc");
-        when(this.discussionService.create("title", "description", "XWiki.Doc")).thenReturn(Optional.empty());
+            .setMainDocument("XWiki.Doc")
+            .setApplicationHint("hint");
+        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc")).thenReturn(Optional.empty());
         XWikiRestException throwable =
             assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
         assertEquals("Fail to create a discussion with title=[title], description=[description]",

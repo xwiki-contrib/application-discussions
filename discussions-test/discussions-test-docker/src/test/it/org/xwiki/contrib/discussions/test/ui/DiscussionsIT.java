@@ -91,7 +91,8 @@ class DiscussionsIT
     void displayDiscussion(TestUtils setup, TestReference reference)
     {
         setup.gotoPage(new DocumentReference("xwiki", "XWiki", "Main"));
-        this.discussionPage = DiscussionPage.createDiscussionPage(reference, this.discussion.getReference(),
+        this.discussionPage = DiscussionPage.createDiscussionPage(reference,
+            this.discussion.getReference().getReference(),
             "discussionsns", 3, "testtype");
 
         assertEquals("title", this.discussionPage.getTitle());
