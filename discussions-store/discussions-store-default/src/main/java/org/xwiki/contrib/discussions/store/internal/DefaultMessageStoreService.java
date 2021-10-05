@@ -157,7 +157,7 @@ public class DefaultMessageStoreService implements MessageStoreService
     {
         try {
             String messageClass = this.messageMetadata.getMessageXClassFullName();
-            List<String> messageReferences = this.queryManager.createQuery(String.format(
+            List<String> pageNames = this.queryManager.createQuery(String.format(
                 " select doc.fullName "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
@@ -176,9 +176,7 @@ public class DefaultMessageStoreService implements MessageStoreService
                 .bindValue("discussionReference", this.discussionReferencesSerializer.serialize(discussionReference))
                 .execute();
 
-            String applicationHint = discussionReference.getApplicationHint();
-            return getBaseObjects(messageReferences.stream()
-                .map(ref -> new MessageReference(applicationHint, ref)).collect(Collectors.toList()));
+            return getBaseObjects(pageNames);
         } catch (QueryException | XWikiException e) {
             this.logger.warn(
                 "Failed to get the list Message for discussionReference=[{}], offset=[{}], limit=[{}]. Cause: [{}].",
@@ -187,14 +185,14 @@ public class DefaultMessageStoreService implements MessageStoreService
         }
     }
 
-    private List<BaseObject> getBaseObjects(List<MessageReference> messageReferences)
+    private List<BaseObject> getBaseObjects(List<String> pageNames)
         throws XWikiException
     {
         // FIXME: use a proper query
         XWikiContext context = this.xcontextProvider.get();
-        return messageReferences.stream().map(it -> {
+        return pageNames.stream().map(it -> {
             try {
-                return Optional.ofNullable(context.getWiki().getDocument(it.getReference(), EntityType.DOCUMENT,
+                return Optional.ofNullable(context.getWiki().getDocument(it, EntityType.DOCUMENT,
                     context));
             } catch (XWikiException e) {
                 return Optional.<XWikiDocument>empty();
@@ -210,7 +208,7 @@ public class DefaultMessageStoreService implements MessageStoreService
     {
         try {
             String messageClass = this.messageMetadata.getMessageXClassFullName();
-            List<String> messageReferences = this.queryManager.createQuery(String.format(
+            List<String> pageNames = this.queryManager.createQuery(String.format(
                 " select doc.fullName "
                     + "from XWikiDocument as doc , "
                     + "BaseObject as obj , "
@@ -224,9 +222,7 @@ public class DefaultMessageStoreService implements MessageStoreService
                 .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                 .execute();
 
-            return getBaseObjects(messageReferences.stream()
-                .map(ref -> this.discussionReferencesResolver.resolve(ref, MessageReference.class))
-                .collect(Collectors.toList()))
+            return getBaseObjects(pageNames)
                 .stream().findFirst();
         } catch (QueryException | XWikiException e) {
             this.logger.warn(

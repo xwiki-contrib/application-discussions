@@ -141,7 +141,7 @@ public class DefaultMessageService implements MessageService
             .flatMap(messageObject -> {
                 String msgDiscussionReference = messageObject.getStringValue(DISCUSSION_REFERENCE_NAME);
                 DiscussionReference discussionReference =
-                    new DiscussionReference(reference.getApplicationHint(), msgDiscussionReference);
+                    this.discussionReferencesResolver.resolve(msgDiscussionReference, DiscussionReference.class);
                 return this.discussionService.get(discussionReference)
                     .map(discussion -> convertToMessage(discussion).apply(messageObject));
             });

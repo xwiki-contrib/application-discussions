@@ -71,7 +71,8 @@
 ## Add the first message.
 #set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
 ## Redirect to the view page of the discussion.
-$response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$discussion.reference"))
+#set ($redirectReference = $escapetool.url($services.discussions.serialize($discussion.reference)))
+$response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$redirectReference"))
 #elseif(!$isGuest)
 #set ($docDiscussionClass = $xwiki.getDocument('Discussions.Code.DiscussionClass'))
 #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
