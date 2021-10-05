@@ -31,7 +31,6 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
@@ -94,9 +93,6 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
-
-    @Inject
-    private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
     public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
@@ -298,6 +294,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                 document = generatePage(applicationHint, name);
             }
             XWikiContext context = getContext();
+            document.setHidden(true);
             context.getWiki().saveDocument(document, context);
         }
         return document;

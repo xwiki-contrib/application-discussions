@@ -171,7 +171,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             List<List<String>> subResults = new ArrayList<>();
             for (DiscussionContextReference discussionContextReference : discussionContextReferences) {
                 // Selects the discussions that are linked to the request contexts individually.
-                // FIXME: change the query to use the application hint too.
                 subResults.add(this.queryManager.createQuery(String.format(
                     "select str_field.value "
                         + "from XWikiDocument as doc , "
@@ -383,6 +382,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 document = generatePage(applicationHint, title);
             }
             XWikiContext context = getContext();
+            document.setHidden(true);
             context.getWiki().saveDocument(document, context);
         }
         return document;

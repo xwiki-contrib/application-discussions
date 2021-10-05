@@ -17,35 +17,45 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.store.internal;
+package org.xwiki.contrib.discussions.messagestream.internal;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
-import org.xwiki.component.annotation.Component;
+import org.junit.jupiter.api.Test;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
+import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWikiContext;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
- * Default implementation of {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration}.
- * This implementation stores every elements under the same space {@code Discussions}, each elements being stored in
- * its own subspace.
+ * Tests for {@link DiscussionMessageStreamConfiguration}.
  *
  * @version $Id$
  * @since 2.0
  */
-@Component
-@Singleton
-public class DefaultDiscussionStoreConfiguration extends AbstractDiscussionStoreConfiguration
+@ComponentTest
+class DiscussionMessageStreamConfigurationTest
 {
-    @Inject
+    @InjectMockComponents
+    private DiscussionMessageStreamConfiguration configuration;
+
+    @MockComponent
     private Provider<XWikiContext> contextProvider;
 
-    @Override
-    public SpaceReference getRootSpaceStorageLocation()
+    @Test
+    void getRootSpaceStorageLocation()
     {
-        return new SpaceReference("Discussions", this.contextProvider.get().getWikiReference());
+        XWikiContext xWikiContext = mock(XWikiContext.class);
+        when(xWikiContext.getWikiReference()).thenReturn(new WikiReference("foo"));
+        when(this.contextProvider.get()).thenReturn(xWikiContext);
+        SpaceReference expected = new SpaceReference("MessageStream", new WikiReference("foo"));
+        assertEquals(expected, this.configuration.getRootSpaceStorageLocation());
     }
 }

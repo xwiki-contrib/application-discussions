@@ -429,6 +429,11 @@
                 <old>class org.xwiki.contrib.discussions.DiscussionsScriptService</old>
                 <justification>Unstable API: the class was moved to org.xwiki.contrib.discussions.script package.</justification>
               </item>
+              <item>
+                <code>java.class.removed</code>
+                <old>class org.xwiki.contrib.discussions.messagestream.DiscussionsMessageStreamScriptService</old>
+                <justification>Unstable API: this class was moved to org.xwiki.contrib.discussions.messagestream.script package.</justification>
+              </item>
             </revapi.ignore>
           </analysisConfiguration>
         </configuration>

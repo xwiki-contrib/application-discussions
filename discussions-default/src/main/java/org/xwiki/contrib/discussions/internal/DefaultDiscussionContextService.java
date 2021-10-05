@@ -133,8 +133,6 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     {
         DiscussionContextReference discussionContextReference = discussionContext.getReference();
         DiscussionReference discussionReference = discussion.getReference();
-
-        // FIXME: do we need to check that both arguments share the same hint?
         String applicationHint = discussionContextReference.getApplicationHint();
         if (this.discussionContextStoreService.link(discussionContextReference, discussionReference)) {
             this.observationManager.notify(new DiscussionContextEvent(UPDATE), applicationHint, discussionContext);
@@ -149,8 +147,6 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     {
         DiscussionContextReference discussionContextReference = discussionContext.getReference();
         DiscussionReference discussionReference = discussion.getReference();
-
-        // FIXME: do we need to check that both arguments share the same hint?
         String applicationHint = discussionContextReference.getApplicationHint();
 
         if (this.discussionContextStoreService.unlink(discussionContextReference, discussionReference)) {

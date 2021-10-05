@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
@@ -92,6 +93,9 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
     private Logger logger;
 
     @Override
@@ -125,7 +129,7 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
                 discussionLiveTableRow.setTitle(d.getTitle());
                 try {
                     discussionLiveTableRow.setTitleUrl(linkTemplate.replace("__REFERENCE__", URLEncoder
-                        .encode(d.getReference().getReference(), "UTF-8")));
+                        .encode(this.discussionReferencesSerializer.serialize(d.getReference()), "UTF-8")));
                 } catch (UnsupportedEncodingException e) {
                     this.logger.warn("Failed to generate the title for discussion [{}]. Cause: [{}]", e,
                         getRootCauseMessage(e));

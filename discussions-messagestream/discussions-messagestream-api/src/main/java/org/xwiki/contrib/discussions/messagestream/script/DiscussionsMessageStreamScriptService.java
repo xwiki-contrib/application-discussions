@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.messagestream;
+package org.xwiki.contrib.discussions.messagestream.script;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
-import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
+import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.script.service.ScriptService;
@@ -42,7 +42,7 @@ import org.xwiki.user.group.GroupException;
 import org.xwiki.user.group.GroupManager;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
-import static org.xwiki.contrib.discussions.internal.messagestream.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
+import static org.xwiki.contrib.discussions.messagestream.internal.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
 
 /**
  * Discussions Message Stream script service.

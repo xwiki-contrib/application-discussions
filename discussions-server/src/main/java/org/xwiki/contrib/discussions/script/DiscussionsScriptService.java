@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
@@ -39,6 +40,7 @@ import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
@@ -92,6 +94,9 @@ public class DiscussionsScriptService implements ScriptService
 
     @Inject
     private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
 
     /**
      * Creates a discussion context.
@@ -364,5 +369,19 @@ public class DiscussionsScriptService implements ScriptService
         }
 
         return discussion;
+    }
+
+    /**
+     * Allow to serialize the given reference.
+     *
+     * @param reference the reference to be serialized.
+     * @param <T> the actual concrete type of the reference.
+     * @return a serialization of the reference.
+     * @since 2.0
+     */
+    @Unstable
+    public <T extends AbstractDiscussionReference> String serialize(T reference)
+    {
+        return this.discussionReferencesSerializer.serialize(reference);
     }
 }

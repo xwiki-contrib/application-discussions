@@ -17,31 +17,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
+package org.xwiki.contrib.discussions.internal.converters;
 
-import org.xwiki.component.annotation.Role;
+import javax.inject.Inject;
+
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
-import org.xwiki.stability.Unstable;
+import org.xwiki.properties.converter.AbstractConverter;
 
 /**
- * Resolve a serialized reference to a given {@link AbstractDiscussionReference}.
+ * Abstract converter of {@link AbstractDiscussionReference} using standard resolver and serializer to perform
+ * conversion.
  *
+ * @param <T> the actual concrete type to convert.
  * @version $Id$
  * @since 2.0
  */
-@Unstable
-@Role
-public interface DiscussionReferencesResolver
+public abstract class AbstractDiscussionReferenceConverter<T extends AbstractDiscussionReference>
+    extends AbstractConverter<T>
 {
-    /**
-     * Perform the resolution of a given serialized reference to the given {@link AbstractDiscussionReference} concrete
-     * type. Note that the serialization might not contain any information about the actual type, so it might not be
-     * possible to check that the type is correct for this reference.
-     *
-     * @param serializedReference a serialization of an {@link AbstractDiscussionReference}.
-     * @param type the concrete type to obtain
-     * @param <T> the actual given concrete type
-     * @return an instance of the given type with the information of the reference
-     */
-    <T extends AbstractDiscussionReference> T resolve(String serializedReference, Class<T> type);
+    @Inject
+    protected DiscussionReferencesResolver discussionReferencesResolver;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Override
+    protected String convertToString(T value)
+    {
+        return this.discussionReferencesSerializer.serialize(value);
+    }
 }

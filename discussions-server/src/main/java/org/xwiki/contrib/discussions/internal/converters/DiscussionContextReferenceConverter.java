@@ -17,27 +17,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
+package org.xwiki.contrib.discussions.internal.converters;
 
-import org.xwiki.component.annotation.Role;
-import org.xwiki.stability.Unstable;
+import java.lang.reflect.Type;
+
+import javax.inject.Singleton;
+
+import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 
 /**
- * Resolve a {@link DiscussionsActorService} according to the requested actor type.
+ * Converter of {@link DiscussionContextReference} which relies on default serializer and resolver.
  *
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
-@Role
-@Unstable
-public interface DiscussionsActorServiceResolver
+@Component
+@Singleton
+public class DiscussionContextReferenceConverter extends
+    AbstractDiscussionReferenceConverter<DiscussionContextReference>
 {
-    /**
-     * Returns an actor service for the requested type.
-     * In case the actor service cannot be found  for the given type, fallback on a default service.
-     *
-     * @param type the type
-     * @return the actor service corresponding to the type, or default service
-     */
-    DiscussionsActorService get(String type);
+    @Override
+    protected DiscussionContextReference convertToType(Type targetType, Object value)
+    {
+        return this.discussionReferencesResolver.resolve(value.toString(), DiscussionContextReference.class);
+    }
 }

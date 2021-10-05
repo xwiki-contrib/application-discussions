@@ -3,3 +3,6 @@ org.xwiki.contrib.discussions.script.DiscussionsScriptService
 org.xwiki.contrib.discussions.internal.QueryStringService
 org.xwiki.contrib.discussions.internal.server.DiscussionsResourceReferenceHandler
 org.xwiki.contrib.discussions.internal.server.DiscussionsResourceReferenceResolver
+org.xwiki.contrib.discussions.internal.converters.DiscussionContextReferenceConverter
+org.xwiki.contrib.discussions.internal.converters.DiscussionReferenceConverter
+org.xwiki.contrib.discussions.internal.converters.MessageReferenceConverter

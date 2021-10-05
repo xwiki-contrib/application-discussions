@@ -106,7 +106,6 @@ public class DefaultMessageStoreService implements MessageStoreService
         XWikiContext context = this.xcontextProvider.get();
         Optional<MessageReference> result = Optional.empty();
         try {
-            // FIXME: is it ok to rely on the application hint of the discussion reference?
             String applicationHint = discussionReference.getApplicationHint();
             XWikiDocument document = generateUniquePage(applicationHint);
             // The title of the page
@@ -304,6 +303,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             while (!document.isNew()) {
                 document = generatePage(applicationHint);
             }
+            document.setHidden(true);
             XWikiContext context = this.xcontextProvider.get();
             context.getWiki().saveDocument(document, context);
         }

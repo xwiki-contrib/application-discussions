@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
@@ -88,6 +89,9 @@ class DefaultDiscussionRESTTest
     @MockComponent
     private DiscussionReferencesResolver discussionReferencesResolver;
 
+    @MockComponent
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
     private DiscussionReference discussionReference = new DiscussionReference("hint", "ref");
 
     @BeforeEach
@@ -134,18 +138,21 @@ class DefaultDiscussionRESTTest
         calendar.setTimeZone(TimeZone.getTimeZone("UTC+1"));
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref"))).thenReturn(12L);
         when(this.discussionService.countByEntityReferences("test-type", asList("test-ref", "*"))).thenReturn(123L);
-        Discussion discussion1 =
-            new Discussion(new DiscussionReference("hint", "d1-ref"), "d1-ttl", "d1-desc", calendar.getTime(), null);
-        Discussion discussion2 =
-            new Discussion(new DiscussionReference("hint", "d2-ref"), "d2-ttl", "d2-desc", calendar.getTime(), null);
-        Discussion discussion3 =
-            new Discussion(new DiscussionReference("hint", "d3-ref"), "d3-ttl", "d3-desc", calendar.getTime(), null);
+        DiscussionReference discussionReference1 = new DiscussionReference("hint", "d1-ref");
+        DiscussionReference discussionReference2 = new DiscussionReference("hint", "d2-ref");
+        DiscussionReference discussionReference3 = new DiscussionReference("hint", "d3-ref");
+        Discussion discussion1 = new Discussion(discussionReference1, "d1-ttl", "d1-desc", calendar.getTime(), null);
+        Discussion discussion2 = new Discussion(discussionReference2, "d2-ttl", "d2-desc", calendar.getTime(), null);
+        Discussion discussion3 = new Discussion(discussionReference3, "d3-ttl", "d3-desc", calendar.getTime(), null);
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref"), 0, 10))
             .thenReturn(asList(discussion1, discussion2));
         when(this.discussionService.findByEntityReferences("test-type", asList("test-ref", "*"), 0, 10))
             .thenReturn(asList(discussion1, discussion2, discussion3));
         when(this.messageService.countByDiscussion(discussion1)).thenReturn(5L);
         when(this.messageService.countByDiscussion(discussion2)).thenReturn(15L);
+        when(this.discussionReferencesSerializer.serialize(discussionReference1)).thenReturn("ref1");
+        when(this.discussionReferencesSerializer.serialize(discussionReference2)).thenReturn("ref2");
+        when(this.discussionReferencesSerializer.serialize(discussionReference3)).thenReturn("ref3");
         Response response = this.target.livetable("test-type", "test-ref", 1, 10, "col", "asc", 1, "http://server/ref"
                 + "=__AAA__",
             joker);

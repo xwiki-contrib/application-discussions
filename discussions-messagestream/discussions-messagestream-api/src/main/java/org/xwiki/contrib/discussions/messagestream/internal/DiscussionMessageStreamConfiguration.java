@@ -17,35 +17,42 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.store.internal;
+package org.xwiki.contrib.discussions.messagestream.internal;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
 import org.xwiki.model.reference.SpaceReference;
 
 import com.xpn.xwiki.XWikiContext;
 
 /**
- * Default implementation of {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration}.
- * This implementation stores every elements under the same space {@code Discussions}, each elements being stored in
- * its own subspace.
+ * Dedicated {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration} for the message stream
+ * application.
  *
  * @version $Id$
  * @since 2.0
  */
 @Component
+@Named(DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT)
 @Singleton
-public class DefaultDiscussionStoreConfiguration extends AbstractDiscussionStoreConfiguration
+public class DiscussionMessageStreamConfiguration extends AbstractDiscussionStoreConfiguration
 {
+    /**
+     * Application hint to be used for message stream discussions.
+     */
+    public static final String DISCUSSION_MESSAGESTREAM_HINT = "messagestream";
+
     @Inject
     private Provider<XWikiContext> contextProvider;
 
     @Override
     public SpaceReference getRootSpaceStorageLocation()
     {
-        return new SpaceReference("Discussions", this.contextProvider.get().getWikiReference());
+        return new SpaceReference("MessageStream", this.contextProvider.get().getWikiReference());
     }
 }

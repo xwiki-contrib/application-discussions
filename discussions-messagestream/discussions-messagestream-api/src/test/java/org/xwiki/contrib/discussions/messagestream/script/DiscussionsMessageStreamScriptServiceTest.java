@@ -17,20 +17,18 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.messagestream;
+package org.xwiki.contrib.discussions.messagestream.script;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import javax.inject.Inject;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
-import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
+import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -43,7 +41,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.xwiki.contrib.discussions.internal.messagestream.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
+import static org.xwiki.contrib.discussions.messagestream.internal.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
 
 /**
  * Test of {@link DiscussionsMessageStreamScriptService}.

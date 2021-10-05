@@ -17,42 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.internal.messagestream;
+package org.xwiki.contrib.discussions.internal.converters;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
+import java.lang.reflect.Type;
+
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
-import org.xwiki.model.reference.SpaceReference;
-
-import com.xpn.xwiki.XWikiContext;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 
 /**
- * Dedicated {@link org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration} for the message stream
- * application.
+ * Converter of {@link MessageReference} which relies on standard resolver and serializer.
  *
  * @version $Id$
  * @since 2.0
  */
 @Component
-@Named(DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT)
 @Singleton
-public class DiscussionMessageStreamConfiguration extends AbstractDiscussionStoreConfiguration
+public class MessageReferenceConverter extends AbstractDiscussionReferenceConverter<MessageReference>
 {
-    /**
-     * Application hint to be used for message stream discussions.
-     */
-    public static final String DISCUSSION_MESSAGESTREAM_HINT = "messagestream";
-
-    @Inject
-    private Provider<XWikiContext> contextProvider;
-
     @Override
-    public SpaceReference getRootSpaceStorageLocation()
+    protected MessageReference convertToType(Type targetType, Object value)
     {
-        return new SpaceReference(this.contextProvider.get().getMainXWiki(), "MessageStream");
+        return this.discussionReferencesResolver.resolve(value.toString(), MessageReference.class);
     }
 }
