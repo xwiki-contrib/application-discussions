@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;

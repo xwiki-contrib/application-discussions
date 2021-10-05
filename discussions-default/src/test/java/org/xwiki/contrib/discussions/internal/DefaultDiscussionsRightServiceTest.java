@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.rights.AdminDiscussionRight;
@@ -217,7 +218,7 @@ class DefaultDiscussionsRightServiceTest
     void canDeleteMessageNotLocalUser()
     {
         Message message = new Message(new MessageReference("hint", "reference"),
-            new MessageContent("content", XWIKI_2_1), "no_local", "actorReference",
+            new MessageContent("content", XWIKI_2_1), new ActorReference("no_local", "actorReference"),
                 new Date(), new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -228,7 +229,7 @@ class DefaultDiscussionsRightServiceTest
     void canDeleteMessageNotAuthor()
     {
         Message message = new Message(new MessageReference("hint", "reference"),
-            new MessageContent("content", XWIKI_2_1), "user", "actorReference",
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "actorReference"),
                 new Date(), new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -239,7 +240,7 @@ class DefaultDiscussionsRightServiceTest
     void canDeleteMessageIsAuthorButWriteDisallowed()
     {
         Message message = new Message(new MessageReference("hint", "reference"),
-            new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "xwiki:XWiki.User"), new Date(),
                 new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -250,7 +251,7 @@ class DefaultDiscussionsRightServiceTest
     void canDeleteMessageIsAuthorAndWriteAllowed()
     {
         Message message = new Message(new MessageReference("hint", "reference"),
-            new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "xwiki:XWiki.User"), new Date(),
                 new Date(),
                 DISCUSSION);
         when(this.authorizationManager
@@ -263,7 +264,7 @@ class DefaultDiscussionsRightServiceTest
     void canDeleteMessageNotAuthorButAdmin()
     {
         Message message = new Message(new MessageReference("hint", "reference"),
-            new MessageContent("content", XWIKI_2_1), "user", "actorReference", new Date(),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "actorReference"), new Date(),
                 new Date(),
                 DISCUSSION);
         when(this.authorizationManager

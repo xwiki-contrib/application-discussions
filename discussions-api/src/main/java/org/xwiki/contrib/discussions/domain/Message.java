@@ -23,6 +23,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
@@ -39,9 +40,7 @@ public class Message
 {
     private final MessageReference reference;
 
-    private final String actorReference;
-
-    private final String actorType;
+    private final ActorReference actorReference;
 
     private final Date createDate;
 
@@ -56,20 +55,16 @@ public class Message
      *
      * @param reference the reference
      * @param messageContent the content of the message and its syntax
-     * @param actorType the actor type
      * @param actorReference the actor reference
      * @param createDate date of creation of the message
      * @param updateDate date of the last update of the message
      * @param discussion the discussion of the message
      */
-    public Message(MessageReference reference, MessageContent messageContent, String actorType,
-        String actorReference,
-        Date createDate,
-        Date updateDate, Discussion discussion)
+    public Message(MessageReference reference, MessageContent messageContent, ActorReference actorReference,
+        Date createDate, Date updateDate, Discussion discussion)
     {
         this.reference = reference;
         this.messageContent = messageContent;
-        this.actorType = actorType;
         this.actorReference = actorReference;
         this.createDate = createDate;
         this.updateDate = updateDate;
@@ -95,17 +90,9 @@ public class Message
     /**
      * @return this actor reference
      */
-    public String getActorReference()
+    public ActorReference getActorReference()
     {
         return this.actorReference;
-    }
-
-    /**
-     * @return the actor type
-     */
-    public String getActorType()
-    {
-        return this.actorType;
     }
 
     /**
@@ -157,7 +144,6 @@ public class Message
             .append(this.reference, message.reference)
             .append(this.messageContent, message.messageContent)
             .append(this.actorReference, message.actorReference)
-            .append(this.actorType, message.actorType)
             .append(this.createDate, message.createDate)
             .append(this.updateDate, message.updateDate)
             .append(this.discussion, message.discussion)
@@ -171,7 +157,6 @@ public class Message
             .append(this.reference)
             .append(this.messageContent)
             .append(this.actorReference)
-            .append(this.actorType)
             .append(this.createDate)
             .append(this.updateDate)
             .append(this.discussion)
@@ -185,7 +170,6 @@ public class Message
             .append("reference", this.getReference())
             .append("content", this.getContent())
             .append("syntax", this.getSyntax())
-            .append("actorType", this.getActorType())
             .append("actorReference", this.getActorReference())
             .append("createDate", this.getCreateDate())
             .append("updateDate", this.getUpdateDate())

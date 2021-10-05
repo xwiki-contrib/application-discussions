@@ -26,7 +26,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReference;

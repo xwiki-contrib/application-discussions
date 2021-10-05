@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.domain;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;

@@ -38,7 +38,7 @@ import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;

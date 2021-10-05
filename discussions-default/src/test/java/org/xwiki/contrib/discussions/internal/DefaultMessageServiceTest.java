@@ -33,6 +33,7 @@ import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
@@ -165,8 +166,7 @@ class DefaultMessageServiceTest
 
         assertEquals(
             Optional.of(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),
-                "AUTHOR_TYPE_NAME",
-                "AUTHOR_REFERENCE_NAME",
+                new ActorReference("AUTHOR_TYPE_NAME", "AUTHOR_REFERENCE_NAME"),
                 createDate, updateDate, discussion)),
             message);
     }
@@ -196,7 +196,7 @@ class DefaultMessageServiceTest
         Date createDate = new Date();
         Date updateDate = new Date();
         Message message = new Message(messageReference, new MessageContent("messageContent", Syntax.XHTML_1_0),
-            "messageActorType", "messageActorReference", createDate, updateDate,
+            new ActorReference("messageActorType", "messageActorReference"), createDate, updateDate,
             discussion);
         ObjectReference entityReference = new ObjectReference("Discussion.Message.MessageObject",
             new DocumentReference("xwiki", "XWiki", "MessageTest"));

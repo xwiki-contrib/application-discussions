@@ -38,6 +38,7 @@ import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.events.MessageEvent;
@@ -217,8 +218,7 @@ public class DefaultMessageService implements MessageService
             return new Message(
                 messageReference,
                 new MessageContent(bo.getLargeStringValue(CONTENT_NAME), bo.getOwnerDocument().getSyntax()),
-                bo.getStringValue(AUTHOR_TYPE_NAME),
-                bo.getStringValue(AUTHOR_REFERENCE_NAME),
+                new ActorReference(bo.getStringValue(AUTHOR_TYPE_NAME), bo.getStringValue(AUTHOR_REFERENCE_NAME)),
                 bo.getDateValue(CREATE_DATE_NAME),
                 bo.getDateValue(UPDATE_DATE_NAME),
                 discussion
