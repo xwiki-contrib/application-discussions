@@ -36,13 +36,4 @@
   <modules>
     <module>discussions-test-pageobjects</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>docker</id>
-      <modules>
-        <module>discussions-test-docker</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
