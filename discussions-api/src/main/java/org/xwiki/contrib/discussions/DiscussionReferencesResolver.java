@@ -38,7 +38,7 @@ public interface DiscussionReferencesResolver
      * type. Note that the serialization might not contain any information about the actual type, so it might not be
      * possible to check that the type is correct for this reference.
      *
-     * @param serializedReference a serialization of an {@link AbstractDiscussionReference}.
+     * @param serializedReference a serialization of an {@link AbstractDiscussionReference}
      * @param type the concrete type to obtain
      * @param <T> the actual given concrete type
      * @return an instance of the given type with the information of the reference
