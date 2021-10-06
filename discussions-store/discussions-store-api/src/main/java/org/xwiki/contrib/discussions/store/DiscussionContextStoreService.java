@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.objects.BaseObject;
@@ -40,14 +43,14 @@ public interface DiscussionContextStoreService
     /**
      * Creates a discussion context object.
      *
+     * @param applicationHint the hint of the application used to create the discussion context
      * @param name the name of the discussion context
      * @param description the description of the discussion context
-     * @param referenceType the type of the entity referenced by the discussion context
      * @param entityReference the reference of the entity referenced by the discussion context
      * @return the unique reference to the created discussion context
      */
-    Optional<String> create(String name, String description, String referenceType,
-        String entityReference);
+    Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference);
 
     /**
      * Returns a discussion context by its reference.
@@ -55,7 +58,7 @@ public interface DiscussionContextStoreService
      * @param reference the discussion context reference
      * @return the discussion context base object
      */
-    Optional<BaseObject> get(String reference);
+    Optional<BaseObject> get(DiscussionContextReference reference);
 
     /**
      * Links (unidirectionally) a discussion context and a discussion.
@@ -64,7 +67,7 @@ public interface DiscussionContextStoreService
      * @param discussionReference the discussion reference
      * @return {@code true} if the link was not already existing, {@code false} otherwise
      */
-    boolean link(String discussionContextReference, String discussionReference);
+    boolean link(DiscussionContextReference discussionContextReference, DiscussionReference discussionReference);
 
     /**
      * Unlinks (unidirectionally) a discussion context and a discussion.
@@ -73,16 +76,15 @@ public interface DiscussionContextStoreService
      * @param discussionReference the discussion reference
      * @return {@code true} if the link was existing and has been removed, {@code false} otherwise
      */
-    boolean unlink(String discussionContextReference, String discussionReference);
+    boolean unlink(DiscussionContextReference discussionContextReference, DiscussionReference discussionReference);
 
     /**
      * Search for a discussion context by its reference.
      *
-     * @param referenceType the reference type
      * @param entityReference the entity reference
      * @return the discussion context
      */
-    Optional<BaseObject> findByReference(String referenceType, String entityReference);
+    Optional<BaseObject> findByReference(DiscussionContextEntityReference entityReference);
 
     /**
      * Search of the discussion contexts linked to a discussion.
@@ -90,5 +92,5 @@ public interface DiscussionContextStoreService
      * @param reference the reference of the discussion
      * @return the list of the discussion contexts
      */
-    List<BaseObject> findByDiscussionReference(String reference);
+    List<BaseObject> findByDiscussionReference(DiscussionReference reference);
 }

@@ -19,8 +19,6 @@
  */
 package org.xwiki.contrib.discussions;
 
-import java.util.Optional;
-
 import org.xwiki.component.annotation.Role;
 import org.xwiki.stability.Unstable;
 
@@ -36,9 +34,10 @@ public interface DiscussionsActorServiceResolver
 {
     /**
      * Returns an actor service for the requested type.
+     * In case the actor service cannot be found  for the given type, fallback on a default service.
      *
      * @param type the type
-     * @return the actor service, {@link Optional#empty()} if the resolution failed
+     * @return the actor service corresponding to the type, or default service
      */
-    Optional<DiscussionsActorService> get(String type);
+    DiscussionsActorService get(String type);
 }

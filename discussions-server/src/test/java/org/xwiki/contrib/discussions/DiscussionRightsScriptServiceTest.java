@@ -21,15 +21,14 @@ package org.xwiki.contrib.discussions;
 
 import java.util.Date;
 
-import javax.inject.Inject;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.script.DiscussionRightsScriptService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.security.authorization.ContextualAuthorizationManager;
 import org.xwiki.security.authorization.Right;
@@ -41,7 +40,7 @@ import org.xwiki.test.junit5.mockito.MockComponent;
  * Test of {@link DiscussionRightsScriptService}.
  *
  * @version $Id$
- * @since 1.5
+ * @since 1.1
  */
 @ComponentTest
 class DiscussionRightsScriptServiceTest
@@ -64,8 +63,9 @@ class DiscussionRightsScriptServiceTest
     @Test
     void setReadNoProgrammingRight()
     {
+        DiscussionReference discussionReference = new DiscussionReference("hint", "discussionReference");
         Discussion discussion =
-            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
+            new Discussion(discussionReference, "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(false);
@@ -78,8 +78,9 @@ class DiscussionRightsScriptServiceTest
     @Test
     void setRead()
     {
+        DiscussionReference discussionReference = new DiscussionReference("hint", "discussionReference");
         Discussion discussion =
-            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
+            new Discussion(discussionReference, "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(true);
@@ -92,8 +93,9 @@ class DiscussionRightsScriptServiceTest
     @Test
     void setWriteNoProgrammingRight()
     {
+        DiscussionReference discussionReference = new DiscussionReference("hint", "discussionReference");
         Discussion discussion =
-            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
+            new Discussion(discussionReference, "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(false);
@@ -106,8 +108,9 @@ class DiscussionRightsScriptServiceTest
     @Test
     void setWrite()
     {
+        DiscussionReference discussionReference = new DiscussionReference("hint", "discussionReference");
         Discussion discussion =
-            new Discussion("discussionReference", "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
+            new Discussion(discussionReference, "discussionTitle", "discussionDescription", new Date(), "XWiki.Test");
         DocumentReference user = new DocumentReference("xwiki", "XWiki", "U1");
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(true);

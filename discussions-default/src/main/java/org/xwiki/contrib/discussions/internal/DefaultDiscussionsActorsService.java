@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 
 /**
  * Resolve an actor descriptor from a local wiki user reference.
@@ -50,13 +51,13 @@ public class DefaultDiscussionsActorsService implements DiscussionsActorService
     }
 
     @Override
-    public Stream<ActorDescriptor> listUsers(String discussionReference)
+    public Stream<ActorDescriptor> listUsers(DiscussionReference discussionReference)
     {
         return Stream.empty();
     }
 
     @Override
-    public long countUsers(String discussionReference)
+    public long countUsers(DiscussionReference discussionReference)
     {
         return 0;
     }

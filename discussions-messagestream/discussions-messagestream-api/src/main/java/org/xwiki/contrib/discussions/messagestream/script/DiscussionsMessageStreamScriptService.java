@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.messagestream;
+package org.xwiki.contrib.discussions.messagestream.script;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,8 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.script.service.ScriptService;
@@ -41,6 +42,7 @@ import org.xwiki.user.group.GroupException;
 import org.xwiki.user.group.GroupManager;
 
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.xwiki.contrib.discussions.messagestream.internal.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
 
 /**
  * Discussions Message Stream script service.
@@ -86,7 +88,8 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
-        this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_USER, "*")
+        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                new DiscussionContextEntityReference(MESSAGESTREAM_USER, "*"))
             .ifPresent(discussionContexts::add);
         return discussionContexts;
     }
@@ -103,7 +106,8 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
         initializeAuthor(author, discussionContexts);
         String serializedAuthor = this.serializer.serialize(this.resolver.resolve(author));
         for (String follower : this.discussionsFollowersService.getFollowers(serializedAuthor)) {
-            this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_USER, follower)
+            this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                    new DiscussionContextEntityReference(MESSAGESTREAM_USER, follower))
                 .ifPresent(discussionContexts::add);
         }
         return discussionContexts;
@@ -123,7 +127,8 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
         for (String user : users) {
             if (!"".equals(user)) {
                 String serialize = this.serializer.serialize(this.resolver.resolve(user));
-                this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_USER, serialize)
+                this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                        new DiscussionContextEntityReference(MESSAGESTREAM_USER, serialize))
                     .ifPresent(discussionContexts::add);
             }
         }
@@ -153,16 +158,19 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
                     return Stream.empty();
                 }
             }).collect(Collectors.toSet()).forEach(it -> this.discussionContextService
-            .getOrCreate("", "", MESSAGESTREAM_USER, this.serializer.serialize(it))
+            .getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                new DiscussionContextEntityReference(MESSAGESTREAM_USER, this.serializer.serialize(it)))
             .ifPresent(discussionContexts::add));
         return discussionContexts;
     }
 
     private void initializeAuthor(String author, ArrayList<DiscussionContext> discussionContexts)
     {
-        this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_EMITTER, author)
+        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                new DiscussionContextEntityReference(MESSAGESTREAM_EMITTER, author))
             .ifPresent(discussionContexts::add);
-        this.discussionContextService.getOrCreate("", "", MESSAGESTREAM_USER, author)
+        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+                new DiscussionContextEntityReference(MESSAGESTREAM_USER, author))
             .ifPresent(discussionContexts::add);
     }
 }

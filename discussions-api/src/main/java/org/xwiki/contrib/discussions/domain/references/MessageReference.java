@@ -17,24 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.test.ui;
+package org.xwiki.contrib.discussions.domain.references;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.xwiki.test.docker.junit5.UITest;
+import org.xwiki.stability.Unstable;
 
 /**
- * All the UI tests of the Discussions application.
+ * Represents a reference of a {@link org.xwiki.contrib.discussions.domain.Message}.
  *
+ * @see org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference
  * @version $Id$
- * @since 1.0
+ * @since 2.0
  */
-@UITest
-public class AllITs
+@Unstable
+public class MessageReference extends AbstractDiscussionReference
 {
-    @Nested
-    @DisplayName("Discussions UI")
-    class NestedDiscussionsIT extends DiscussionsIT
+    /**
+     * Default constructor.
+     *
+     * @param applicationHint the application in which the context is used.
+     * @param reference the actual reference of the context.
+     */
+    public MessageReference(String applicationHint, String reference)
     {
+        super(applicationHint, reference);
     }
 }

@@ -28,10 +28,13 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.events.DiscussionContextEvent;
 import org.xwiki.contrib.discussions.events.DiscussionEvent;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
@@ -42,7 +45,6 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
 import static org.xwiki.contrib.discussions.events.ActionType.UPDATE;
-import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
@@ -60,32 +62,36 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
 public class DefaultDiscussionContextService implements DiscussionContextService
 {
     @Inject
+    private ObservationManager observationManager;
+
+    @Inject
     private DiscussionContextStoreService discussionContextStoreService;
 
     @Inject
     private DiscussionStoreService discussionStoreService;
 
     @Inject
-    private ObservationManager observationManager;
-
-    @Inject
     private DiscussionsRightService discussionsRightService;
 
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     @Override
-    public Optional<DiscussionContext> create(String name, String description, String referenceType,
-        String entityReference)
+    public Optional<DiscussionContext> create(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference)
     {
-        return this.discussionContextStoreService.create(name, description, referenceType, entityReference)
+        return this.discussionContextStoreService.create(applicationHint, name, description, entityReference)
             .map(reference -> {
-                DiscussionContext discussionContext = new DiscussionContext(reference, name, description,
-                    new DiscussionContextEntityReference(referenceType, entityReference));
-                this.observationManager.notify(new DiscussionContextEvent(CREATE), EVENT_SOURCE, discussionContext);
+                DiscussionContext discussionContext =
+                    new DiscussionContext(reference, name, description, entityReference);
+                this.observationManager.notify(
+                    new DiscussionContextEvent(CREATE), applicationHint, discussionContext);
                 return discussionContext;
             });
     }
 
     @Override
-    public List<DiscussionContext> findByDiscussionReference(String reference)
+    public List<DiscussionContext> findByDiscussionReference(DiscussionReference reference)
     {
         return this.discussionContextStoreService.findByDiscussionReference(reference)
             .stream()
@@ -102,7 +108,7 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
-    public boolean canViewDiscussionContext(String reference)
+    public boolean canViewDiscussionContext(DiscussionContextReference reference)
     {
         return this.discussionContextStoreService.get(reference)
             .map(o -> this.discussionsRightService.canWriteDiscussionContext(o.getDocumentReference()))
@@ -110,47 +116,49 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
-    public Optional<DiscussionContext> getOrCreate(String name, String description, String referenceType,
-        String entityReference)
+    public Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
+        DiscussionContextEntityReference entityReference)
     {
         Optional<BaseObject> baseObject =
-            this.discussionContextStoreService.findByReference(referenceType, entityReference);
+            this.discussionContextStoreService.findByReference(entityReference);
         if (baseObject.isPresent()) {
             return baseObject.flatMap(this::mapBaseObject);
         } else {
-            return this.create(name, description, referenceType, entityReference);
+            return this.create(applicationHint, name, description, entityReference);
         }
     }
 
     @Override
     public void link(DiscussionContext discussionContext, Discussion discussion)
     {
-        String discussionContextReference = discussionContext.getReference();
-        String discussionReference = discussion.getReference();
-
+        DiscussionContextReference discussionContextReference = discussionContext.getReference();
+        DiscussionReference discussionReference = discussion.getReference();
+        String applicationHint = discussionContextReference.getApplicationHint();
         if (this.discussionContextStoreService.link(discussionContextReference, discussionReference)) {
-            this.observationManager.notify(new DiscussionContextEvent(UPDATE), EVENT_SOURCE, discussionContext);
+            this.observationManager.notify(new DiscussionContextEvent(UPDATE), applicationHint, discussionContext);
         }
         if (this.discussionStoreService.link(discussionReference, discussionContextReference)) {
-            this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion);
+            this.observationManager.notify(new DiscussionEvent(UPDATE), applicationHint, discussion);
         }
     }
 
     @Override
     public void unlink(DiscussionContext discussionContext, Discussion discussion)
     {
-        String discussionContextReference = discussionContext.getReference();
-        String discussionReference = discussion.getReference();
+        DiscussionContextReference discussionContextReference = discussionContext.getReference();
+        DiscussionReference discussionReference = discussion.getReference();
+        String applicationHint = discussionContextReference.getApplicationHint();
+
         if (this.discussionContextStoreService.unlink(discussionContextReference, discussionReference)) {
-            this.observationManager.notify(new DiscussionContextEvent(UPDATE), EVENT_SOURCE, discussionContext);
+            this.observationManager.notify(new DiscussionContextEvent(UPDATE), applicationHint, discussionContext);
         }
         if (this.discussionStoreService.unlink(discussionReference, discussionContextReference)) {
-            this.observationManager.notify(new DiscussionEvent(UPDATE), EVENT_SOURCE, discussion);
+            this.observationManager.notify(new DiscussionEvent(UPDATE), applicationHint, discussion);
         }
     }
 
     @Override
-    public Optional<DiscussionContext> get(String reference)
+    public Optional<DiscussionContext> get(DiscussionContextReference reference)
     {
         return this.discussionContextStoreService.get(reference)
             .flatMap(this::mapBaseObject);
@@ -158,9 +166,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
 
     private Optional<DiscussionContext> mapBaseObject(BaseObject baseObject)
     {
+        DiscussionContextReference discussionContextReference =
+            this.discussionReferencesResolver.resolve(baseObject.getStringValue(REFERENCE_NAME),
+                DiscussionContextReference.class);
         return Optional
             .of(new DiscussionContext(
-                baseObject.getStringValue(REFERENCE_NAME),
+                discussionContextReference,
                 baseObject.getStringValue(NAME_NAME),
                 baseObject.getStringValue(DESCRIPTION_NAME),
                 new DiscussionContextEntityReference(

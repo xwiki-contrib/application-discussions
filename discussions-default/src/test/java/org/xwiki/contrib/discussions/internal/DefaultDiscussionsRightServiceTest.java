@@ -31,6 +31,9 @@ import org.mockito.Mock;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.rights.AdminDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.ReadDiscussionRight;
 import org.xwiki.contrib.discussions.internal.rights.WriteDiscussionRight;
@@ -65,8 +68,8 @@ class DefaultDiscussionsRightServiceTest
 
     private static final DocumentReference DISCUSSION_REFERENCE = new DocumentReference("xwiki", "XWiki", "Discussion");
 
-    public static final Discussion DISCUSSION =
-        new Discussion("referenceDiscussion", "title", "description", new Date(), null);
+    public static final Discussion DISCUSSION = new Discussion(new DiscussionReference("hint", "referenceDiscussion"),
+        "title", "description", new Date(), null);
 
     public static final String USER_REFERENCE = "xwiki:XWiki.User";
 
@@ -214,8 +217,8 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotLocalUser()
     {
-        Message message =
-            new Message("reference", new MessageContent("content", XWIKI_2_1), "no_local", "actorReference",
+        Message message = new Message(new MessageReference("hint", "reference"),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("no_local", "actorReference"),
                 new Date(), new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -225,8 +228,8 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotAuthor()
     {
-        Message message =
-            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "actorReference",
+        Message message = new Message(new MessageReference("hint", "reference"),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "actorReference"),
                 new Date(), new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -236,8 +239,8 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageIsAuthorButWriteDisallowed()
     {
-        Message message =
-            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+        Message message = new Message(new MessageReference("hint", "reference"),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "xwiki:XWiki.User"), new Date(),
                 new Date(),
                 DISCUSSION);
         boolean b = this.defaultDiscussionsRightService.canDeleteMessage(message, DISCUSSION_REFERENCE);
@@ -247,8 +250,8 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageIsAuthorAndWriteAllowed()
     {
-        Message message =
-            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "xwiki:XWiki.User", new Date(),
+        Message message = new Message(new MessageReference("hint", "reference"),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "xwiki:XWiki.User"), new Date(),
                 new Date(),
                 DISCUSSION);
         when(this.authorizationManager
@@ -260,8 +263,8 @@ class DefaultDiscussionsRightServiceTest
     @Test
     void canDeleteMessageNotAuthorButAdmin()
     {
-        Message message =
-            new Message("reference", new MessageContent("content", XWIKI_2_1), "user", "actorReference", new Date(),
+        Message message = new Message(new MessageReference("hint", "reference"),
+            new MessageContent("content", XWIKI_2_1), new ActorReference("user", "actorReference"), new Date(),
                 new Date(),
                 DISCUSSION);
         when(this.authorizationManager

@@ -30,6 +30,8 @@ import org.xwiki.stability.Unstable;
 @Unstable
 public class CreateDiscussion
 {
+    private String applicationHint;
+
     private String title;
 
     private String description;
@@ -87,6 +89,26 @@ public class CreateDiscussion
     public CreateDiscussion setMainDocument(String mainDocument)
     {
         this.mainDocument = mainDocument;
+        return this;
+    }
+
+    /**
+     * @return the application used for creating the discussion
+     * @since 2.0
+     */
+    public String getApplicationHint()
+    {
+        return applicationHint;
+    }
+
+    /**
+     * @param applicationHint the application used for creating the discussion
+     * @return the current instance
+     * @since 2.0
+     */
+    public CreateDiscussion setApplicationHint(String applicationHint)
+    {
+        this.applicationHint = applicationHint;
         return this;
     }
 }

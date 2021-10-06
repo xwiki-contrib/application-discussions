@@ -31,12 +31,16 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.MessageContent;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.events.MessageEvent;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
@@ -51,7 +55,6 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import static org.xwiki.contrib.discussions.events.ActionType.CREATE;
 import static org.xwiki.contrib.discussions.events.ActionType.DELETE;
-import static org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_TYPE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_NAME;
@@ -93,8 +96,11 @@ public class DefaultMessageService implements MessageService
     @Inject
     private ObservationManager observationManager;
 
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     @Override
-    public Optional<Message> create(String content, Syntax syntax, String discussionReference)
+    public Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference)
     {
         DocumentReference author = this.xcontextProvider.get().getUserReference();
         String authorReference = this.entityReferenceSerializer.serialize(author);
@@ -103,7 +109,7 @@ public class DefaultMessageService implements MessageService
 
     @Override
     public Optional<Message> create(String content, Syntax syntax,
-        String discussionReference, String authorType,
+        DiscussionReference discussionReference, String authorType,
         String authorReference)
     {
         return create(content, syntax, discussionReference, authorType, authorReference, true);
@@ -111,7 +117,7 @@ public class DefaultMessageService implements MessageService
 
     @Override
     public Optional<Message> create(String content, Syntax syntax,
-        String discussionReference, String authorType,
+        DiscussionReference discussionReference, String authorType,
         String authorReference, boolean notify)
     {
         String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
@@ -122,23 +128,28 @@ public class DefaultMessageService implements MessageService
                 Optional<Message> messageOpt = getByReference(reference);
                 if (notify) {
                     messageOpt
-                        .ifPresent(m -> this.observationManager.notify(new MessageEvent(CREATE), EVENT_SOURCE, m));
+                        .ifPresent(m -> this.observationManager
+                            .notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), m));
                 }
                 return messageOpt;
             });
     }
 
     @Override
-    public Optional<Message> getByReference(String reference)
+    public Optional<Message> getByReference(MessageReference reference)
     {
         return this.messageStoreService.getByReference(reference)
-            .flatMap(
-                messageObject -> this.discussionService.get(messageObject.getStringValue(DISCUSSION_REFERENCE_NAME))
-                    .map(discussion -> convertToMessage(discussion).apply(messageObject)));
+            .flatMap(messageObject -> {
+                String msgDiscussionReference = messageObject.getStringValue(DISCUSSION_REFERENCE_NAME);
+                DiscussionReference discussionReference =
+                    this.discussionReferencesResolver.resolve(msgDiscussionReference, DiscussionReference.class);
+                return this.discussionService.get(discussionReference)
+                    .map(discussion -> convertToMessage(discussion).apply(messageObject));
+            });
     }
 
     @Override
-    public List<Message> getByDiscussion(String discussionReference, int offset, int limit)
+    public List<Message> getByDiscussion(DiscussionReference discussionReference, int offset, int limit)
     {
         return this.discussionService.get(discussionReference)
             .map(discussion -> this.messageStoreService.getByDiscussion(discussionReference, offset, limit)
@@ -155,17 +166,17 @@ public class DefaultMessageService implements MessageService
     }
 
     @Override
-    public void delete(String reference, String discussionReference)
+    public void delete(MessageReference reference)
     {
         this.getByReference(reference)
             .ifPresent(message -> {
                 this.messageStoreService.delete(message.getReference());
-                this.observationManager.notify(new MessageEvent(DELETE), EVENT_SOURCE, message);
+                this.observationManager.notify(new MessageEvent(DELETE), reference.getApplicationHint(), message);
             });
     }
 
     @Override
-    public String renderContent(String messageReference)
+    public String renderContent(MessageReference messageReference)
     {
         return this.messageStoreService.getByReference(messageReference)
             .map(it -> {
@@ -181,7 +192,7 @@ public class DefaultMessageService implements MessageService
     @Override
     public boolean canDelete(Message message)
     {
-        String discussionReference = message.getDiscussion().getReference();
+        DiscussionReference discussionReference = message.getDiscussion().getReference();
         return this.discussionStoreService.get(discussionReference).map(
             baseObject -> this.discussionsRightService.canDeleteMessage(message, baseObject.getDocumentReference()))
             .orElse(false);
@@ -191,20 +202,27 @@ public class DefaultMessageService implements MessageService
     public Optional<Message> getByEntity(EntityReference entityReference)
     {
         return this.messageStoreService.getByEntityReference(entityReference)
-            .flatMap(bo -> this.discussionService.get(bo.getStringValue(DISCUSSION_REFERENCE_NAME))
-                .map(it -> convertToMessage(it).apply(bo)));
+            .flatMap(bo -> {
+                DiscussionReference discussionReference = this.discussionReferencesResolver
+                    .resolve(bo.getStringValue(DISCUSSION_REFERENCE_NAME), DiscussionReference.class);
+                return this.discussionService.get(discussionReference)
+                    .map(it -> convertToMessage(it).apply(bo));
+            });
     }
 
     private Function<BaseObject, Message> convertToMessage(Discussion discussion)
     {
-        return bo -> new Message(
-            bo.getStringValue(REFERENCE_NAME),
-            new MessageContent(bo.getLargeStringValue(CONTENT_NAME), bo.getOwnerDocument().getSyntax()),
-            bo.getStringValue(AUTHOR_TYPE_NAME),
-            bo.getStringValue(AUTHOR_REFERENCE_NAME),
-            bo.getDateValue(CREATE_DATE_NAME),
-            bo.getDateValue(UPDATE_DATE_NAME),
-            discussion
-        );
+        return bo -> {
+            MessageReference messageReference =
+                this.discussionReferencesResolver.resolve(bo.getStringValue(REFERENCE_NAME), MessageReference.class);
+            return new Message(
+                messageReference,
+                new MessageContent(bo.getLargeStringValue(CONTENT_NAME), bo.getOwnerDocument().getSyntax()),
+                new ActorReference(bo.getStringValue(AUTHOR_TYPE_NAME), bo.getStringValue(AUTHOR_REFERENCE_NAME)),
+                bo.getDateValue(CREATE_DATE_NAME),
+                bo.getDateValue(UPDATE_DATE_NAME),
+                discussion
+            );
+        };
     }
 }

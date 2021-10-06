@@ -26,4 +26,5 @@
 
 <suppressions>
   <suppress checks="ParameterNumber" files="DefaultDiscussionREST.java"/>
+  <suppress checks="ClassFanOutComplexity" files="DefaultDiscussionREST.java"/>
 </suppressions>

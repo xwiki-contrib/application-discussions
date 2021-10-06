@@ -25,6 +25,8 @@ import java.util.Optional;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.stability.Unstable;
@@ -47,7 +49,7 @@ public interface MessageService
      * @param discussionReference the discussion reference
      * @return the created message
      */
-    Optional<Message> create(String content, Syntax syntax, String discussionReference);
+    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference);
 
     /**
      * Creates a message for a specific user.
@@ -59,7 +61,7 @@ public interface MessageService
      * @param authorReference the author reference
      * @return the create message
      */
-    Optional<Message> create(String content, Syntax syntax, String discussionReference,
+    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
         String authorType, String authorReference);
 
     /**
@@ -74,7 +76,7 @@ public interface MessageService
      *     otherwise
      * @return the create message
      */
-    Optional<Message> create(String content, Syntax syntax, String discussionReference, String authorType,
+    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference, String authorType,
         String authorReference,
         boolean notify);
 
@@ -84,7 +86,7 @@ public interface MessageService
      * @param reference the reference
      * @return the message
      */
-    Optional<Message> getByReference(String reference);
+    Optional<Message> getByReference(MessageReference reference);
 
     /**
      * Returns the paginated list of messages of the discussion.
@@ -94,7 +96,7 @@ public interface MessageService
      * @param limit the limit
      * @return the list of messages
      */
-    List<Message> getByDiscussion(String discussionReference, int offset, int limit);
+    List<Message> getByDiscussion(DiscussionReference discussionReference, int offset, int limit);
 
     /**
      * Returns the count of messages of a discussion.
@@ -116,9 +118,8 @@ public interface MessageService
      * Delete a message.
      *
      * @param reference the message reference
-     * @param discussionReference the reference of the discussion of the message
      */
-    void delete(String reference, String discussionReference);
+    void delete(MessageReference reference);
 
     /**
      * Safely renders the content of a message.
@@ -126,7 +127,7 @@ public interface MessageService
      * @param messageReference the reference of the message to render
      * @return the result of the rendering in html
      */
-    String renderContent(String messageReference);
+    String renderContent(MessageReference messageReference);
 
     /**
      * Load a message object by its entity reference.

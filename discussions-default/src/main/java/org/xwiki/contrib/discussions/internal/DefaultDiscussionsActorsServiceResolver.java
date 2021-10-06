@@ -19,9 +19,8 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -44,6 +43,7 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
 public class DefaultDiscussionsActorsServiceResolver implements DiscussionsActorServiceResolver
 {
     @Inject
+    @Named("context")
     private ComponentManager componentManager;
 
     @Inject
@@ -53,14 +53,17 @@ public class DefaultDiscussionsActorsServiceResolver implements DiscussionsActor
     private Logger logger;
 
     @Override
-    public Optional<DiscussionsActorService> get(String type)
+    public DiscussionsActorService get(String type)
     {
+        DiscussionsActorService result = this.defaultDiscussionsActorService;
         try {
-            return Optional.of(this.componentManager.getInstance(DiscussionsActorService.class, type));
+            if (this.componentManager.hasComponent(DiscussionsActorService.class, type)) {
+                result = this.componentManager.getInstance(DiscussionsActorService.class, type);
+            }
         } catch (ComponentLookupException e) {
             this.logger
-                .debug("Failed to find an actor service for type [{}]. Cause: [{}]", type, getRootCauseMessage(e));
-            return Optional.of(this.defaultDiscussionsActorService);
+                .warn("Error to initialize service for type [{}]. Cause: [{}]", type, getRootCauseMessage(e));
         }
+        return result;
     }
 }

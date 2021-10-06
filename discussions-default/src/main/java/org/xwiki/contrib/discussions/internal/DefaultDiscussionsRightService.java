@@ -125,9 +125,9 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
         // Or the current user is an administrator of the discussion.
         DocumentReference userReference = this.xcontextProvider.get().getUserReference();
         String serialize = this.entityReferenceSerializer.serialize(userReference);
-        boolean isLocalUser = Objects.equals(message.getActorType(), "user");
+        boolean isLocalUser = Objects.equals(message.getActorReference().getType(), "user");
         if (isLocalUser) {
-            boolean isAuthor = Objects.equals(message.getActorReference(), serialize);
+            boolean isAuthor = Objects.equals(message.getActorReference().getReference(), serialize);
             if (isAuthor && this.canWriteDiscussion(discussion)) {
                 return true;
             }

@@ -39,8 +39,11 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.container.servlet.ServletResponse;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
 import org.xwiki.csrf.CSRFToken;
 import org.xwiki.rendering.parser.ParseException;
@@ -106,6 +109,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     @Inject
     private CSRFToken csrfToken;
 
+    @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
     @Override
     public List<ResourceType> getSupportedResourceReferences()
     {
@@ -150,8 +156,10 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     {
         switch (discussionsResourceReference.getDiscussionsEntityType()) {
             case MESSAGE:
-                this.messageService.delete(request.getParameter(REFERENCE_PARAM),
-                    request.getParameter(DISCUSSION_REFERENCE_PARAM));
+                MessageReference messageReference =
+                    this.discussionReferencesResolver.resolve(request.getParameter(REFERENCE_PARAM),
+                        MessageReference.class);
+                this.messageService.delete(messageReference);
                 redirect(response, request.getParameter(ORIGINAL_URL_PARAM));
                 break;
             case DISCUSSION:
@@ -217,8 +225,11 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                 this.logger.warn("Failed to return a request error response. Cause: [{}]", getRootCauseMessage(e));
             }
         } else {
+            DiscussionReference discussionReference =
+                this.discussionReferencesResolver.resolve(request.getParameter(DISCUSSION_REFERENCE_PARAM),
+                    DiscussionReference.class);
             this.discussionService
-                .get(request.getParameter(DISCUSSION_REFERENCE_PARAM))
+                .get(discussionReference)
                 .ifPresent(d -> {
                     String content = getContent(request);
                     Syntax syntax;

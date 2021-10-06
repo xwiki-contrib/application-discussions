@@ -24,7 +24,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,12 +35,15 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.rest.DiscussionLiveTableRow;
 import org.xwiki.contrib.discussions.rest.DiscussionREST;
 import org.xwiki.contrib.discussions.rest.DiscussionUserRow;
@@ -88,12 +90,20 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
     private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Inject
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
     private Logger logger;
 
     @Override
     public Discussion get(String reference) throws XWikiRestException
     {
-        return this.discussionService.get(reference)
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(reference, DiscussionReference.class);
+        return this.discussionService.get(discussionReference)
             .orElseThrow(() -> new XWikiRestException(
                 String.format("Discussion with reference=[%s] not found.", reference)));
     }
@@ -119,7 +129,7 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
                 discussionLiveTableRow.setTitle(d.getTitle());
                 try {
                     discussionLiveTableRow.setTitleUrl(linkTemplate.replace("__REFERENCE__", URLEncoder
-                        .encode(d.getReference(), "UTF-8")));
+                        .encode(this.discussionReferencesSerializer.serialize(d.getReference()), "UTF-8")));
                 } catch (UnsupportedEncodingException e) {
                     this.logger.warn("Failed to generate the title for discussion [{}]. Cause: [{}]", e,
                         getRootCauseMessage(e));
@@ -141,29 +151,28 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
     public Response listusers(String type, String reference, Integer offset, Integer limit,
         Integer reqNo)
     {
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(reference, DiscussionReference.class);
         LiveTableResult<DiscussionUserRow> ltr = new LiveTableResult<>();
         ltr.setReqNo(reqNo);
-        Optional<DiscussionsActorService> discussionsActorService = this.discussionsActorServiceResolver.get(type);
-        if (discussionsActorService.isPresent()) {
-            DiscussionsActorService discussionsActorService1 = discussionsActorService.get();
-            Stream<ActorDescriptor> users = discussionsActorService1.listUsers(reference);
-            Stream<ActorDescriptor> collect = users.sorted(Comparator.comparing(ActorDescriptor::getName));
-            if (offset != null) {
-                ltr.setOffset(offset);
-                collect = collect.skip(offset - 1);
-            }
-            if (limit != null) {
-                collect = collect.limit(limit);
-            }
-            ltr.setTotalrows(discussionsActorService1.countUsers(reference));
-            ltr.setRows(collect.map(it -> {
-                EntityReference resolve = this.documentReferenceResolver.resolve(it.getLink().toASCIIString());
-                String serialize = this.urlSerializer.serialize(resolve);
-                return new DiscussionUserRow(it.getName(), serialize);
-            }).collect(Collectors.toList()));
-        } else {
-            // TODO error
+        DiscussionsActorService discussionsActorService = this.discussionsActorServiceResolver.get(type);
+
+        Stream<ActorDescriptor> users = discussionsActorService.listUsers(discussionReference);
+        Stream<ActorDescriptor> collect = users.sorted(Comparator.comparing(ActorDescriptor::getName));
+        if (offset != null) {
+            ltr.setOffset(offset);
+            collect = collect.skip(offset - 1);
         }
+        if (limit != null) {
+            collect = collect.limit(limit);
+        }
+        ltr.setTotalrows(discussionsActorService.countUsers(discussionReference));
+        ltr.setRows(collect.map(it -> {
+            EntityReference resolve = this.documentReferenceResolver.resolve(it.getLink().toASCIIString());
+            String serialize = this.urlSerializer.serialize(resolve);
+            return new DiscussionUserRow(it.getName(), serialize);
+        }).collect(Collectors.toList()));
+
         try {
             return Response.ok(new ObjectMapper().writeValueAsString(ltr), MediaType.APPLICATION_JSON).build();
         } catch (JsonProcessingException e) {
@@ -175,10 +184,11 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
     @Override
     public Discussion create(CreateDiscussion discussion) throws XWikiRestException
     {
+        String applicationHint = discussion.getApplicationHint();
         String title = discussion.getTitle();
         String description = discussion.getDescription();
         String mainDocument = discussion.getMainDocument();
-        return this.discussionService.create(title, description, mainDocument)
+        return this.discussionService.create(applicationHint, title, description, mainDocument)
             .orElseThrow(() -> new XWikiRestException(
                 String.format("Fail to create a discussion with title=[%s], description=[%s]", title, description)));
     }

@@ -31,8 +31,4 @@ import org.xwiki.stability.Unstable;
 @Unstable
 public interface DiscussionsEvent extends Event
 {
-    /**
-     * Source of the discussions  event.
-     */
-    String EVENT_SOURCE = "org.xwiki.contrib:activitypub-notifications";
 }

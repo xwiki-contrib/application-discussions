@@ -24,14 +24,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -56,11 +56,13 @@ class DefaultDiscussionContextServiceTest
     void createCreateFail()
     {
         when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(true);
-        when(this.discussionContextStoreService.create("name", "description", "referenceType", "entityReference"))
+        when(this.discussionContextStoreService.create("hint", "name", "description",
+            new DiscussionContextEntityReference("referenceType", "entityReference")))
             .thenReturn(Optional.empty());
 
         Optional<DiscussionContext> discussionContext =
-            this.defaultDiscussionContextService.create("name", "description", "referenceType", "entityReference");
+            this.defaultDiscussionContextService.create("hint", "name", "description",
+                new DiscussionContextEntityReference("referenceType", "entityReference"));
 
         assertEquals(Optional.empty(), discussionContext);
     }
@@ -69,14 +71,17 @@ class DefaultDiscussionContextServiceTest
     void create()
     {
         when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(true);
-        when(this.discussionContextStoreService.create("name", "description", "referenceType", "entityReference"))
-            .thenReturn(Optional.of("reference"));
+        when(this.discussionContextStoreService.create("hint", "name", "description",
+            new DiscussionContextEntityReference("referenceType", "entityReference")))
+            .thenReturn(Optional.of(new DiscussionContextReference("hint", "reference")));
 
         Optional<DiscussionContext> discussionContext =
-            this.defaultDiscussionContextService.create("name", "description", "referenceType", "entityReference");
+            this.defaultDiscussionContextService.create("hint", "name", "description",
+                new DiscussionContextEntityReference("referenceType", "entityReference"));
 
         assertEquals(
-            Optional.of(new DiscussionContext("reference", "name", "description",
+            Optional.of(new DiscussionContext(new DiscussionContextReference("hint", "reference")
+                , "name", "description",
                 new DiscussionContextEntityReference("referenceType", "entityReference"))),
             discussionContext);
     }

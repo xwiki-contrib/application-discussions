@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>12.10</version>
+    <version>12.10.6</version>
   </parent>
 
   <artifactId>application-discussions</artifactId>
@@ -90,6 +90,381 @@
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
+        <configuration>
+          <analysisConfiguration>
+            <revapi.ignore>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.DiscussionContextService::canViewDiscussionContext(===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.DiscussionContextService::canViewDiscussionContext(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.List&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::findByDiscussionReference(===java.lang.String===)</old>
+                <new>parameter java.util.List&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::findByDiscussionReference(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::get(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::get(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canRead(===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canRead(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canViewDiscussion(===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canViewDiscussion(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canWrite(===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.DiscussionService::canWrite(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::create(java.lang.String, java.lang.String, java.lang.String)</old>
+                <new>method java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::create(java.lang.String, java.lang.String, java.lang.String, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::get(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::get(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::getOrCreate(java.lang.String, java.lang.String, java.util.List&lt;java.lang.String&gt;)</old>
+                <new>method java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Discussion&gt; org.xwiki.contrib.discussions.DiscussionService::getOrCreate(java.lang.String, java.lang.String, java.lang.String, java.util.List&lt;org.xwiki.contrib.discussions.domain.references.DiscussionContextReference&gt;)</new>
+                <justification>Unstable API and refactoring of references.E</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.DiscussionService::touch(===java.lang.String===)</old>
+                <new>parameter void org.xwiki.contrib.discussions.DiscussionService::touch(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter long org.xwiki.contrib.discussions.DiscussionsActorService::countUsers(===java.lang.String===)</old>
+                <new>parameter long org.xwiki.contrib.discussions.DiscussionsActorService::countUsers(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.stream.Stream&lt;org.xwiki.contrib.discussions.domain.ActorDescriptor&gt; org.xwiki.contrib.discussions.DiscussionsActorService::listUsers(===java.lang.String===)</old>
+                <new>parameter java.util.stream.Stream&lt;org.xwiki.contrib.discussions.domain.ActorDescriptor&gt; org.xwiki.contrib.discussions.DiscussionsActorService::listUsers(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method java.util.Optional&lt;org.xwiki.contrib.discussions.DiscussionsActorService&gt; org.xwiki.contrib.discussions.DiscussionsActorServiceResolver::get(java.lang.String)</old>
+                <new>method org.xwiki.contrib.discussions.DiscussionsActorService org.xwiki.contrib.discussions.DiscussionsActorServiceResolver::get(java.lang.String)</new>
+                <justification>Unstable API: this optional here was actually useless and made the API more difficult to use.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===java.lang.String===, java.lang.String, java.lang.String)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, java.lang.String, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===java.lang.String===, java.lang.String, java.lang.String, boolean)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, java.lang.String, java.lang.String, boolean)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method void org.xwiki.contrib.discussions.MessageService::delete(java.lang.String, java.lang.String)</old>
+                <new>method void org.xwiki.contrib.discussions.MessageService::delete(org.xwiki.contrib.discussions.domain.references.MessageReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.List&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::getByDiscussion(===java.lang.String===, int, int)</old>
+                <new>parameter java.util.List&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::getByDiscussion(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, int, int)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::getByReference(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.Message&gt; org.xwiki.contrib.discussions.MessageService::getByReference(===org.xwiki.contrib.discussions.domain.references.MessageReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.lang.String org.xwiki.contrib.discussions.MessageService::renderContent(===java.lang.String===)</old>
+                <new>parameter java.lang.String org.xwiki.contrib.discussions.MessageService::renderContent(===org.xwiki.contrib.discussions.domain.references.MessageReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.domain.Discussion::&lt;init&gt;(===java.lang.String===, java.lang.String, java.lang.String, java.util.Date, java.lang.String)</old>
+                <new>parameter void org.xwiki.contrib.discussions.domain.Discussion::&lt;init&gt;(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, java.lang.String, java.lang.String, java.util.Date, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method java.lang.String org.xwiki.contrib.discussions.domain.Discussion::getReference()</old>
+                <new>method org.xwiki.contrib.discussions.domain.references.DiscussionReference org.xwiki.contrib.discussions.domain.Discussion::getReference()</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.domain.Discussion::setReference(===java.lang.String===)</old>
+                <new>parameter void org.xwiki.contrib.discussions.domain.Discussion::setReference(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method java.lang.String org.xwiki.contrib.discussions.domain.DiscussionContext::getReference()</old>
+                <new>method org.xwiki.contrib.discussions.domain.references.DiscussionContextReference org.xwiki.contrib.discussions.domain.DiscussionContext::getReference()</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method java.lang.String org.xwiki.contrib.discussions.domain.Message::getReference()</old>
+                <new>method org.xwiki.contrib.discussions.domain.references.MessageReference org.xwiki.contrib.discussions.domain.Message::getReference()</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.field.removedWithConstant</code>
+                <old>field org.xwiki.contrib.discussions.events.DiscussionsEvent.EVENT_SOURCE</old>
+                <justification>Unstable API: this constant was wrong and unneeded.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.List&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::findByDiscussionReference(===java.lang.String===)</old>
+                <new>parameter java.util.List&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::findByDiscussionReference(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.E</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::get(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::get(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::link(===java.lang.String===, java.lang.String)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::link(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===, org.xwiki.contrib.discussions.domain.references.DiscussionReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::link(java.lang.String, ===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::link(org.xwiki.contrib.discussions.domain.references.DiscussionContextReference, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::unlink(===java.lang.String===, java.lang.String)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::unlink(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===, org.xwiki.contrib.discussions.domain.references.DiscussionReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::unlink(java.lang.String, ===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionContextStoreService::unlink(org.xwiki.contrib.discussions.domain.references.DiscussionContextReference, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method java.util.Optional&lt;java.lang.String&gt; org.xwiki.contrib.discussions.store.DiscussionStoreService::create(java.lang.String, java.lang.String, java.lang.String)</old>
+                <new>method java.util.Optional&lt;org.xwiki.contrib.discussions.domain.references.DiscussionReference&gt; org.xwiki.contrib.discussions.store.DiscussionStoreService::create(java.lang.String, java.lang.String, java.lang.String, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionStoreService::get(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionStoreService::get(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::link(===java.lang.String===, java.lang.String)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::link(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, org.xwiki.contrib.discussions.domain.references.DiscussionContextReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::link(java.lang.String, ===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::link(org.xwiki.contrib.discussions.domain.references.DiscussionReference, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.store.DiscussionStoreService::touch(===java.lang.String===)</old>
+                <new>parameter void org.xwiki.contrib.discussions.store.DiscussionStoreService::touch(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::unlink(===java.lang.String===, java.lang.String)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::unlink(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, org.xwiki.contrib.discussions.domain.references.DiscussionContextReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::unlink(java.lang.String, ===java.lang.String===)</old>
+                <new>parameter boolean org.xwiki.contrib.discussions.store.DiscussionStoreService::unlink(org.xwiki.contrib.discussions.domain.references.DiscussionReference, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService::setDiscussionRightToUser(===java.lang.String===, org.xwiki.model.reference.DocumentReference, java.lang.String)</old>
+                <new>parameter void org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService::setDiscussionRightToUser(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, org.xwiki.model.reference.DocumentReference, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter long org.xwiki.contrib.discussions.store.MessageStoreService::countByDiscussion(===java.lang.String===)</old>
+                <new>parameter long org.xwiki.contrib.discussions.store.MessageStoreService::countByDiscussion(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;java.lang.String&gt; org.xwiki.contrib.discussions.store.MessageStoreService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, java.lang.String, java.lang.String, ===java.lang.String===, java.lang.String)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.references.MessageReference&gt; org.xwiki.contrib.discussions.store.MessageStoreService::create(java.lang.String, org.xwiki.rendering.syntax.Syntax, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, java.lang.String)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.store.MessageStoreService::delete(===java.lang.String===)</old>
+                <new>parameter void org.xwiki.contrib.discussions.store.MessageStoreService::delete(===org.xwiki.contrib.discussions.domain.references.MessageReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.List&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.MessageStoreService::getByDiscussion(===java.lang.String===, int, int)</old>
+                <new>parameter java.util.List&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.MessageStoreService::getByDiscussion(===org.xwiki.contrib.discussions.domain.references.DiscussionReference===, int, int)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.MessageStoreService::getByReference(===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.MessageStoreService::getByReference(===org.xwiki.contrib.discussions.domain.references.MessageReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.removed</code>
+                <old>method org.xwiki.model.reference.SpaceReference org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata::getDiscussionContextSpace()</old>
+                <justification>Unstable API: this method was actually moved to the new class DiscussionStoreConfiguration.</justification>
+              </item>
+              <item>
+                <code>java.method.removed</code>
+                <old>method org.xwiki.model.reference.SpaceReference org.xwiki.contrib.discussions.store.meta.DiscussionMetadata::getDiscussionSpace()</old>
+                <justification>Unstable API: this method was actually moved to the new class DiscussionStoreConfiguration.</justification>
+              </item>
+              <item>
+                <code>java.method.removed</code>
+                <old>method org.xwiki.model.reference.SpaceReference org.xwiki.contrib.discussions.store.meta.MessageMetadata::getMessageSpace()</old>
+                <justification>Unstable API: this method was actually moved to the new class DiscussionStoreConfiguration.</justification>
+              </item>
+              <item>
+                <code>java.class.removed</code>
+                <old>class org.xwiki.contrib.discussions.DiscussionRightsScriptService</old>
+                <justification>Unstable API: the class was moved to org.xwiki.contrib.discussions.script package.</justification>
+              </item>
+              <item>
+                <code>java.class.removed</code>
+                <old>class org.xwiki.contrib.discussions.DiscussionsScriptService</old>
+                <justification>Unstable API: the class was moved to org.xwiki.contrib.discussions.script package.</justification>
+              </item>
+              <item>
+                <code>java.class.removed</code>
+                <old>class org.xwiki.contrib.discussions.messagestream.DiscussionsMessageStreamScriptService</old>
+                <justification>Unstable API: this class was moved to org.xwiki.contrib.discussions.messagestream.script package.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::create(java.lang.String, java.lang.String, java.lang.String, ===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::create(java.lang.String, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::getOrCreate(java.lang.String, java.lang.String, java.lang.String, ===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.DiscussionContext&gt; org.xwiki.contrib.discussions.DiscussionContextService::getOrCreate(java.lang.String, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method boolean org.xwiki.contrib.discussions.DiscussionService::findByDiscussionContext(java.lang.String, java.lang.String)</old>
+                <new>method boolean org.xwiki.contrib.discussions.DiscussionService::findByDiscussionContext(org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.domain.DiscussionContext::&lt;init&gt;(===java.lang.String===, java.lang.String, java.lang.String, org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference)</old>
+                <new>parameter void org.xwiki.contrib.discussions.domain.DiscussionContext::&lt;init&gt;(===org.xwiki.contrib.discussions.domain.references.DiscussionContextReference===, java.lang.String, java.lang.String, org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter void org.xwiki.contrib.discussions.domain.DiscussionContext::&lt;init&gt;(java.lang.String, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference===)</old>
+                <new>parameter void org.xwiki.contrib.discussions.domain.DiscussionContext::&lt;init&gt;(org.xwiki.contrib.discussions.domain.references.DiscussionContextReference, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference org.xwiki.contrib.discussions.domain.DiscussionContext::getEntityReference()</old>
+                <new>method org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference org.xwiki.contrib.discussions.domain.DiscussionContext::getEntityReference()</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.class.removed</code>
+                <old>class org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference</old>
+                <justification>Unstable API: class moved to org.xwiki.contrib.discussions.domain.references package.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method void org.xwiki.contrib.discussions.domain.Message::&lt;init&gt;(java.lang.String, org.xwiki.contrib.discussions.domain.MessageContent, java.lang.String, java.lang.String, java.util.Date, java.util.Date, org.xwiki.contrib.discussions.domain.Discussion)</old>
+                <new>method void org.xwiki.contrib.discussions.domain.Message::&lt;init&gt;(org.xwiki.contrib.discussions.domain.references.MessageReference, org.xwiki.contrib.discussions.domain.MessageContent, org.xwiki.contrib.discussions.domain.references.ActorReference, java.util.Date, java.util.Date, org.xwiki.contrib.discussions.domain.Discussion)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.returnTypeChanged</code>
+                <old>method java.lang.String org.xwiki.contrib.discussions.domain.Message::getActorReference()</old>
+                <new>method org.xwiki.contrib.discussions.domain.references.ActorReference org.xwiki.contrib.discussions.domain.Message::getActorReference()</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.removed</code>
+                <old>method java.lang.String org.xwiki.contrib.discussions.domain.Message::getActorType()</old>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.Optional&lt;java.lang.String&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::create(java.lang.String, java.lang.String, java.lang.String, ===java.lang.String===)</old>
+                <new>parameter java.util.Optional&lt;org.xwiki.contrib.discussions.domain.references.DiscussionContextReference&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::create(java.lang.String, java.lang.String, java.lang.String, ===org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference===)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+              <item>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::findByReference(java.lang.String, java.lang.String)</old>
+                <new>method java.util.Optional&lt;com.xpn.xwiki.objects.BaseObject&gt; org.xwiki.contrib.discussions.store.DiscussionContextStoreService::findByReference(org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference)</new>
+                <justification>Unstable API and refactoring of references.</justification>
+              </item>
+            </revapi.ignore>
+          </analysisConfiguration>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -17,19 +17,18 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions.messagestream;
+package org.xwiki.contrib.discussions.messagestream.script;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
-import org.xwiki.contrib.discussions.domain.DiscussionContextEntityReference;
-import org.xwiki.contrib.discussions.internal.messagestream.DiscussionsFollowersService;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -42,6 +41,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.xwiki.contrib.discussions.messagestream.internal.DiscussionMessageStreamConfiguration.DISCUSSION_MESSAGESTREAM_HINT;
 
 /**
  * Test of {@link DiscussionsMessageStreamScriptService}.
@@ -73,18 +73,24 @@ class DiscussionsMessageStreamScriptServiceTest
     @Test
     void initializeContextPublic()
     {
-        DiscussionContext dc1 = new DiscussionContext("", "", "",
+        DiscussionContext dc1 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
             new DiscussionContextEntityReference("messagestream-emitter", "Author"));
-        DiscussionContext dc2 = new DiscussionContext("", "", "",
+        DiscussionContext dc2 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc2"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "Author"));
-        DiscussionContext dc3 = new DiscussionContext("", "", "",
+        DiscussionContext dc3 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", ""));
 
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-emitter", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "Author")))
             .thenReturn(Optional.of(dc2));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "*"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "*")))
             .thenReturn(Optional.of(dc3));
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextPublic("Author");
@@ -98,23 +104,29 @@ class DiscussionsMessageStreamScriptServiceTest
     void initializeContextFollowers()
     {
         DocumentReference authorDR = new DocumentReference("xwiki", "XWiki", "Author");
-        DiscussionContext dc1 = new DiscussionContext("", "", "",
+        DiscussionContext dc1 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
             new DiscussionContextEntityReference("messagestream-emitter", "Author"));
-        DiscussionContext dc2 = new DiscussionContext("", "", "",
+        DiscussionContext dc2 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc2"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "Author"));
-        DiscussionContext dc3 = new DiscussionContext("", "", "",
+        DiscussionContext dc3 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower"));
 
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-emitter", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "Author")))
             .thenReturn(Optional.of(dc2));
         when(this.resolver.resolve("Author")).thenReturn(authorDR);
         when(this.serializer.serialize(authorDR)).thenReturn("xwiki:XWiki.Author");
         when(this.discussionsFollowersService.getFollowers("xwiki:XWiki.Author")).thenReturn(Arrays.asList(
             "xwiki:XWiki.Follower"
         ));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.Follower"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower")))
             .thenReturn(Optional.of(dc3));
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextFollowers("Author");
@@ -127,24 +139,32 @@ class DiscussionsMessageStreamScriptServiceTest
     @Test
     void initializeContextUsers()
     {
-        DiscussionContext dc1 = new DiscussionContext("", "", "",
+        DiscussionContext dc1 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
             new DiscussionContextEntityReference("messagestream-emitter", "Author"));
-        DiscussionContext dc2 = new DiscussionContext("", "", "",
+        DiscussionContext dc2 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc2"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "Author"));
-        DiscussionContext dc3 = new DiscussionContext("", "", "",
+        DiscussionContext dc3 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user1"));
-        DiscussionContext dc4 = new DiscussionContext("", "", "",
+        DiscussionContext dc4 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc4"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user2"));
         DocumentReference user1Reference = new DocumentReference("xwiki", "XWiki", "user1");
         DocumentReference user2Reference = new DocumentReference("xwiki", "XWiki", "user2");
 
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-emitter", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "Author")))
             .thenReturn(Optional.of(dc2));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.user1"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user1")))
             .thenReturn(Optional.of(dc3));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.user2"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user2")))
             .thenReturn(Optional.of(dc4));
 
         when(this.resolver.resolve("user1")).thenReturn(user1Reference);
@@ -165,22 +185,28 @@ class DiscussionsMessageStreamScriptServiceTest
     @Test
     void initializeContextGroups() throws Exception
     {
-        DiscussionContext dc1 = new DiscussionContext("", "", "",
+        DiscussionContext dc1 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
             new DiscussionContextEntityReference("messagestream-emitter", "Author"));
-        DiscussionContext dc2 = new DiscussionContext("", "", "",
+        DiscussionContext dc2 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc2"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "Author"));
-        DiscussionContext dc3 = new DiscussionContext("", "", "",
+        DiscussionContext dc3 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U1"));
-        DiscussionContext dc4 = new DiscussionContext("", "", "",
+        DiscussionContext dc4 = new DiscussionContext(
+            new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc4"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U2"));
         DocumentReference g1DR = new DocumentReference("xwiki", "XWiki", "G1");
         DocumentReference g2DR = new DocumentReference("xwiki", "XWiki", "G2");
         DocumentReference u1DR = new DocumentReference("xwiki", "XWiki", "U1");
         DocumentReference u2DR = new DocumentReference("xwiki", "XWiki", "U2");
 
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-emitter", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "Author"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "Author")))
             .thenReturn(Optional.of(dc2));
         when(this.resolver.resolve("G1")).thenReturn(g1DR);
         when(this.resolver.resolve("G2")).thenReturn(g2DR);
@@ -188,9 +214,11 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.groupManager.getMembers(g2DR, true)).thenReturn(asList(u1DR, u2DR));
         when(this.serializer.serialize(u1DR)).thenReturn("xwiki:XWiki.U1");
         when(this.serializer.serialize(u2DR)).thenReturn("xwiki:XWiki.U2");
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.U1"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U1")))
             .thenReturn(Optional.of(dc3));
-        when(this.discussionContextService.getOrCreate("", "", "messagestream-user", "xwiki:XWiki.U2"))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U2")))
             .thenReturn(Optional.of(dc4));
 
         List<DiscussionContext> discussionContexts =

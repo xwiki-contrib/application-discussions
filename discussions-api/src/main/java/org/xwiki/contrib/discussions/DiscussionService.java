@@ -24,6 +24,9 @@ import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -39,24 +42,27 @@ public interface DiscussionService
     /**
      * Creates a discussion with a main document.
      *
+     * @param applicationHint the hint of the application used to create the discussion
      * @param title the discussion title
      * @param description the discussion description
      * @param mainDocument the main document to view the discussion
      * @return the created discussion
      */
-    Optional<Discussion> create(String title, String description, String mainDocument);
+    Optional<Discussion> create(String applicationHint, String title, String description, String mainDocument);
 
     /**
      * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly
      * returned. If it does not, it is initialized with the provided title and description, and linked to the list of
      * discussion contexts.
      *
+     * @param applicationHint the hint of the application used to create the discussion
      * @param title the title
      * @param description the description
      * @param discussionContexts the list of discussion contexts
      * @return the created or found discussion
      */
-    Optional<Discussion> getOrCreate(String title, String description, List<String> discussionContexts);
+    Optional<Discussion> getOrCreate(String applicationHint, String title, String description,
+        List<DiscussionContextReference> discussionContexts);
 
     /**
      * Search and retrieve a discussion by its reference.
@@ -64,19 +70,19 @@ public interface DiscussionService
      * @param reference the discussion reference
      * @return the discussion
      */
-    Optional<Discussion> get(String reference);
+    Optional<Discussion> get(DiscussionReference reference);
 
     /**
      * @param reference a discussion reference
      * @return {@code true} if the current user has the right to view the discussion, {@code false} otherwise
      */
-    boolean canRead(String reference);
+    boolean canRead(DiscussionReference reference);
 
     /**
      * @param reference a discussion reference
      * @return {@code true} if the current user has the rights to write in the discussion, {@code false} otherwise
      */
-    boolean canWrite(String reference);
+    boolean canWrite(DiscussionReference reference);
 
     /**
      * Find a list of discussions that are linked at least to the list of discussion context passed in parameter.
@@ -84,7 +90,7 @@ public interface DiscussionService
      * @param discussionContextReferences a list of discussion context references
      * @return the list discussions attached to the list of discussion contexts
      */
-    List<Discussion> findByDiscussionContexts(List<String> discussionContextReferences);
+    List<Discussion> findByDiscussionContexts(List<DiscussionContextReference> discussionContextReferences);
 
     /**
      * Count the number of discussions linked to a context with the given entity references values.
@@ -111,16 +117,15 @@ public interface DiscussionService
      *
      * @param discussionReference the reference of the discussion to update
      */
-    void touch(String discussionReference);
+    void touch(DiscussionReference discussionReference);
 
     /**
      * Return true if a discussion exists with the request discussion context entity.
      *
-     * @param type the type of the discussion context entity
      * @param reference the reference of the discussion context entity
      * @return {@code true} if a discussion context is found, {@code false} otherwise
      */
-    boolean findByDiscussionContext(String type, String reference);
+    boolean findByDiscussionContext(DiscussionContextEntityReference reference);
 
     /**
      * @return {@code true} if the current user can create a discussion, {@code false} otherwise
@@ -131,5 +136,5 @@ public interface DiscussionService
      * @param reference the reference of the discussion
      * @return {@code true} if the current user is allowed to view the discussion, {@code false} otherwise
      */
-    boolean canViewDiscussion(String reference);
+    boolean canViewDiscussion(DiscussionReference reference);
 }

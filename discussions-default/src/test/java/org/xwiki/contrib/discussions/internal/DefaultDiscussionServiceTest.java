@@ -22,9 +22,12 @@ package org.xwiki.contrib.discussions.internal;
 import java.util.Date;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.junit5.mockito.ComponentTest;
@@ -62,15 +65,26 @@ class DefaultDiscussionServiceTest
     @MockComponent
     private DiscussionsRightService discussionsRightService;
 
+    @MockComponent
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
+    private DiscussionReference discussionReference;
+
+    @BeforeEach
+    void setup()
+    {
+        this.discussionReference = new DiscussionReference("hint", "reference");
+    }
+
     @Test
     void createCreateFail()
     {
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
-        when(this.discussionStoreService.create("title", "description", null))
+        when(this.discussionStoreService.create("hint", "title", "description", null))
             .thenReturn(Optional.empty());
 
         Optional<Discussion> discussion =
-            this.defaultDiscussionService.create("title", "description", "XWiki.Doc");
+            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc");
 
         assertEquals(Optional.empty(), discussion);
     }
@@ -79,24 +93,28 @@ class DefaultDiscussionServiceTest
     void create()
     {
         Date updateDate = new Date();
-        Discussion discussion = new Discussion("reference", "title", "description", updateDate, "XWiki.Doc");
+        DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
+        Discussion discussion = new Discussion(discussionReference, "title", "description", updateDate, "XWiki.Doc");
         BaseObject baseObject = mock(BaseObject.class);
 
         DocumentReference value = new DocumentReference("xwiki", "a", "b");
         when(baseObject.getDocumentReference()).thenReturn(value);
         when(baseObject.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(this.discussionReferencesResolver.resolve("reference", DiscussionReference.class))
+            .thenReturn(discussionReference);
         when(baseObject.getStringValue(TITLE_NAME)).thenReturn("title");
         when(baseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
         when(baseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
         when(baseObject.getStringValue(MAIN_DOCUMENT_NAME)).thenReturn("XWiki.Doc");
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
         when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
-        when(this.discussionStoreService.create("title", "description", "XWiki.Doc"))
-            .thenReturn(Optional.of("reference"));
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.create("hint", "title", "description", "XWiki.Doc"))
+            .thenReturn(Optional.of(this.discussionReference));
+        when(this.discussionStoreService.get(this.discussionReference))
+            .thenReturn(Optional.of(baseObject));
 
         Optional<Discussion> discussionOpt =
-            this.defaultDiscussionService.create("title", "description", "XWiki.Doc");
+            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc");
 
         assertEquals(Optional.of(discussion), discussionOpt);
     }
@@ -104,8 +122,10 @@ class DefaultDiscussionServiceTest
     @Test
     void getDoesNotExist()
     {
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
-        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
+        when(this.discussionStoreService.get(new DiscussionReference("hint", "reference")))
+            .thenReturn(Optional.empty());
+        Optional<Discussion> discussion = this.defaultDiscussionService
+            .get(new DiscussionReference("hint", "reference"));
         assertEquals(Optional.empty(), discussion);
     }
 
@@ -121,20 +141,24 @@ class DefaultDiscussionServiceTest
         when(discussionBaseObject.getStringValue(TITLE_NAME)).thenReturn("title");
         when(discussionBaseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
         when(discussionBaseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(discussionBaseObject));
+        when(this.discussionReferencesResolver.resolve("reference", DiscussionReference.class))
+            .thenReturn(discussionReference);
+        when(this.discussionStoreService.get(discussionReference))
+            .thenReturn(Optional.of(discussionBaseObject));
         when(this.discussionsRightService.canReadDiscussion(dr)).thenReturn(true);
 
-        Optional<Discussion> discussion = this.defaultDiscussionService.get("reference");
+        Optional<Discussion> discussion = this.defaultDiscussionService.get(discussionReference);
 
-        assertEquals(Optional.of(new Discussion("reference", "title", "description", updateDate, null)), discussion);
+        assertEquals(Optional.of(new Discussion(discussionReference, "title", "description", updateDate, null)),
+            discussion);
     }
 
     @Test
     void canReadNotFound()
     {
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.empty());
 
-        boolean reference = this.defaultDiscussionService.canRead("reference");
+        boolean reference = this.defaultDiscussionService.canRead(this.discussionReference);
 
         assertFalse(reference);
     }
@@ -146,10 +170,10 @@ class DefaultDiscussionServiceTest
         DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
         when(baseObject.getDocumentReference()).thenReturn(documentReference);
 
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(baseObject));
         when(this.discussionsRightService.canReadDiscussion(documentReference)).thenReturn(false);
 
-        boolean reference = this.defaultDiscussionService.canRead("reference");
+        boolean reference = this.defaultDiscussionService.canRead(this.discussionReference);
 
         assertFalse(reference);
     }
@@ -161,10 +185,10 @@ class DefaultDiscussionServiceTest
         DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
         when(baseObject.getDocumentReference()).thenReturn(documentReference);
 
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(baseObject));
         when(this.discussionsRightService.canReadDiscussion(documentReference)).thenReturn(true);
 
-        boolean reference = this.defaultDiscussionService.canRead("reference");
+        boolean reference = this.defaultDiscussionService.canRead(this.discussionReference);
 
         assertTrue(reference);
     }
@@ -172,9 +196,9 @@ class DefaultDiscussionServiceTest
     @Test
     void canWriteNotFound()
     {
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.empty());
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.empty());
 
-        boolean reference = this.defaultDiscussionService.canWrite("reference");
+        boolean reference = this.defaultDiscussionService.canWrite(this.discussionReference);
 
         assertFalse(reference);
     }
@@ -186,10 +210,10 @@ class DefaultDiscussionServiceTest
         DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
         when(baseObject.getDocumentReference()).thenReturn(documentReference);
 
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(baseObject));
         when(this.discussionsRightService.canWriteDiscussion(documentReference)).thenReturn(false);
 
-        boolean reference = this.defaultDiscussionService.canWrite("reference");
+        boolean reference = this.defaultDiscussionService.canWrite(this.discussionReference);
 
         assertFalse(reference);
     }
@@ -201,10 +225,10 @@ class DefaultDiscussionServiceTest
         DocumentReference documentReference = new DocumentReference("xwiki", "XWiki", "Discussion");
         when(baseObject.getDocumentReference()).thenReturn(documentReference);
 
-        when(this.discussionStoreService.get("reference")).thenReturn(Optional.of(baseObject));
+        when(this.discussionStoreService.get(this.discussionReference)).thenReturn(Optional.of(baseObject));
         when(this.discussionsRightService.canWriteDiscussion(documentReference)).thenReturn(true);
 
-        boolean reference = this.defaultDiscussionService.canWrite("reference");
+        boolean reference = this.defaultDiscussionService.canWrite(this.discussionReference);
 
         assertTrue(reference);
     }

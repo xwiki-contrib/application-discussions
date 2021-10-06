@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -51,7 +52,7 @@ public interface DiscussionsActorService
      * @param discussionReference the discussion reference
      * @return the list of actors involved in a discuission
      */
-    Stream<ActorDescriptor> listUsers(String discussionReference);
+    Stream<ActorDescriptor> listUsers(DiscussionReference discussionReference);
 
     /**
      * Returns the number of users involved in a discussion.
@@ -59,5 +60,5 @@ public interface DiscussionsActorService
      * @param discussionReference the discussion reference
      * @return the number of users involved in the request discussion
      */
-    long countUsers(String discussionReference);
+    long countUsers(DiscussionReference discussionReference);
 }
