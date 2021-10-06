@@ -32,9 +32,11 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
@@ -100,14 +102,15 @@ public class DefaultMessageStoreService implements MessageStoreService
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
-    public Optional<MessageReference> create(String content, Syntax syntax, String authorType,
-        String authorReference, DiscussionReference discussionReference, String title)
+    public Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
+        DiscussionReference discussionReference, String title,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         XWikiContext context = this.xcontextProvider.get();
         Optional<MessageReference> result = Optional.empty();
         try {
             String applicationHint = discussionReference.getApplicationHint();
-            XWikiDocument document = generateUniquePage(applicationHint);
+            XWikiDocument document = generateUniquePage(discussionReference, configurationParameters);
             // The title of the page
             document.setTitle(title);
             document.setHidden(true);
@@ -119,8 +122,9 @@ public class DefaultMessageStoreService implements MessageStoreService
                 + "\"reference=$message.discussionReference\"))\n"
                 + "{{/velocity}}");
             DocumentReference authorReferenceDoc;
+            String authorType = authorReference.getType();
             if (authorType.equals("user")) {
-                authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference);
+                authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference.getReference());
             } else {
                 authorReferenceDoc = null;
             }
@@ -131,7 +135,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             String serializedReference = this.discussionReferencesSerializer.serialize(messageReference);
             messageBaseObject.set(REFERENCE_NAME, serializedReference, context);
             messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
-            messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference, context);
+            messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference.getReference(), context);
             messageBaseObject.set(CONTENT_NAME, content, context);
             document.setSyntax(syntax);
             messageBaseObject.set(DISCUSSION_REFERENCE_NAME,
@@ -290,14 +294,15 @@ public class DefaultMessageStoreService implements MessageStoreService
             });
     }
 
-    private XWikiDocument generateUniquePage(String applicationHint) throws XWikiException
+    private XWikiDocument generateUniquePage(DiscussionReference discussionReference,
+        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         XWikiDocument document;
         synchronized (this) {
-            document = generatePage(applicationHint);
+            document = generatePage(discussionReference, configurationParameters);
 
             while (!document.isNew()) {
-                document = generatePage(applicationHint);
+                document = generatePage(discussionReference, configurationParameters);
             }
             document.setHidden(true);
             XWikiContext context = this.xcontextProvider.get();
@@ -306,12 +311,14 @@ public class DefaultMessageStoreService implements MessageStoreService
         return document;
     }
 
-    private XWikiDocument generatePage(String applicationHint) throws XWikiException
+    private XWikiDocument generatePage(DiscussionReference discussionReference,
+        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         String generatedString = this.randomGeneratorService.randomString(10);
-        DiscussionStoreConfiguration discussionStoreConfiguration =
-            this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration(applicationHint);
-        SpaceReference messageSpace = discussionStoreConfiguration.getMessageSpaceStorageLocation();
+        DiscussionStoreConfiguration discussionStoreConfiguration = this.discussionStoreConfigurationFactory
+            .getDiscussionStoreConfiguration(discussionReference.getApplicationHint());
+        SpaceReference messageSpace = discussionStoreConfiguration
+            .getMessageSpaceStorageLocation(configurationParameters, discussionReference);
         DocumentReference documentReference = new DocumentReference(generatedString, messageSpace);
 
         XWikiContext context = this.xcontextProvider.get();

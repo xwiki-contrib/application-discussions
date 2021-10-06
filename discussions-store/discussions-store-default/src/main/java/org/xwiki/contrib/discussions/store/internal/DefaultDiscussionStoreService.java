@@ -36,6 +36,7 @@ import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.model.EntityType;
@@ -97,11 +98,11 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
 
     @Override
     public Optional<DiscussionReference> create(String applicationHint, String title, String description,
-        String mainDocument)
+        String mainDocument, DiscussionStoreConfigurationParameters configurationParameters)
     {
         Optional<DiscussionReference> result = Optional.empty();
         try {
-            XWikiDocument document = generateUniquePage(applicationHint, title);
+            XWikiDocument document = generateUniquePage(applicationHint, title, configurationParameters);
             XWikiContext context = this.getContext();
             BaseObject object = document.newXObject(this.discussionMetadata.getDiscussionXClass(), context);
             object.setStringValue(TITLE_NAME, title);
@@ -372,14 +373,15 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 }).orElse(false);
     }
 
-    private XWikiDocument generateUniquePage(String applicationHint, String title) throws XWikiException
+    private XWikiDocument generateUniquePage(String applicationHint, String title,
+        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         XWikiDocument document;
         synchronized (this) {
-            document = generatePage(applicationHint, title);
+            document = generatePage(applicationHint, title, configurationParameters);
 
             while (!document.isNew()) {
-                document = generatePage(applicationHint, title);
+                document = generatePage(applicationHint, title, configurationParameters);
             }
             XWikiContext context = getContext();
             document.setHidden(true);
@@ -393,12 +395,14 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         return this.xcontextProvider.get();
     }
 
-    private XWikiDocument generatePage(String applicationHint, String title) throws XWikiException
+    private XWikiDocument generatePage(String applicationHint, String title,
+        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         String generatedString = this.randomGeneratorService.randomString();
         DiscussionStoreConfiguration discussionStoreConfiguration =
             this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration(applicationHint);
-        SpaceReference discussionSpace = discussionStoreConfiguration.getDiscussionSpaceStorageLocation();
+        SpaceReference discussionSpace =
+            discussionStoreConfiguration.getDiscussionSpaceStorageLocation(configurationParameters);
         DocumentReference documentReference =
             new DocumentReference(String.format("%s-%s", title, generatedString), discussionSpace);
 

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
@@ -47,10 +48,12 @@ public interface DiscussionContextStoreService
      * @param name the name of the discussion context
      * @param description the description of the discussion context
      * @param entityReference the reference of the entity referenced by the discussion context
+     * @param configurationParameters parameters used for data storage configuration
      * @return the unique reference to the created discussion context
      */
     Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
-        DiscussionContextEntityReference entityReference);
+        DiscussionContextEntityReference entityReference,
+        DiscussionStoreConfigurationParameters configurationParameters);
 
     /**
      * Returns a discussion context by its reference.

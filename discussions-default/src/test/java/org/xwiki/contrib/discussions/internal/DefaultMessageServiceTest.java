@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
@@ -113,6 +114,7 @@ class DefaultMessageServiceTest
     @Test
     void createDisallowed()
     {
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
         Discussion discussion = new Discussion(discussionReference, "title", "description", new Date(), null);
         when(this.discussionService.get(discussionReference)).thenReturn(Optional.of(discussion));
@@ -122,7 +124,8 @@ class DefaultMessageServiceTest
         when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
         setDiscussionWriteRight(discussionDocumentReference, false);
 
-        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, discussionReference);
+        Optional<Message> message =
+            this.defaultMessageService.create("content", XWIKI_2_1, discussionReference, parameters);
 
         assertEquals(Optional.empty(), message);
     }
@@ -130,6 +133,7 @@ class DefaultMessageServiceTest
     @Test
     void createAllowed()
     {
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
         Discussion discussion = new Discussion(discussionReference, "title", "description", new Date(), "XWiki.Doc");
         when(this.discussionService.get(discussionReference)).thenReturn(Optional.of(discussion));
@@ -141,7 +145,8 @@ class DefaultMessageServiceTest
         setDiscussionReadRight(discussionDocumentReference, true);
         MessageReference messageReference = new MessageReference("hint", "messageReference");
         when(this.messageStoreService
-            .create("content", XWIKI_2_1, "user", USER_REFERENCE, discussionReference, "title"))
+            .create("content", XWIKI_2_1, new ActorReference("user", USER_REFERENCE), discussionReference, "title",
+                parameters))
             .thenReturn(Optional.of(messageReference));
         BaseObject messageBaseObject = mock(BaseObject.class);
         when(this.messageStoreService.getByReference(messageReference))
@@ -162,7 +167,8 @@ class DefaultMessageServiceTest
         when(messageBaseObject.getStringValue(DISCUSSION_REFERENCE_NAME)).thenReturn("reference");
         when(referencesResolver.resolve("reference", DiscussionReference.class)).thenReturn(discussionReference);
 
-        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, discussionReference);
+        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, discussionReference,
+            parameters);
 
         assertEquals(
             Optional.of(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),

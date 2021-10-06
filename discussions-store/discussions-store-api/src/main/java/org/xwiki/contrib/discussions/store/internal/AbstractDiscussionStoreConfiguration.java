@@ -19,7 +19,10 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.model.reference.SpaceReference;
 
 /**
@@ -32,19 +35,21 @@ import org.xwiki.model.reference.SpaceReference;
 public abstract class AbstractDiscussionStoreConfiguration implements DiscussionStoreConfiguration
 {
     @Override
-    public SpaceReference getDiscussionContextSpaceStorageLocation()
+    public SpaceReference getDiscussionContextSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters,
+        DiscussionContextEntityReference contextEntityReference)
     {
         return new SpaceReference("DiscussionContext", getRootSpaceStorageLocation());
     }
 
     @Override
-    public SpaceReference getDiscussionSpaceStorageLocation()
+    public SpaceReference getDiscussionSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters)
     {
         return new SpaceReference("Discussion", getRootSpaceStorageLocation());
     }
 
     @Override
-    public SpaceReference getMessageSpaceStorageLocation()
+    public SpaceReference getMessageSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters,
+        DiscussionReference discussionReference)
     {
         return new SpaceReference("Message", getRootSpaceStorageLocation());
     }

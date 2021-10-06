@@ -33,6 +33,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
@@ -100,29 +101,31 @@ public class DefaultMessageService implements MessageService
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
-    public Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference)
+    public Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         DocumentReference author = this.xcontextProvider.get().getUserReference();
         String authorReference = this.entityReferenceSerializer.serialize(author);
-        return this.create(content, syntax, discussionReference, DEFAULT_ACTOR_TYPE, authorReference);
+        return this.create(content, syntax, discussionReference,
+            new ActorReference(DEFAULT_ACTOR_TYPE, authorReference), configurationParameters);
     }
 
     @Override
     public Optional<Message> create(String content, Syntax syntax,
-        DiscussionReference discussionReference, String authorType,
-        String authorReference)
+        DiscussionReference discussionReference, ActorReference authorReference,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
-        return create(content, syntax, discussionReference, authorType, authorReference, true);
+        return create(content, syntax, discussionReference, authorReference, true, configurationParameters);
     }
 
     @Override
     public Optional<Message> create(String content, Syntax syntax,
-        DiscussionReference discussionReference, String authorType,
-        String authorReference, boolean notify)
+        DiscussionReference discussionReference, ActorReference authorReference, boolean notify,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
         return this.messageStoreService
-            .create(content, syntax, authorType, authorReference, discussionReference, title)
+            .create(content, syntax, authorReference, discussionReference, title, configurationParameters)
             .flatMap(reference -> {
                 this.discussionService.touch(discussionReference);
                 Optional<Message> messageOpt = getByReference(reference);

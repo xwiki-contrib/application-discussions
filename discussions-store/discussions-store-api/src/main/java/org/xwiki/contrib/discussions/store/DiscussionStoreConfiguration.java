@@ -20,6 +20,9 @@
 package org.xwiki.contrib.discussions.store;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
+import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.stability.Unstable;
@@ -38,17 +41,31 @@ import org.xwiki.stability.Unstable;
 public interface DiscussionStoreConfiguration
 {
     /**
-     * @return the space where to store the discussion contexts.
+     * Retrieve a space reference where to store the discussion contexts information.
+     *
+     * @param parameters configuration parameters given in the API that might be used to compute the storage location
+     * @param contextEntityReference entity the context is attached to that can be used to compute the storage location
+     * @return the space where to store the discussion contexts
      */
-    SpaceReference getDiscussionContextSpaceStorageLocation();
+    SpaceReference getDiscussionContextSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters,
+        DiscussionContextEntityReference contextEntityReference);
 
     /**
-     * @return the space where to store the discussions.
+     * Retrieve a space reference where to store the discussion information.
+     *
+     * @param parameters configuration parameters given in the API that might be used to compute the storage location
+     * @return the space where to store the discussions
      */
-    SpaceReference getDiscussionSpaceStorageLocation();
+    SpaceReference getDiscussionSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters);
 
     /**
-     * @return the space where to store the messages.
+     * Retrieve a space reference where to store the message information.
+     *
+     * @param parameters configuration parameters given in the API that might be used to compute the storage location
+     * @param discussionReference reference of the discussion the message is attached to, that can be used to compute
+     *                             the storage location
+     * @return the space where to store the messages
      */
-    SpaceReference getMessageSpaceStorageLocation();
+    SpaceReference getMessageSpaceStorageLocation(DiscussionStoreConfigurationParameters parameters,
+        DiscussionReference discussionReference);
 }

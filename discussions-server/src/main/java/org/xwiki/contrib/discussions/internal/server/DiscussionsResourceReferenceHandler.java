@@ -41,6 +41,7 @@ import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
@@ -90,6 +91,8 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private static final String REQUIRES_HTML_CONVERSION_PARAMETER = "RequiresHTMLConversion";
 
     private static final String CONTENT_SYNTAX_PARAMETER = "content_syntax";
+
+    private static final String STORE_CONFIGURATION_PARAMETER_PREFIX = "storeConfiguration_";
 
     @Inject
     private Logger logger;
@@ -242,7 +245,14 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                     } else {
                         syntax = XWIKI_2_0;
                     }
-                    this.messageService.create(content, syntax, d.getReference())
+                    DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
+                    request.getParameterMap().forEach((key, value) -> {
+                        if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
+                            String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
+                            parameters.put(parameterKey, value);
+                        }
+                    });
+                    this.messageService.create(content, syntax, d.getReference(), parameters)
                         .ifPresent(m -> {
                             String parameter = request.getParameter(ORIGINAL_URL_PARAM);
                             try {

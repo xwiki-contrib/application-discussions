@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
@@ -78,9 +79,11 @@ public class DefaultDiscussionContextService implements DiscussionContextService
 
     @Override
     public Optional<DiscussionContext> create(String applicationHint, String name, String description,
-        DiscussionContextEntityReference entityReference)
+        DiscussionContextEntityReference entityReference,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
-        return this.discussionContextStoreService.create(applicationHint, name, description, entityReference)
+        return this.discussionContextStoreService.create(applicationHint, name, description, entityReference,
+                configurationParameters)
             .map(reference -> {
                 DiscussionContext discussionContext =
                     new DiscussionContext(reference, name, description, entityReference);
@@ -117,14 +120,15 @@ public class DefaultDiscussionContextService implements DiscussionContextService
 
     @Override
     public Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
-        DiscussionContextEntityReference entityReference)
+        DiscussionContextEntityReference entityReference,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         Optional<BaseObject> baseObject =
             this.discussionContextStoreService.findByReference(entityReference);
         if (baseObject.isPresent()) {
             return baseObject.flatMap(this::mapBaseObject);
         } else {
-            return this.create(applicationHint, name, description, entityReference);
+            return this.create(applicationHint, name, description, entityReference, configurationParameters);
         }
     }
 

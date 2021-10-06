@@ -413,12 +413,12 @@ $services.localization.render('discussions.discussion.usersList.public')
 #end
 
 #foreach ($message in $messages)
-  #set ($actorDescriptor = $services.discussions.getActorDescriptor($message.actorType, $message.actorReference))
+  #set ($actorDescriptor = $services.discussions.getActorDescriptor($message.actorReference))
   (% class='box' %)(((
     (% class='row' %)(((
       (% class='col-xs-1' %)(((
-        #if ($message.actorType == 'user')
-          {{html}}#mediumUserAvatar($message.actorReference){{/html}}
+        #if ($message.actorReference.type == 'user')
+          {{html}}#mediumUserAvatar($message.actorReference.reference){{/html}}
         #end
       )))
       (% class='col-xs-11' %)(((

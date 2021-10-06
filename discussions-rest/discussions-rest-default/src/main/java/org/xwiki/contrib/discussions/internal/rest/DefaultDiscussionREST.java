@@ -38,6 +38,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
@@ -188,7 +189,9 @@ public class DefaultDiscussionREST implements DiscussionREST, XWikiRestComponent
         String title = discussion.getTitle();
         String description = discussion.getDescription();
         String mainDocument = discussion.getMainDocument();
-        return this.discussionService.create(applicationHint, title, description, mainDocument)
+        DiscussionStoreConfigurationParameters parameters =
+            new DiscussionStoreConfigurationParameters(discussion.getStoreConfigurationParameters());
+        return this.discussionService.create(applicationHint, title, description, mainDocument, parameters)
             .orElseThrow(() -> new XWikiRestException(
                 String.format("Fail to create a discussion with title=[%s], description=[%s]", title, description)));
     }

@@ -32,6 +32,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
@@ -122,12 +124,14 @@ class DefaultMessageStoreServiceTest
         when(this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration("hint"))
             .thenReturn(discussionStoreConfiguration);
 
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         BaseObject messageBaseObject = mock(BaseObject.class);
         DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "randomString");
         DocumentReference messageXClassDocumentReference = new DocumentReference("xwiki", "XWiki", "MessageClass");
         XWikiDocument document = mock(XWikiDocument.class);
         SpaceReference value = new SpaceReference("xwiki", "Discussions", "Message");
-        when(discussionStoreConfiguration.getMessageSpaceStorageLocation()).thenReturn(value);
+        when(discussionStoreConfiguration.getMessageSpaceStorageLocation(parameters, discussionReference))
+            .thenReturn(value);
 
         when(document.getDocumentReference()).thenReturn(discussionDocumentReference);
         when(document.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
@@ -142,9 +146,8 @@ class DefaultMessageStoreServiceTest
         when(this.discussionReferencesSerializer.serialize(discussionReference))
             .thenReturn("discussionReference;hint=hint");
 
-        Optional<MessageReference> reference =
-            this.defaultMessageStoreService.create("content", XWIKI_2_1, "authorType", "authorReference",
-                discussionReference, "TODO");
+        Optional<MessageReference> reference = this.defaultMessageStoreService.create("content", XWIKI_2_1,
+            new ActorReference("authorType", "authorReference"), discussionReference, "TODO", parameters);
         assertEquals(Optional.of(messageReference), reference);
         assertEquals(0, this.logCapture.size());
         verify(messageBaseObject).set(REFERENCE_NAME, "randomString;hint=hint", this.xWikiContext);

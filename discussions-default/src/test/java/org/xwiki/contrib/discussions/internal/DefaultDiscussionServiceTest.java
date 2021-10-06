@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
@@ -79,12 +80,13 @@ class DefaultDiscussionServiceTest
     @Test
     void createCreateFail()
     {
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
-        when(this.discussionStoreService.create("hint", "title", "description", null))
+        when(this.discussionStoreService.create("hint", "title", "description", null, parameters))
             .thenReturn(Optional.empty());
 
         Optional<Discussion> discussion =
-            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc");
+            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc", parameters);
 
         assertEquals(Optional.empty(), discussion);
     }
@@ -92,6 +94,7 @@ class DefaultDiscussionServiceTest
     @Test
     void create()
     {
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         Date updateDate = new Date();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
         Discussion discussion = new Discussion(discussionReference, "title", "description", updateDate, "XWiki.Doc");
@@ -108,13 +111,13 @@ class DefaultDiscussionServiceTest
         when(baseObject.getStringValue(MAIN_DOCUMENT_NAME)).thenReturn("XWiki.Doc");
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
         when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
-        when(this.discussionStoreService.create("hint", "title", "description", "XWiki.Doc"))
+        when(this.discussionStoreService.create("hint", "title", "description", "XWiki.Doc", parameters))
             .thenReturn(Optional.of(this.discussionReference));
         when(this.discussionStoreService.get(this.discussionReference))
             .thenReturn(Optional.of(baseObject));
 
         Optional<Discussion> discussionOpt =
-            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc");
+            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc", parameters);
 
         assertEquals(Optional.of(discussion), discussionOpt);
     }

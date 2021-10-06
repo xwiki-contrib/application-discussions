@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.rest.model;
 
+import java.util.Map;
+
 import org.xwiki.stability.Unstable;
 
 /**
@@ -37,6 +39,8 @@ public class CreateDiscussion
     private String description;
 
     private String mainDocument;
+
+    private Map<String, Object> storeConfigurationParameters;
 
     /**
      * @return the title
@@ -109,6 +113,26 @@ public class CreateDiscussion
     public CreateDiscussion setApplicationHint(String applicationHint)
     {
         this.applicationHint = applicationHint;
+        return this;
+    }
+
+    /**
+     * @return parameters used for configuration store.
+     * @since 2.0
+     */
+    public Map<String, Object> getStoreConfigurationParameters()
+    {
+        return storeConfigurationParameters;
+    }
+
+    /**
+     * @param storeConfigurationParameters the parameters used for configuration store.
+     * @return the current instance.
+     * @since 2.0
+     */
+    public CreateDiscussion setStoreConfigurationParameters(Map<String, Object> storeConfigurationParameters)
+    {
+        this.storeConfigurationParameters = storeConfigurationParameters;
         return this;
     }
 }

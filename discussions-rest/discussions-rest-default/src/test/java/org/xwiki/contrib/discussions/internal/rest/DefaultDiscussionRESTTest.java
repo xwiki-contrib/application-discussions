@@ -21,7 +21,9 @@ package org.xwiki.contrib.discussions.internal.rest;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsActorService;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
@@ -189,13 +192,16 @@ class DefaultDiscussionRESTTest
     @Test
     void create() throws Exception
     {
+        Map<String, Object> parameters = Collections.singletonMap("foo", "nar");
         CreateDiscussion createDiscussion = new CreateDiscussion()
             .setTitle("title")
             .setDescription("description")
             .setMainDocument("XWiki.Doc")
-            .setApplicationHint("hint");
+            .setApplicationHint("hint")
+            .setStoreConfigurationParameters(parameters);
         Discussion discussion = new Discussion();
-        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc")).thenReturn(Optional.of(
+        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc",
+            new DiscussionStoreConfigurationParameters(parameters))).thenReturn(Optional.of(
             discussion));
         Discussion actual = this.target.create(createDiscussion);
         assertSame(discussion, actual);
@@ -204,12 +210,15 @@ class DefaultDiscussionRESTTest
     @Test
     void createException()
     {
+        Map<String, Object> parameters = Collections.singletonMap("foo", "nar");
         CreateDiscussion createDiscussion = new CreateDiscussion()
             .setTitle("title")
             .setDescription("description")
             .setMainDocument("XWiki.Doc")
-            .setApplicationHint("hint");
-        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc")).thenReturn(Optional.empty());
+            .setApplicationHint("hint")
+            .setStoreConfigurationParameters(parameters);
+        when(this.discussionService.create("hint", "title", "description", "XWiki.Doc",
+            new DiscussionStoreConfigurationParameters(parameters))).thenReturn(Optional.empty());
         XWikiRestException throwable =
             assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
         assertEquals("Fail to create a discussion with title=[title], description=[description]",

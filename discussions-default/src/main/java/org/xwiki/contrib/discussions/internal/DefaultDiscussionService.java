@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
@@ -72,23 +73,26 @@ public class DefaultDiscussionService implements DiscussionService
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
-    public Optional<Discussion> create(String applicationHint, String title, String description, String mainDocument)
+    public Optional<Discussion> create(String applicationHint, String title, String description, String mainDocument,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         Optional<Discussion> discussion =
-            this.discussionStoreService.create(applicationHint, title, description, mainDocument).flatMap(this::get);
+            this.discussionStoreService.create(applicationHint, title, description, mainDocument,
+                configurationParameters).flatMap(this::get);
         discussion.ifPresent(d -> this.observationManager.notify(new DiscussionEvent(CREATE), applicationHint, d));
         return discussion;
     }
 
     @Override
     public Optional<Discussion> getOrCreate(String applicationHint, String title, String description,
-        List<DiscussionContextReference> discussionContexts)
+        List<DiscussionContextReference> discussionContexts,
+        DiscussionStoreConfigurationParameters configurationParameters)
     {
         List<BaseObject> byDiscussionContexts =
             this.discussionStoreService.findByDiscussionContexts(discussionContexts);
         if (byDiscussionContexts.isEmpty()) {
             Optional<DiscussionReference> discussionReferenceOpt =
-                this.discussionStoreService.create(applicationHint, title, description, null);
+                this.discussionStoreService.create(applicationHint, title, description, null, configurationParameters);
             discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
                 discussionContextReference -> this.discussionStoreService
                     .link(discussionReference, discussionContextReference)));

@@ -43,10 +43,6 @@
 #set ($applicationHint = 'messagestream')
 ## Computes the discussion contexts according to the recipients and emitter.
 ## Register the emitter as emitter as well as user in the discussion
-#set($discussionContexts = [
-  $services.discussions.getOrCreateDiscussionContext($applicationHint, '', '', 'messagestream-emitter', $xcontext.userReference),
-  $services.discussions.getOrCreateDiscussionContext($applicationHint, '', '', 'messagestream-user', $xcontext.userReference)
-])
 #if ($to == 'public')
   #set($discussionContexts = $services.discussions-messagestream.initializeContextPublic($xcontext.userReference))
 #elseif ($to == 'followers')
@@ -59,7 +55,7 @@
     $request.getParameterValues('new-discussion-groups')))
 #end
 ## Creates the discussion.
-#set ($discussion = $services.discussions.createDiscussion($applicationHint, $request.title, '', 'Discussions.MessageStream.Discussion'))
+#set ($discussion = $services.discussions.createDiscussion($applicationHint, $request.title, '', 'Discussions.MessageStream.Discussion', {}))
 ## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
   #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
@@ -69,7 +65,7 @@
   #end
 #end
 ## Add the first message.
-#set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion))
+#set ($discard = $services.discussions.createMessage($request.content, 'xwiki/2.1', $discussion.reference, {}))
 ## Redirect to the view page of the discussion.
 #set ($redirectReference = $escapetool.url($services.discussions.serialize($discussion.reference)))
 $response.sendRedirect($xwiki.getURL('Discussions.MessageStream.Discussion', 'view', "reference=$redirectReference"))

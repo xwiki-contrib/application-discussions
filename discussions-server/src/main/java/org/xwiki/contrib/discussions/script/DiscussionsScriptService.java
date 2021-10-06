@@ -33,11 +33,13 @@ import org.xwiki.contrib.discussions.DiscussionContextService;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsActorServiceResolver;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.AbstractDiscussionReference;
@@ -106,14 +108,16 @@ public class DiscussionsScriptService implements ScriptService
      * @param description the description
      * @param referenceType the entity reference type
      * @param entityReference the entity reference
+     * @param storeConfigurationParameters parameters used for configuration storage
      * @return the created discussion context
      */
     public DiscussionContext createDiscussionContext(String applicationHint, String name, String description,
-        String referenceType, String entityReference)
+        String referenceType, String entityReference, Map<String, Object> storeConfigurationParameters)
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
             return this.discussionContextService.create(applicationHint, name, description,
-                new DiscussionContextEntityReference(referenceType, entityReference)).orElse(null);
+                new DiscussionContextEntityReference(referenceType, entityReference),
+                new DiscussionStoreConfigurationParameters(storeConfigurationParameters)).orElse(null);
         } else {
             return null;
         }
@@ -127,14 +131,16 @@ public class DiscussionsScriptService implements ScriptService
      * @param description the discussion context description
      * @param referenceType the entity reference type
      * @param entityReference the entity reference
+     * @param storeConfigurationParameters parameters used for configuration storage
      * @return the request discussion context
      */
     public DiscussionContext getOrCreateDiscussionContext(String applicationHint, String name, String description,
-        String referenceType, String entityReference)
+        String referenceType, String entityReference, Map<String, Object> storeConfigurationParameters)
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
             return this.discussionContextService.getOrCreate(applicationHint, name, description,
-                    new DiscussionContextEntityReference(referenceType, entityReference))
+                    new DiscussionContextEntityReference(referenceType, entityReference),
+                    new DiscussionStoreConfigurationParameters(storeConfigurationParameters))
                 .orElse(null);
         } else {
             return null;
@@ -148,11 +154,14 @@ public class DiscussionsScriptService implements ScriptService
      * @param title the discussion title
      * @param description the discussion description
      * @param mainDocument the main document to view the discussion
+     * @param storeConfigurationParameters parameters used for configuration storage
      * @return the created discussion
      */
-    public Discussion createDiscussion(String applicationHint, String title, String description, String mainDocument)
+    public Discussion createDiscussion(String applicationHint, String title, String description, String mainDocument,
+        Map<String, Object> storeConfigurationParameters)
     {
-        return this.discussionService.create(applicationHint, title, description, mainDocument).orElse(null);
+        return this.discussionService.create(applicationHint, title, description, mainDocument,
+            new DiscussionStoreConfigurationParameters(storeConfigurationParameters)).orElse(null);
     }
 
     /**
@@ -194,14 +203,19 @@ public class DiscussionsScriptService implements ScriptService
      *
      * @param content the content
      * @param syntax the syntax of the content of the message
-     * @param discussion the discussion
+     * @param reference the discussion reference
+     * @param storeConfigurationParameters parameters used for configuration storage
      * @return the created message
      */
-    public Message createMessage(String content, String syntax, Discussion discussion)
+    public Message createMessage(String content, String syntax, String reference,
+        Map<String, Object> storeConfigurationParameters)
     {
-        if (this.discussionService.canWrite(discussion.getReference())) {
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(reference, DiscussionReference.class);
+        if (this.discussionService.canWrite(discussionReference)) {
             try {
-                return this.messageService.create(content, Syntax.valueOf(syntax), discussion.getReference())
+                return this.messageService.create(content, Syntax.valueOf(syntax), discussionReference,
+                        new DiscussionStoreConfigurationParameters(storeConfigurationParameters))
                     .orElse(null);
             } catch (ParseException e) {
                 this.logger.warn("Malformed syntax [{}]. Cause: [{}].", syntax, getRootCauseMessage(e));
@@ -303,6 +317,17 @@ public class DiscussionsScriptService implements ScriptService
     public ActorDescriptor getActorDescriptor(String type, String reference)
     {
         return this.actorsServiceResolver.get(type).resolve(reference).orElse(null);
+    }
+
+    /**
+     * Returns an actor descriptor for the provided actor reference.
+     *
+     * @param actorReference the reference of the actor
+     * @return the {@link ActorDescriptor}, or {@code null} in case of error during the resolution
+     */
+    public ActorDescriptor getActorDescriptor(ActorReference actorReference)
+    {
+        return this.getActorDescriptor(actorReference.getType(), actorReference.getReference());
     }
 
     /**

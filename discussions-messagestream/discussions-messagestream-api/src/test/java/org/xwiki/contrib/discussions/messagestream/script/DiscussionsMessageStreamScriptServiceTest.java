@@ -25,10 +25,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
+import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
@@ -70,6 +72,9 @@ class DiscussionsMessageStreamScriptServiceTest
     @MockComponent
     private DiscussionsFollowersService discussionsFollowersService;
 
+    @MockComponent
+    private ContextualLocalizationManager localizationManager;
+
     @Test
     void initializeContextPublic()
     {
@@ -83,14 +88,33 @@ class DiscussionsMessageStreamScriptServiceTest
             new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", ""));
 
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.title", "Author"))
+            .thenReturn("Emitter context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.description",
+            "Author"))
+            .thenReturn("Emitter context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.title", "Author"))
+            .thenReturn("Personal context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.description",
+            "Author"))
+            .thenReturn("Personal context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.public.title", "Author"))
+            .thenReturn("Public context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.public.description",
+            "Author"))
+            .thenReturn("Public context description");
+
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
+            "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "Author")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
+            "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc2));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "*")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Public context title",
+            "Public context description", new DiscussionContextEntityReference("messagestream-user", "*"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc3));
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextPublic("Author");
@@ -114,19 +138,39 @@ class DiscussionsMessageStreamScriptServiceTest
             new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc3"), "", "",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower"));
 
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.title", "Author"))
+            .thenReturn("Emitter context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.description",
+            "Author"))
+            .thenReturn("Emitter context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.title", "Author"))
+            .thenReturn("Personal context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.description",
+            "Author"))
+            .thenReturn("Personal context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.followers.title", "Author"))
+            .thenReturn("Followers context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.followers.description",
+            "Author"))
+            .thenReturn("Followers context description");
+
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
+            "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "Author")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
+            "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc2));
         when(this.resolver.resolve("Author")).thenReturn(authorDR);
         when(this.serializer.serialize(authorDR)).thenReturn("xwiki:XWiki.Author");
         when(this.discussionsFollowersService.getFollowers("xwiki:XWiki.Author")).thenReturn(Arrays.asList(
             "xwiki:XWiki.Follower"
         ));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Followers context title",
+            "Followers context description",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc3));
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextFollowers("Author");
@@ -154,17 +198,42 @@ class DiscussionsMessageStreamScriptServiceTest
         DocumentReference user1Reference = new DocumentReference("xwiki", "XWiki", "user1");
         DocumentReference user2Reference = new DocumentReference("xwiki", "XWiki", "user2");
 
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.title", "Author"))
+            .thenReturn("Emitter context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.description",
+            "Author"))
+            .thenReturn("Emitter context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.title", "Author"))
+            .thenReturn("Personal context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.description",
+            "Author"))
+            .thenReturn("Personal context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.title"))
+            .thenReturn("User context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.description",
+            "Author", "user1"))
+            .thenReturn("User context description 1");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.description",
+            "Author", "user2"))
+            .thenReturn("User context description 2");
+
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
+            "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "Author")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
+            "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc2));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user1")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
+            "User context description 1",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user1"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc3));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user2")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
+            "User context description 2",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user2"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc4));
 
         when(this.resolver.resolve("user1")).thenReturn(user1Reference);
@@ -202,11 +271,32 @@ class DiscussionsMessageStreamScriptServiceTest
         DocumentReference u1DR = new DocumentReference("xwiki", "XWiki", "U1");
         DocumentReference u2DR = new DocumentReference("xwiki", "XWiki", "U2");
 
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-emitter", "Author")))
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.title", "Author"))
+            .thenReturn("Emitter context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.description",
+            "Author"))
+            .thenReturn("Emitter context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.title", "Author"))
+            .thenReturn("Personal context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.description",
+            "Author"))
+            .thenReturn("Personal context description");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.title"))
+            .thenReturn("User context title");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.description",
+            "Author", "xwiki:XWiki.U1"))
+            .thenReturn("User context description 1");
+        when(this.localizationManager.getTranslationPlain("discussion.messagestream.context.users.description",
+            "Author", "xwiki:XWiki.U2"))
+            .thenReturn("User context description 2");
+
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
+            "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc1));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "Author")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
+            "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc2));
         when(this.resolver.resolve("G1")).thenReturn(g1DR);
         when(this.resolver.resolve("G2")).thenReturn(g2DR);
@@ -214,11 +304,15 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.groupManager.getMembers(g2DR, true)).thenReturn(asList(u1DR, u2DR));
         when(this.serializer.serialize(u1DR)).thenReturn("xwiki:XWiki.U1");
         when(this.serializer.serialize(u2DR)).thenReturn("xwiki:XWiki.U2");
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U1")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
+            "User context description 1",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U1"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc3));
-        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "", "",
-            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U2")))
+        when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
+            "User context description 2",
+            new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U2"),
+            new DiscussionStoreConfigurationParameters()))
             .thenReturn(Optional.of(dc4));
 
         List<DiscussionContext> discussionContexts =
