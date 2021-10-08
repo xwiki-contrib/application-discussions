@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -43,6 +45,8 @@ import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.MessageService;
+import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
@@ -58,7 +62,6 @@ import org.xwiki.resource.annotations.Authenticate;
 import org.xwiki.wysiwyg.converter.HTMLConverter;
 
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
 
 /**
@@ -135,7 +138,11 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
         switch (discussionsResourceReference.getActionType()) {
             case CREATE:
-                handleCreate(discussionsResourceReference, request, response);
+                try {
+                    handleCreate(discussionsResourceReference, request, response);
+                } catch (IOException e) {
+                    throw new ResourceReferenceHandlerException("Error when handling discussion create action", e);
+                }
                 break;
             case READ:
                 handleRead(discussionsResourceReference);
@@ -203,7 +210,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     }
 
     private void handleCreate(DiscussionsResourceReference discussionsResourceReference, HttpServletRequest request,
-        HttpServletResponse response)
+        HttpServletResponse response) throws IOException
     {
         switch (discussionsResourceReference.getDiscussionsEntityType()) {
             case MESSAGE:
@@ -218,60 +225,69 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         }
     }
 
-    private void createMessage(HttpServletRequest request, HttpServletResponse response)
+    private void createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-
         if (!this.csrfToken.isTokenValid(request.getParameter("form_token"))) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token.");
+        } else {
+            String serializedReference = request.getParameter(DISCUSSION_REFERENCE_PARAM);
+            DiscussionReference discussionReference =
+                this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
+            Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
+            if (!discussionOptional.isPresent()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    String.format("Cannot find discussion with reference [%s]", serializedReference));
+            } else {
+                Discussion discussion = discussionOptional.get();
+                String content = getContent(request);
+                Syntax syntax = getSyntax(request);
+                DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
+                request.getParameterMap().forEach((key, value) -> {
+                    if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
+                        String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
+                        parameters.put(parameterKey, value);
+                    }
+                });
+                Optional<Message> messageOptional =
+                    this.messageService.create(content, syntax, discussion.getReference(), parameters);
+                if (!messageOptional.isPresent()) {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
+                } else {
+                    String parameter = request.getParameter(ORIGINAL_URL_PARAM);
+                    try {
+                        URIBuilder uriBuilder = new URIBuilder(parameter);
+                        List<NameValuePair> queryParams = uriBuilder
+                            .getQueryParams();
+                        String offsetName = request.getParameter("namespace") + "_offset";
+                        List<NameValuePair> collect =
+                            queryParams.stream().filter(it -> !it.getName().equals(offsetName))
+                                .collect(Collectors.toList());
+                        URI namespace = uriBuilder.clearParameters().setParameters(collect)
+                            .build();
+                        redirect(response, namespace.toASCIIString());
+                    } catch (URISyntaxException e) {
+                        this.logger.warn("Error when building URI from parameter [{}]: [{}]", parameter,
+                            ExceptionUtils.getRootCauseMessage(e));
+                        redirect(response, parameter);
+                    }
+                }
+            }
+        }
+    }
+
+    private Syntax getSyntax(HttpServletRequest request)
+    {
+        Syntax syntax;
+        if (request.getParameter(CONTENT_SYNTAX_PARAMETER) != null) {
             try {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token.");
-            } catch (IOException e) {
-                this.logger.warn("Failed to return a request error response. Cause: [{}]", getRootCauseMessage(e));
+                syntax = Syntax.valueOf(request.getParameter(CONTENT_SYNTAX_PARAMETER));
+            } catch (ParseException e) {
+                syntax = XWIKI_2_0;
             }
         } else {
-            DiscussionReference discussionReference =
-                this.discussionReferencesResolver.resolve(request.getParameter(DISCUSSION_REFERENCE_PARAM),
-                    DiscussionReference.class);
-            this.discussionService
-                .get(discussionReference)
-                .ifPresent(d -> {
-                    String content = getContent(request);
-                    Syntax syntax;
-                    if (request.getParameter(CONTENT_SYNTAX_PARAMETER) != null) {
-                        try {
-                            syntax = Syntax.valueOf(request.getParameter(CONTENT_SYNTAX_PARAMETER));
-                        } catch (ParseException e) {
-                            syntax = XWIKI_2_0;
-                        }
-                    } else {
-                        syntax = XWIKI_2_0;
-                    }
-                    DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-                    request.getParameterMap().forEach((key, value) -> {
-                        if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
-                            String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
-                            parameters.put(parameterKey, value);
-                        }
-                    });
-                    this.messageService.create(content, syntax, d.getReference(), parameters)
-                        .ifPresent(m -> {
-                            String parameter = request.getParameter(ORIGINAL_URL_PARAM);
-                            try {
-                                URIBuilder uriBuilder = new URIBuilder(parameter);
-                                List<NameValuePair> queryParams = uriBuilder
-                                    .getQueryParams();
-                                String offsetName = request.getParameter("namespace") + "_offset";
-                                List<NameValuePair> collect =
-                                    queryParams.stream().filter(it -> !it.getName().equals(offsetName))
-                                        .collect(Collectors.toList());
-                                URI namespace = uriBuilder.clearParameters().setParameters(collect)
-                                    .build();
-                                redirect(response, namespace.toASCIIString());
-                            } catch (URISyntaxException e) {
-                                redirect(response, parameter);
-                            }
-                        });
-                });
+            syntax = XWIKI_2_0;
         }
+        return syntax;
     }
 
     private String getContent(HttpServletRequest request)
