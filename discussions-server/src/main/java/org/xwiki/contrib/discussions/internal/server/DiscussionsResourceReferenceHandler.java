@@ -22,13 +22,16 @@ package org.xwiki.contrib.discussions.internal.server;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,6 +45,7 @@ import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
+import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.MessageService;
@@ -60,6 +64,9 @@ import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
 import org.xwiki.resource.annotations.Authenticate;
 import org.xwiki.wysiwyg.converter.HTMLConverter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xpn.xwiki.XWikiContext;
 
 import static java.util.Collections.singletonList;
 import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
@@ -97,6 +104,8 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private static final String STORE_CONFIGURATION_PARAMETER_PREFIX = "storeConfiguration_";
 
+    private static final String ASYNC_PARAMETER = "async";
+
     @Inject
     private Logger logger;
 
@@ -117,6 +126,12 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     @Inject
     private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @Inject
+    private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
+    private Provider<XWikiContext> contextProvider;
 
     @Override
     public List<ResourceType> getSupportedResourceReferences()
@@ -253,26 +268,65 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                 if (!messageOptional.isPresent()) {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
                 } else {
-                    String parameter = request.getParameter(ORIGINAL_URL_PARAM);
-                    try {
-                        URIBuilder uriBuilder = new URIBuilder(parameter);
-                        List<NameValuePair> queryParams = uriBuilder
-                            .getQueryParams();
-                        String offsetName = request.getParameter("namespace") + "_offset";
-                        List<NameValuePair> collect =
-                            queryParams.stream().filter(it -> !it.getName().equals(offsetName))
-                                .collect(Collectors.toList());
-                        URI namespace = uriBuilder.clearParameters().setParameters(collect)
-                            .build();
-                        redirect(response, namespace.toASCIIString());
-                    } catch (URISyntaxException e) {
-                        this.logger.warn("Error when building URI from parameter [{}]: [{}]", parameter,
-                            ExceptionUtils.getRootCauseMessage(e));
-                        redirect(response, parameter);
+                    if (isAsync(request)) {
+                        Map<String, String> answer = new LinkedHashMap<>();
+                        answer.put("messageReference",
+                            this.discussionReferencesSerializer.serialize(messageOptional.get().getReference()));
+                        this.answerJSON(response, HttpServletResponse.SC_OK, answer);
+                    } else {
+                        this.handleCreateMessageRedirect(request, response);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Answer to a request with a JSON content.
+     * Note: this method was partially copied from {@link com.xpn.xwiki.web.XWikiAction}.
+     *
+     * @param response where to send the response
+     * @param status the status code to send back.
+     * @param answer the content of the JSON answer.
+     * @throws IOException in case of error during the serialization of the JSON.
+     */
+    protected void answerJSON(HttpServletResponse response, int status, Map<String, String> answer) throws IOException
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        XWikiContext context = contextProvider.get();
+        String jsonAnswerAsString = mapper.writeValueAsString(answer);
+        response.setContentType("application/json");
+        response.setContentLength(jsonAnswerAsString.length());
+        response.setStatus(status);
+        response.setCharacterEncoding(context.getWiki().getEncoding());
+        response.getWriter().print(jsonAnswerAsString);
+        context.setResponseSent(true);
+    }
+
+    private void handleCreateMessageRedirect(HttpServletRequest request, HttpServletResponse response)
+    {
+        String parameter = request.getParameter(ORIGINAL_URL_PARAM);
+        try {
+            URIBuilder uriBuilder = new URIBuilder(parameter);
+            List<NameValuePair> queryParams = uriBuilder
+                .getQueryParams();
+            String offsetName = request.getParameter("namespace") + "_offset";
+            List<NameValuePair> collect =
+                queryParams.stream().filter(it -> !it.getName().equals(offsetName))
+                    .collect(Collectors.toList());
+            URI namespace = uriBuilder.clearParameters().setParameters(collect)
+                .build();
+            redirect(response, namespace.toASCIIString());
+        } catch (URISyntaxException e) {
+            this.logger.warn("Error when building URI from parameter [{}]: [{}]", parameter,
+                ExceptionUtils.getRootCauseMessage(e));
+            redirect(response, parameter);
+        }
+    }
+
+    private boolean isAsync(HttpServletRequest request)
+    {
+        return "1".equals(request.getParameter(ASYNC_PARAMETER));
     }
 
     private Syntax getSyntax(HttpServletRequest request)
