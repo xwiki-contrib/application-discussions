@@ -66,6 +66,7 @@ public interface DiscussionContextStoreService
     /**
      * Links (unidirectionally) a discussion context and a discussion.
      *
+     * @see DiscussionStoreService#link(DiscussionReference, DiscussionContextReference)
      * @param discussionContextReference the discussion context reference
      * @param discussionReference the discussion reference
      * @return {@code true} if the link was not already existing, {@code false} otherwise
@@ -75,6 +76,7 @@ public interface DiscussionContextStoreService
     /**
      * Unlinks (unidirectionally) a discussion context and a discussion.
      *
+     * @see DiscussionStoreService#unlink(DiscussionReference, DiscussionContextReference)
      * @param discussionContextReference the discussion context reference
      * @param discussionReference the discussion reference
      * @return {@code true} if the link was existing and has been removed, {@code false} otherwise

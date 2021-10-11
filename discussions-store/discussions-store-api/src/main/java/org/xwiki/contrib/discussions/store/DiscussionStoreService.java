@@ -83,6 +83,7 @@ public interface DiscussionStoreService
     /**
      * Links (unidirectionally) a discussion to a discussion context.
      *
+     * @see DiscussionContextStoreService#link(DiscussionContextReference, DiscussionReference)
      * @param discussionReference the discussion reference
      * @param discussionContextReference the discussion context reference
      * @return {@code true} if the link was not already existing, {@code false} otherwise
@@ -92,6 +93,7 @@ public interface DiscussionStoreService
     /**
      * Unlinks (unidirectionally) a discussion to a discussion context.
      *
+     * @see DiscussionContextStoreService#unlink(DiscussionContextReference, DiscussionReference)
      * @param discussionReference the discussion reference
      * @param discussionContextReference the discussion context reference
      * @return {@code true} if the link was existing and has been removed, {@code false} otherwise

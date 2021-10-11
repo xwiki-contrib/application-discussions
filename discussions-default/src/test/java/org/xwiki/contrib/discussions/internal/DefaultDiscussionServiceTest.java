@@ -19,7 +19,10 @@
  */
 package org.xwiki.contrib.discussions.internal;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +31,9 @@ import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.Discussion;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
+import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.junit5.mockito.ComponentTest;
@@ -41,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.MAIN_DOCUMENT_NAME;
@@ -62,6 +68,9 @@ class DefaultDiscussionServiceTest
 
     @MockComponent
     private DiscussionStoreService discussionStoreService;
+
+    @MockComponent
+    private DiscussionContextStoreService discussionContextStoreService;
 
     @MockComponent
     private DiscussionsRightService discussionsRightService;
@@ -234,5 +243,47 @@ class DefaultDiscussionServiceTest
         boolean reference = this.defaultDiscussionService.canWrite(this.discussionReference);
 
         assertTrue(reference);
+    }
+
+    @Test
+    void getOrCreate()
+    {
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
+        Date updateDate = new Date();
+        DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
+        Discussion discussion = new Discussion(discussionReference, "title", "description", updateDate, "XWiki.Doc");
+        BaseObject baseObject = mock(BaseObject.class);
+
+        DocumentReference value = new DocumentReference("xwiki", "a", "b");
+        when(baseObject.getDocumentReference()).thenReturn(value);
+        when(baseObject.getStringValue(REFERENCE_NAME)).thenReturn("reference");
+        when(this.discussionReferencesResolver.resolve("reference", DiscussionReference.class))
+            .thenReturn(discussionReference);
+        when(baseObject.getStringValue(TITLE_NAME)).thenReturn("title");
+        when(baseObject.getStringValue(DESCRIPTION_NAME)).thenReturn("description");
+        when(baseObject.getDateValue(UPDATE_DATE_NAME)).thenReturn(updateDate);
+        when(baseObject.getStringValue(MAIN_DOCUMENT_NAME)).thenReturn("XWiki.Doc");
+        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
+        when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
+        when(this.discussionStoreService.create("hint", "title", "description", null, parameters))
+            .thenReturn(Optional.of(this.discussionReference));
+        when(this.discussionStoreService.get(this.discussionReference))
+            .thenReturn(Optional.of(baseObject));
+
+        DiscussionContextReference ref1 = mock(DiscussionContextReference.class);
+        DiscussionContextReference ref2 = mock(DiscussionContextReference.class);
+        List<DiscussionContextReference> contextReferenceList = Arrays.asList(ref1, ref2);
+
+        when(this.discussionStoreService.findByDiscussionContexts(contextReferenceList))
+            .thenReturn(Collections.emptyList());
+        Optional<Discussion> discussionOpt = this.defaultDiscussionService
+            .getOrCreate("hint", "title", "description", contextReferenceList, parameters);
+
+        assertEquals(Optional.of(discussion), discussionOpt);
+        verify(this.discussionStoreService).findByDiscussionContexts(contextReferenceList);
+        verify(this.discussionStoreService).link(this.discussionReference, ref1);
+        verify(this.discussionStoreService).link(this.discussionReference, ref2);
+        verify(this.discussionContextStoreService).link(ref1, this.discussionReference);
+        verify(this.discussionContextStoreService).link(ref2, this.discussionReference);
     }
 }

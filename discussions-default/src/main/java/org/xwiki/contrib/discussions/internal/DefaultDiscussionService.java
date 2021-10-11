@@ -37,6 +37,7 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityRe
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.events.DiscussionEvent;
+import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.observation.ObservationManager;
 
@@ -67,6 +68,9 @@ public class DefaultDiscussionService implements DiscussionService
     private DiscussionStoreService discussionStoreService;
 
     @Inject
+    private DiscussionContextStoreService discussionContextStoreService;
+
+    @Inject
     private DiscussionsRightService discussionsRightService;
 
     @Inject
@@ -94,8 +98,10 @@ public class DefaultDiscussionService implements DiscussionService
             Optional<DiscussionReference> discussionReferenceOpt =
                 this.discussionStoreService.create(applicationHint, title, description, null, configurationParameters);
             discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
-                discussionContextReference -> this.discussionStoreService
-                    .link(discussionReference, discussionContextReference)));
+                discussionContextReference -> {
+                    this.discussionStoreService.link(discussionReference, discussionContextReference);
+                    this.discussionContextStoreService.link(discussionContextReference, discussionReference);
+                }));
             return discussionReferenceOpt.flatMap(this::get);
         }
         BaseObject baseObject = byDiscussionContexts.get(0);

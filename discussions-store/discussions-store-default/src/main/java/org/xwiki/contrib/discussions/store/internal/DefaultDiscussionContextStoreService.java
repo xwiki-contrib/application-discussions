@@ -40,6 +40,7 @@ import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
+import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -94,6 +95,9 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
+    private ContextualLocalizationManager localizationManager;
 
     @Override
     public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
@@ -181,7 +185,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
                 if (!listValue.contains(serializedReference)) {
                     listValue.add(serializedReference);
-                    save(discussionContext);
+                    save(discussionContext, true, "discussions.store.discussionContext.linkDiscussion");
                     return true;
                 }
                 return false;
@@ -198,7 +202,7 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
                 if (listValue.contains(serializedReference)) {
                     listValue.remove(serializedReference);
-                    save(discussionContext);
+                    save(discussionContext, true, "discussions.store.discussionContext.unlinkDiscussion");
                     return true;
                 }
                 return false;
@@ -328,11 +332,12 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         return context.getWiki().getDocument(documentReference, context);
     }
 
-    private void save(BaseObject discussionContext)
+    private void save(BaseObject discussionContext, boolean minor, String translationKey)
     {
         XWikiContext context = this.getContext();
         try {
-            context.getWiki().saveDocument(discussionContext.getOwnerDocument(), context);
+            context.getWiki().saveDocument(discussionContext.getOwnerDocument(),
+                this.localizationManager.getTranslationPlain(translationKey), minor, context);
         } catch (XWikiException e) {
             this.logger.warn("Failed to save the discussion context. Cause: [{}]", getRootCauseMessage(e));
         }

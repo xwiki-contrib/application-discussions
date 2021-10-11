@@ -39,6 +39,7 @@ import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
+import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -95,6 +96,9 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
 
     @Inject
     private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @Inject
+    private ContextualLocalizationManager localizationManager;
 
     @Override
     public Optional<DiscussionReference> create(String applicationHint, String title, String description,
@@ -186,7 +190,8 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                         + "and field.id.name='discussionContexts' "
                         + "and str_field.id.name='reference' ",
                     discussionClass), Query.HQL)
-                    .bindValue("discussionContextReference", discussionContextReference)
+                    .bindValue("discussionContextReference",
+                        this.discussionReferencesSerializer.serialize(discussionContextReference))
                     .execute());
             }
             // Selects the discussions that are linked to exactly as much contexts as the number requested.
@@ -334,7 +339,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     {
         get(discussionReference).ifPresent(discussion -> {
             discussion.setDateValue(UPDATE_DATE_NAME, new Date());
-            save(discussion);
+            save(discussion, true, "discussions.store.discussion.updateDate");
         });
     }
 
@@ -347,7 +352,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionContextReference);
                 if (!listValue.contains(serializedReference)) {
                     listValue.add(serializedReference);
-                    save(discussion);
+                    save(discussion, true, "discussions.store.discussion.linkContext");
                     return true;
                 }
                 return false;
@@ -366,7 +371,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                         .serialize(discussionContextReference);
                     if (listValue.contains(serializedReference)) {
                         listValue.remove(serializedReference);
-                        save(discussion);
+                        save(discussion, true, "discussions.store.discussion.unlinkContext");
                         return true;
                     }
                     return false;
@@ -410,12 +415,13 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         return context.getWiki().getDocument(documentReference, context);
     }
 
-    private void save(BaseObject discussion)
+    private void save(BaseObject discussion, boolean minor, String translationKey)
     {
         XWikiContext context = getContext();
         try {
             discussion.setDateValue(UPDATE_DATE_NAME, new Date());
-            context.getWiki().saveDocument(discussion.getOwnerDocument(), context);
+            context.getWiki().saveDocument(discussion.getOwnerDocument(),
+                this.localizationManager.getTranslationPlain(translationKey), minor, context);
         } catch (XWikiException e) {
             this.logger.warn("Failed to save the discussion context. Cause: [{}]", getRootCauseMessage(e));
         }
