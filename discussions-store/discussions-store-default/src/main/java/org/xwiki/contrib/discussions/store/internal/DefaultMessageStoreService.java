@@ -114,16 +114,6 @@ public class DefaultMessageStoreService implements MessageStoreService
             // The title of the page
             document.setTitle(title);
             document.setHidden(true);
-            // FIXME: object class should come from initializers
-
-            document.setContent("{{velocity}}\n"
-                + "#set ($message = $doc.getObject('Discussions.Code.MessageClass'))\n"
-                + "#set ($discussion = $services.discussions.getDiscussion($message.discussionReference))\n"
-                + "#if ($discussion.mainDocument)\n"
-                + "$response.sendRedirect($xwiki.getURL($discussion.mainDocument, 'view', "
-                + "\"reference=$message.discussionReference\"))\n"
-                + "#end"
-                + "{{/velocity}}");
             DocumentReference authorReferenceDoc;
             String authorType = authorReference.getType();
             if (authorType.equals("user")) {
