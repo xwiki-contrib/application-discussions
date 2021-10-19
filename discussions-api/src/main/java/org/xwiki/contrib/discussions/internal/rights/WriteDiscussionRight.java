@@ -48,7 +48,7 @@ public final class WriteDiscussionRight implements RightDescription
     @Override
     public String getName()
     {
-        return "Write Discussion";
+        return "discussion-right";
     }
 
     @Override

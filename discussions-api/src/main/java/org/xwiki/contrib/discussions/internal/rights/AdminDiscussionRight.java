@@ -48,7 +48,7 @@ public final class AdminDiscussionRight implements RightDescription
     @Override
     public String getName()
     {
-        return "Admin Discussion";
+        return "discussion-admin";
     }
 
     @Override

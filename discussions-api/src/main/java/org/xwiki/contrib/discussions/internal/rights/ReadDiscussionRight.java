@@ -48,7 +48,7 @@ public final class ReadDiscussionRight implements RightDescription
     @Override
     public String getName()
     {
-        return "Read Discussion";
+        return "discussion-read";
     }
 
     @Override

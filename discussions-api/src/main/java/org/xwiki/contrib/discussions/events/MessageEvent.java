@@ -24,7 +24,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.stability.Unstable;
 
 /**
- * Event sent when a discussion context is changed.
+ * Event sent when a message is changed.
+ *
+ * The event also send the following parameters:
+ * <ul>
+ *   <li>source: the application hint of the message reference</li>
+ *   <li>data: the actual message object</li>
+ * </ul>
  *
  * @version $Id$
  * @since 1.0
