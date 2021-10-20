@@ -151,26 +151,34 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         HttpServletResponse response =
             ((ServletResponse) this.container.getResponse()).getHttpServletResponse();
 
-        switch (discussionsResourceReference.getActionType()) {
-            case CREATE:
-                try {
-                    handleCreate(discussionsResourceReference, request, response);
-                } catch (IOException e) {
-                    throw new ResourceReferenceHandlerException("Error when handling discussion create action", e);
-                }
-                break;
-            case READ:
-                handleRead(discussionsResourceReference);
-                break;
-            case UPDATE:
-                handleUpdate(discussionsResourceReference);
-                break;
-            case DELETE:
-                handleDelete(discussionsResourceReference, request, response);
-                break;
-            default:
-                handleNext(reference, chain);
-                return;
+        if (!this.csrfToken.isTokenValid(request.getParameter("form_token"))) {
+            try {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token.");
+            } catch (IOException e) {
+                throw new ResourceReferenceHandlerException("Error while sending error response", e);
+            }
+        } else {
+            switch (discussionsResourceReference.getActionType()) {
+                case CREATE:
+                    try {
+                        handleCreate(discussionsResourceReference, request, response);
+                    } catch (IOException e) {
+                        throw new ResourceReferenceHandlerException("Error when handling discussion create action", e);
+                    }
+                    break;
+                case READ:
+                    handleRead(discussionsResourceReference);
+                    break;
+                case UPDATE:
+                    handleUpdate(discussionsResourceReference);
+                    break;
+                case DELETE:
+                    handleDelete(discussionsResourceReference, request, response);
+                    break;
+                default:
+                    handleNext(reference, chain);
+                    return;
+            }
         }
 
         handleNext(reference, chain);
@@ -242,40 +250,36 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private void createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        if (!this.csrfToken.isTokenValid(request.getParameter("form_token"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token.");
+        String serializedReference = request.getParameter(DISCUSSION_REFERENCE_PARAM);
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
+        Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
+        if (!discussionOptional.isPresent()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                String.format("Cannot find discussion with reference [%s]", serializedReference));
         } else {
-            String serializedReference = request.getParameter(DISCUSSION_REFERENCE_PARAM);
-            DiscussionReference discussionReference =
-                this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
-            Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
-            if (!discussionOptional.isPresent()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                    String.format("Cannot find discussion with reference [%s]", serializedReference));
+            Discussion discussion = discussionOptional.get();
+            String content = getContent(request);
+            Syntax syntax = getSyntax(request);
+            DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
+            request.getParameterMap().forEach((key, value) -> {
+                if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
+                    String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
+                    parameters.put(parameterKey, value);
+                }
+            });
+            Optional<Message> messageOptional =
+                this.messageService.create(content, syntax, discussion.getReference(), parameters);
+            if (!messageOptional.isPresent()) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
             } else {
-                Discussion discussion = discussionOptional.get();
-                String content = getContent(request);
-                Syntax syntax = getSyntax(request);
-                DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-                request.getParameterMap().forEach((key, value) -> {
-                    if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
-                        String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
-                        parameters.put(parameterKey, value);
-                    }
-                });
-                Optional<Message> messageOptional =
-                    this.messageService.create(content, syntax, discussion.getReference(), parameters);
-                if (!messageOptional.isPresent()) {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
+                if (isAsync(request)) {
+                    Map<String, String> answer = new LinkedHashMap<>();
+                    answer.put("messageReference",
+                        this.discussionReferencesSerializer.serialize(messageOptional.get().getReference()));
+                    this.answerJSON(response, HttpServletResponse.SC_OK, answer);
                 } else {
-                    if (isAsync(request)) {
-                        Map<String, String> answer = new LinkedHashMap<>();
-                        answer.put("messageReference",
-                            this.discussionReferencesSerializer.serialize(messageOptional.get().getReference()));
-                        this.answerJSON(response, HttpServletResponse.SC_OK, answer);
-                    } else {
-                        this.handleCreateMessageRedirect(request, response);
-                    }
+                    this.handleCreateMessageRedirect(request, response);
                 }
             }
         }

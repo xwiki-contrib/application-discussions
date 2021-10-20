@@ -435,7 +435,7 @@ $services.localization.render('discussions.discussion.usersList.public')
           &lt;div class='text-right'&gt;
             #if ($services.discussions.rights.canDeleteMessage($message))
             #set ($messageReference = $services.discussions.serialize($message.reference))
-            #set ($deleteUrl = "${request.getContextPath()}/discussions/delete/Message/$discussion.reference?discussionReference=$escapetool.url($reference)&amp;reference=$escapetool.url($messageReference)&amp;originalURL=$escapetool.url($originalUrl)")
+            #set ($deleteUrl = "${request.getContextPath()}/discussions/delete/Message/$discussion.reference?discussionReference=$escapetool.url($reference)&amp;reference=$escapetool.url($messageReference)&amp;originalURL=$escapetool.url($originalUrl)&amp;form_token=$services.csrf.token")
               &lt;a class='btn btn-danger btn-xs discussions message delete' href="$deleteUrl"&gt;$services.icon.renderHTML('trash')&lt;/a&gt;
             #end
           &lt;/div&gt;
