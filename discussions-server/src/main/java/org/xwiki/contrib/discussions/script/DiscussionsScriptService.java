@@ -409,4 +409,16 @@ public class DiscussionsScriptService implements ScriptService
     {
         return this.discussionReferencesSerializer.serialize(reference);
     }
+
+    /**
+     * Retrieve a message by reference.
+     * @param reference the reference of the message.
+     * @return the retrieved message or null.
+     * @since 2.0
+     */
+    @Unstable
+    public Message getMessage(MessageReference reference)
+    {
+        return this.messageService.getByReference(reference).orElse(null);
+    }
 }
