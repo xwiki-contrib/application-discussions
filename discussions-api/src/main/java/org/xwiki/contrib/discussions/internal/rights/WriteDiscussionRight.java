@@ -26,6 +26,7 @@ import org.xwiki.security.authorization.Right;
 import org.xwiki.security.authorization.RightDescription;
 import org.xwiki.security.authorization.RuleState;
 
+import static org.xwiki.security.authorization.RuleState.ALLOW;
 import static org.xwiki.security.authorization.RuleState.DENY;
 
 /**
@@ -48,13 +49,13 @@ public final class WriteDiscussionRight implements RightDescription
     @Override
     public String getName()
     {
-        return "discussion-right";
+        return "discussion-write";
     }
 
     @Override
     public RuleState getDefaultState()
     {
-        return DENY;
+        return ALLOW;
     }
 
     @Override
@@ -66,7 +67,7 @@ public final class WriteDiscussionRight implements RightDescription
     @Override
     public boolean getInheritanceOverridePolicy()
     {
-        return false;
+        return true;
     }
 
     @Override

@@ -35,6 +35,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.security.authorization.ContextualAuthorizationManager;
 import org.xwiki.security.authorization.Right;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -100,11 +101,13 @@ public class DiscussionRightsScriptService implements ScriptService
      *
      * @param discussion a discussion
      * @param user a user
+     * @param allow use {@code true} to allow the right and {@code false} to deny it.
      */
-    public void setRead(Discussion discussion, DocumentReference user)
+    public void setRead(Discussion discussion, DocumentReference user, boolean allow)
     {
         if (this.authorizationManager.hasAccess(Right.PROGRAM)) {
-            this.discussionsRightService.setRead(discussion, user);
+            RuleState state = (allow) ? RuleState.ALLOW : RuleState.DENY;
+            this.discussionsRightService.setRead(discussion, user, state);
         }
     }
 
@@ -113,11 +116,13 @@ public class DiscussionRightsScriptService implements ScriptService
      *
      * @param discussion a discussion
      * @param user a user
+     * @param allow use {@code true} to allow the right and {@code false} to deny it.
      */
-    public void setWrite(Discussion discussion, DocumentReference user)
+    public void setWrite(Discussion discussion, DocumentReference user, boolean allow)
     {
         if (this.authorizationManager.hasAccess(Right.PROGRAM)) {
-            this.discussionsRightService.setWrite(discussion, user);
+            RuleState state = (allow) ? RuleState.ALLOW : RuleState.DENY;
+            this.discussionsRightService.setWrite(discussion, user, state);
         }
     }
 }

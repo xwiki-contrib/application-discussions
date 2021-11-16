@@ -33,6 +33,7 @@ import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.LocalDocumentReference;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
@@ -106,7 +107,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.xwikiDocument.newXObject(RIGHTS_CLASS_REFERENCE, this.xwikiContext)).thenReturn(newRightBaseObject);
         when(this.serializer.serialize(user)).thenReturn("U1");
 
-        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1", RuleState.ALLOW);
 
         verify(newRightBaseObject).setStringValue(LEVELS_FIELD_NAME, "R1");
         verify(newRightBaseObject).setStringValue(USERS_FIELD_NAME, "U1");
@@ -131,7 +132,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.xwikiDocument.newXObject(RIGHTS_CLASS_REFERENCE, this.xwikiContext)).thenReturn(newRightBaseObject);
         when(this.serializer.serialize(user)).thenReturn("U1");
 
-        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1", RuleState.ALLOW);
 
         verify(newRightBaseObject).setStringValue(LEVELS_FIELD_NAME, "R1");
         verify(newRightBaseObject).setStringValue(USERS_FIELD_NAME, "U1");
@@ -155,7 +156,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.serializer.serialize(user)).thenReturn("U1");
         when(existingRightBaseObject.getStringValue(LEVELS_FIELD_NAME)).thenReturn("R2");
 
-        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1", RuleState.ALLOW);
 
         verify(existingRightBaseObject).setStringValue(LEVELS_FIELD_NAME,
             LevelsClass.getStringFromList(Arrays.asList("R2", "R1"), ","));
@@ -179,7 +180,7 @@ class DefaultDiscussionsRightStoreServiceTest
         when(this.serializer.serialize(user)).thenReturn("U1");
         when(existingRightBaseObject.getStringValue(LEVELS_FIELD_NAME)).thenReturn("R1,R2");
 
-        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1");
+        this.target.setDiscussionRightToUser(this.discussionReference, user, "R1", RuleState.ALLOW);
 
         verify(existingRightBaseObject).setStringValue(LEVELS_FIELD_NAME,
             LevelsClass.getStringFromList(Arrays.asList("R1", "R2"), ","));

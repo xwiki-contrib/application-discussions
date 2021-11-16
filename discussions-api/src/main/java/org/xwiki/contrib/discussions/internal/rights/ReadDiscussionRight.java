@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.internal.rights;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.xwiki.model.EntityType;
@@ -26,6 +27,7 @@ import org.xwiki.security.authorization.Right;
 import org.xwiki.security.authorization.RightDescription;
 import org.xwiki.security.authorization.RuleState;
 
+import static org.xwiki.security.authorization.RuleState.ALLOW;
 import static org.xwiki.security.authorization.RuleState.DENY;
 
 /**
@@ -54,7 +56,7 @@ public final class ReadDiscussionRight implements RightDescription
     @Override
     public RuleState getDefaultState()
     {
-        return DENY;
+        return ALLOW;
     }
 
     @Override
@@ -66,7 +68,7 @@ public final class ReadDiscussionRight implements RightDescription
     @Override
     public boolean getInheritanceOverridePolicy()
     {
-        return false;
+        return true;
     }
 
     @Override

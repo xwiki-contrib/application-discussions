@@ -32,6 +32,7 @@ import org.xwiki.contrib.discussions.script.DiscussionRightsScriptService;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.security.authorization.ContextualAuthorizationManager;
 import org.xwiki.security.authorization.Right;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
@@ -70,7 +71,7 @@ class DiscussionRightsScriptServiceTest
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(false);
 
-        this.target.setRead(discussion, user);
+        this.target.setRead(discussion, user, true);
 
         verifyNoInteractions(this.discussionsRightService);
     }
@@ -85,9 +86,9 @@ class DiscussionRightsScriptServiceTest
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(true);
 
-        this.target.setRead(discussion, user);
+        this.target.setRead(discussion, user, true);
 
-        verify(this.discussionsRightService).setRead(discussion, user);
+        verify(this.discussionsRightService).setRead(discussion, user, RuleState.ALLOW);
     }
 
     @Test
@@ -100,7 +101,7 @@ class DiscussionRightsScriptServiceTest
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(false);
 
-        this.target.setWrite(discussion, user);
+        this.target.setWrite(discussion, user, true);
 
         verifyNoInteractions(this.discussionsRightService);
     }
@@ -115,8 +116,8 @@ class DiscussionRightsScriptServiceTest
 
         when(this.authorizationManager.hasAccess(Right.PROGRAM)).thenReturn(true);
 
-        this.target.setWrite(discussion, user);
+        this.target.setWrite(discussion, user, true);
 
-        verify(this.discussionsRightService).setWrite(discussion, user);
+        verify(this.discussionsRightService).setWrite(discussion, user, RuleState.ALLOW);
     }
 }

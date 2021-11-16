@@ -40,6 +40,7 @@ import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.security.authorization.AuthorizationManager;
 import org.xwiki.security.authorization.Right;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.security.authorization.UnableToRegisterRightException;
 
 import com.xpn.xwiki.XWikiContext;
@@ -143,17 +144,17 @@ public class DefaultDiscussionsRightService implements DiscussionsRightService, 
     }
 
     @Override
-    public void setRead(Discussion discussion, DocumentReference user)
+    public void setRead(Discussion discussion, DocumentReference user, RuleState state)
     {
         this.discussionsRightsStoreService
-            .setDiscussionRightToUser(discussion.getReference(), user, this.readDiscussionRight.getName());
+            .setDiscussionRightToUser(discussion.getReference(), user, this.readDiscussionRight.getName(), state);
     }
 
     @Override
-    public void setWrite(Discussion discussion, DocumentReference user)
+    public void setWrite(Discussion discussion, DocumentReference user, RuleState state)
     {
         this.discussionsRightsStoreService
-            .setDiscussionRightToUser(discussion.getReference(), user, this.writeDiscussionRight.getName());
+            .setDiscussionRightToUser(discussion.getReference(), user, this.writeDiscussionRight.getName(), state);
     }
 
     private boolean isAdministrator()

@@ -59,9 +59,10 @@
 ## Attaches the discussion contexts to the discussion
 #foreach($discussionContext in $discussionContexts)
   #set ($discard = $services.discussions.linkDiscussionToDiscussionContext($discussion, $discussionContext))
-  #if ($discussionContext.entityReference.type == 'messagestream-user')
-     #set ($discard = $services.discussions.rights.setRead($discussion, $discussionContext.entityReference.reference))
-     #set ($discard = $services.discussions.rights.setWrite($discussion, $discussionContext.entityReference.reference))
+  ## We don't set rights in case of public discussions so that anyone can participate.
+  #if ($to != 'public')
+     #set ($discard = $services.discussions.rights.setRead($discussion, $discussionContext.entityReference.reference, true))
+     #set ($discard = $services.discussions.rights.setWrite($discussion, $discussionContext.entityReference.reference, true))
   #end
 #end
 ## Add the first message.

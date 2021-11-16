@@ -36,6 +36,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.LocalDocumentReference;
+import org.xwiki.security.authorization.RuleState;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -77,7 +78,7 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
 
     @Override
     public void setDiscussionRightToUser(DiscussionReference discussionReference, DocumentReference user,
-        String rightName)
+        String rightName, RuleState state)
     {
         this.discussionStoreService.get(discussionReference).ifPresent(d -> {
             XWikiContext context = this.xWikiContextProvider.get();
@@ -91,27 +92,16 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                 String userReference;
                 String groupReference;
                 Optional<BaseObject> rightsObject;
-                if (!user.getName().equals("*")) {
-                    userReference = this.serializer.serialize(user);
-                    groupReference = null;
-                    rightsObject = xObjects.stream()
-                        .filter(obj -> UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME))
-                            .stream()
-                            .anyMatch(userId -> Objects.equals(userId, userReference)))
-                        .findAny();
-                } else {
-                    userReference = null;
-                    // FIXME: not good
-                    groupReference = "XWiki.XWikiAllGroup";
-                    rightsObject = xObjects.stream()
-                        .filter(obj -> UsersClass.getListFromString(obj.getStringValue(GROUPS_FIELD_NAME))
-                            .stream()
-                            .anyMatch(groupId -> Objects.equals(groupId, groupReference)))
-                        .findAny();
-                }
+                userReference = this.serializer.serialize(user);
+                groupReference = null;
+                rightsObject = xObjects.stream()
+                    .filter(obj -> UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME))
+                        .stream()
+                        .anyMatch(userId -> Objects.equals(userId, userReference)))
+                    .findAny();
 
-                setDiscussionRightToUser(rightName, document, rightsClassReference, userReference, groupReference,
-                    rightsObject);
+                setDiscussionRightToUser(rightName, document, rightsClassReference, userReference, null, rightsObject,
+                    state);
             } catch (XWikiException e) {
                 this.logger
                     .warn("Failed to set right [{}] to user [{}] on document [{}]. Cause: [{}].", rightName, user,
@@ -122,10 +112,11 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
 
     private void setDiscussionRightToUser(String rightName, XWikiDocument document,
         EntityReference rightsClassReference, String userReference, String groupReference,
-        Optional<BaseObject> rightsObject) throws XWikiException
+        Optional<BaseObject> rightsObject, RuleState state) throws XWikiException
     {
         XWikiContext context = this.xWikiContextProvider.get();
         XWiki wiki = context.getWiki();
+        int allowFieldValue = (state == RuleState.ALLOW) ? 1 : 0;
         if (rightsObject.isPresent()) {
             // add the the existing base object
             BaseObject obj = rightsObject.get();
@@ -135,7 +126,7 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                 levels.add(rightName);
             }
             obj.setStringValue(LEVELS_FIELD_NAME, LevelsClass.getStringFromList(levels, ","));
-            obj.setIntValue(ALLOW_FIELD_NAME, 1);
+            obj.setIntValue(ALLOW_FIELD_NAME, allowFieldValue);
             wiki.saveDocument(document, context);
         } else {
             // create and add a new base object
@@ -147,7 +138,7 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
             if (groupReference != null) {
                 obj.setStringValue(GROUPS_FIELD_NAME, groupReference);
             }
-            obj.setIntValue(ALLOW_FIELD_NAME, 1);
+            obj.setIntValue(ALLOW_FIELD_NAME, allowFieldValue);
             wiki.saveDocument(document, context);
         }
     }

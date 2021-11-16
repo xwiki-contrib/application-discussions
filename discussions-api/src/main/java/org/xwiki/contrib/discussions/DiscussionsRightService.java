@@ -24,6 +24,7 @@ import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -78,18 +79,20 @@ public interface DiscussionsRightService
     boolean isAdminDiscussion(DocumentReference discussion);
 
     /**
-     * Allow the user to read the discussion.
+     * Define the user right to read the discussion.
      *
      * @param discussion the discussion
      * @param user the user
+     * @param state define if the right should be allowed or denied
      */
-    void setRead(Discussion discussion, DocumentReference user);
+    void setRead(Discussion discussion, DocumentReference user, RuleState state);
 
     /**
      * Allow the user to write the discussion.
      *
      * @param discussion the discussion
      * @param user the user
+     * @param state define if the right should be allowed or denied
      */
-    void setWrite(Discussion discussion, DocumentReference user);
+    void setWrite(Discussion discussion, DocumentReference user, RuleState state);
 }

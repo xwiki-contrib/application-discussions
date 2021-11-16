@@ -66,7 +66,7 @@ public final class AdminDiscussionRight implements RightDescription
     @Override
     public boolean getInheritanceOverridePolicy()
     {
-        return false;
+        return true;
     }
 
     @Override

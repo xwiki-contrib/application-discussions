@@ -22,6 +22,7 @@ package org.xwiki.contrib.discussions.store;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.security.authorization.RuleState;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -40,6 +41,8 @@ public interface DiscussionsRightsStoreService
      * @param discussionReference the discussion reference
      * @param user the user
      * @param rightName the name of the right to add
+     * @param state define if the right should be allowed or denied
      */
-    void setDiscussionRightToUser(DiscussionReference discussionReference, DocumentReference user, String rightName);
+    void setDiscussionRightToUser(DiscussionReference discussionReference, DocumentReference user, String rightName,
+        RuleState state);
 }
