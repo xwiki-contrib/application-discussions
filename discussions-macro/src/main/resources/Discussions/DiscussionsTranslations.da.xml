@@ -1,1 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
 
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.DiscussionsTranslations" locale="da">
+  <web>Discussions</web>
+  <name>DiscussionsTranslations</name>
+  <language>da</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Discussions.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.application.name=Debatter
+discussions.discussion.messages.title=Beskeder
+discussions.discussion.messages.empty=Ingen beskeder!
+discussions.discussion.notAllowed.view=Du har ikke adgang til denne debat.
+discussions.discussion.newMessage.form.title=Ny besked
+discussions.discussion.deleteMessage.form.title=Slet en besked
+discussions.discussion.deleteMessage.form.confirmation=Er du sikker på du vil slette denne besked?
+discussions.discussion.deleteMessage.form.cancel=Fortryd
+discussions.discussion.deleteMessage.form.confirm=Godkend
+discussions.discussions.table.header.title=Overskrift
+discussions.discussions.table.header.updateDate=Senest rettet
+discussions.discussions.table.header.messageCount=Antal beskeder
+discussions.discussions.userstable.header.name=Navn
+discussions.home.description=Dette indeholder koden til debat-programmet.
+discussions.home.discussionsTable.column.title=Titel
+discussions.home.discussionsTable.column.creationDate=Opretdato
+discussions.home.discussionsTable.column.updateDate=Rettedato
+discussions.home.discussionsTable.column.discussionContexts=Debatindhold
+discussions.home.discussionsTable.column.reference=Henvisning
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=Navn
+discussions.home.discussionContextsTable.column.entityReferenceType=Elementhenvisningstype
+discussions.home.discussionContextsTable.column.entityReference=Elementhenvisning
+discussions.home.discussionContextsTable.column.creationDate=Oprettedato
+discussions.home.discussionContextsTable.column.discussions=Debat
+discussions.home.discussionContextsTable.column.reference=Henvisning
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=Debatindeks
+discussions.discussion.usersList.title=Brugerliste
+discussions.discussion.usersList.public=Debatten er offentlig.
+</content>
+  </xwikidoc>
