@@ -85,7 +85,7 @@ public class MessageXClassInitializer extends AbstractDiscussionContextXClassIni
             BaseClass xClass = document.getXClass();
             int textSize = Integer.MAX_VALUE;
             xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
-            xClass.addTextAreaField(CONTENT_NAME, CONTENT_PRETTY_NAME, 10, 10, TextAreaClass.EditorType.WYSIWYG);
+            xClass.addTextAreaField(CONTENT_NAME, CONTENT_PRETTY_NAME, 10, 10);
             xClass.addTextField(DISCUSSION_REFERENCE_NAME, DISCUSSION_REFERENCE_PRETTY_NAME, textSize);
             xClass.addTextField(AUTHOR_TYPE_NAME, AUTHOR_TYPE_PRETTY_NAME, textSize);
             xClass.addTextField(AUTHOR_REFERENCE_NAME, AUTHOR_REFERENCE_PRETTY_NAME, textSize);
