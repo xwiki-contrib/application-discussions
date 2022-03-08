@@ -36,6 +36,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
@@ -51,10 +52,13 @@ import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.MessageService;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
+import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
 import org.xwiki.csrf.CSRFToken;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
@@ -106,6 +110,8 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private static final String ASYNC_PARAMETER = "async";
 
+    private static final String REPLY_TO_PARAMETER = "replyTo";
+
     @Inject
     private Logger logger;
 
@@ -132,6 +138,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     @Inject
     private Provider<XWikiContext> contextProvider;
+
+    @Inject
+    private EntityReferenceSerializer<String> entityReferenceSerializer;
 
     @Override
     public List<ResourceType> getSupportedResourceReferences()
@@ -258,18 +267,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             response.sendError(HttpServletResponse.SC_NOT_FOUND,
                 String.format("Cannot find discussion with reference [%s]", serializedReference));
         } else {
-            Discussion discussion = discussionOptional.get();
-            String content = getContent(request);
-            Syntax syntax = getSyntax(request);
-            DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-            request.getParameterMap().forEach((key, value) -> {
-                if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
-                    String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
-                    parameters.put(parameterKey, value);
-                }
-            });
-            Optional<Message> messageOptional =
-                this.messageService.create(content, syntax, discussion.getReference(), parameters);
+            Optional<Message> messageOptional = this.createMessage(discussionOptional.get(), request);
             if (!messageOptional.isPresent()) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
             } else {
@@ -283,6 +281,44 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                 }
             }
         }
+    }
+
+    private Optional<Message> createMessage(Discussion discussion, HttpServletRequest request)
+    {
+        String content = getContent(request);
+        Syntax syntax = getSyntax(request);
+        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
+        request.getParameterMap().forEach((key, value) -> {
+            if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
+                String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
+                parameters.put(parameterKey, value);
+            }
+        });
+        Optional<Message> messageOptional;
+
+        String serializedReplyTo = request.getParameter(REPLY_TO_PARAMETER);
+        DocumentReference author = this.contextProvider.get().getAuthorReference();
+        String serializedAuthorReference = this.entityReferenceSerializer.serialize(author);
+        ActorReference actorReference = new ActorReference("user", serializedAuthorReference);
+
+        Message replyToMessage = null;
+        if (!StringUtils.isEmpty(serializedReplyTo)) {
+            MessageReference replyTo =
+                this.discussionReferencesResolver.resolve(serializedReplyTo, MessageReference.class);
+            Optional<Message> replyToReference = this.messageService.getByReference(replyTo);
+            if (replyToReference.isPresent()) {
+                replyToMessage = replyToReference.get();
+            }
+        }
+
+        if (replyToMessage == null) {
+            messageOptional = this.messageService
+                .create(content, syntax, discussion.getReference(), actorReference, true, parameters);
+        } else {
+            messageOptional = this.messageService
+                .createReplyTo(content, syntax, replyToMessage, actorReference, true, parameters);
+        }
+        return messageOptional;
     }
 
     /**

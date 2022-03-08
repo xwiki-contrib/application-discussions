@@ -29,7 +29,6 @@ import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
-import com.xpn.xwiki.objects.classes.TextAreaClass;
 
 import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
 import static com.xpn.xwiki.objects.classes.ListClass.FREE_TEXT_ALLOWED;

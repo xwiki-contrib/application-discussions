@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
@@ -62,6 +63,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_N
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REPLY_TO_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -106,6 +108,22 @@ public class DefaultMessageStoreService implements MessageStoreService
         DiscussionReference discussionReference, String title,
         DiscussionStoreConfigurationParameters configurationParameters)
     {
+        return this.createMessage(content, syntax, authorReference, discussionReference, null, title,
+            configurationParameters);
+    }
+
+    @Override
+    public Optional<MessageReference> createReplyTo(String content, Syntax syntax, ActorReference authorReference,
+        Message originalMessage, String title, DiscussionStoreConfigurationParameters configurationParameters)
+    {
+        return this.createMessage(content, syntax, authorReference, originalMessage.getDiscussion().getReference(),
+            originalMessage.getReference(), title, configurationParameters);
+    }
+
+    private Optional<MessageReference> createMessage(String content, Syntax syntax, ActorReference authorReference,
+        DiscussionReference discussionReference, MessageReference originalMessage, String title,
+        DiscussionStoreConfigurationParameters configurationParameters)
+    {
         XWikiContext context = this.xcontextProvider.get();
         Optional<MessageReference> result = Optional.empty();
         try {
@@ -136,7 +154,10 @@ public class DefaultMessageStoreService implements MessageStoreService
             Date now = new Date();
             messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
             messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
-            // TODO replyTo
+            if (originalMessage != null) {
+                messageBaseObject.set(REPLY_TO_NAME, this.discussionReferencesSerializer.serialize(originalMessage),
+                    context);
+            }
             context.getWiki().saveDocument(document, context);
 
             result = Optional.of(messageReference);

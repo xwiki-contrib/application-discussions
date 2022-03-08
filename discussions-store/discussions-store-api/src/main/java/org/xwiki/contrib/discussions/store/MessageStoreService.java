@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
@@ -57,6 +58,23 @@ public interface MessageStoreService
     Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, String title,
         DiscussionStoreConfigurationParameters configurationParameters);
+
+    /**
+     * Creates a message object in response to a message.
+     *
+     * @param content the message content
+     * @param syntax the syntax of the content of the message
+     * @param authorReference the author reference
+     * @param originalMessage the original message this message replies to
+     * @param title the title of the discussion of the message
+     * @param configurationParameters parameters used for data storage configuration
+     * @return the unique reference of the created message
+     */
+    default Optional<MessageReference> createReplyTo(String content, Syntax syntax, ActorReference authorReference,
+        Message originalMessage, String title, DiscussionStoreConfigurationParameters configurationParameters)
+    {
+        return Optional.empty();
+    }
 
     /**
      * Returns a paginate list of messages of a discussion.

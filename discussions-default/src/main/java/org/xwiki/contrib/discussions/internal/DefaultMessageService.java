@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
@@ -62,6 +63,7 @@ import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CONTENT_N
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.CREATE_DATE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.DISCUSSION_REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.REPLY_TO_NAME;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.UPDATE_DATE_NAME;
 
 /**
@@ -126,6 +128,26 @@ public class DefaultMessageService implements MessageService
         String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
         return this.messageStoreService
             .create(content, syntax, authorReference, discussionReference, title, configurationParameters)
+            .flatMap(reference -> {
+                this.discussionService.touch(discussionReference);
+                Optional<Message> messageOpt = getByReference(reference);
+                if (notify) {
+                    messageOpt
+                        .ifPresent(m -> this.observationManager
+                            .notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), m));
+                }
+                return messageOpt;
+            });
+    }
+
+    @Override
+    public Optional<Message> createReplyTo(String content, Syntax syntax, Message originalMessage,
+        ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters)
+    {
+        DiscussionReference discussionReference = originalMessage.getDiscussion().getReference();
+        String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
+        return this.messageStoreService
+            .createReplyTo(content, syntax, authorReference, originalMessage, title, configurationParameters)
             .flatMap(reference -> {
                 this.discussionService.touch(discussionReference);
                 Optional<Message> messageOpt = getByReference(reference);
@@ -218,13 +240,19 @@ public class DefaultMessageService implements MessageService
         return bo -> {
             MessageReference messageReference =
                 this.discussionReferencesResolver.resolve(bo.getStringValue(REFERENCE_NAME), MessageReference.class);
+            MessageReference replyToReference = null;
+            if (!StringUtils.isEmpty(bo.getStringValue(REPLY_TO_NAME))) {
+                replyToReference = this.discussionReferencesResolver
+                    .resolve(bo.getStringValue(REFERENCE_NAME), MessageReference.class);
+            }
             return new Message(
                 messageReference,
                 new MessageContent(bo.getLargeStringValue(CONTENT_NAME), bo.getOwnerDocument().getSyntax()),
                 new ActorReference(bo.getStringValue(AUTHOR_TYPE_NAME), bo.getStringValue(AUTHOR_REFERENCE_NAME)),
                 bo.getDateValue(CREATE_DATE_NAME),
                 bo.getDateValue(UPDATE_DATE_NAME),
-                discussion
+                discussion,
+                replyToReference
             );
         };
     }

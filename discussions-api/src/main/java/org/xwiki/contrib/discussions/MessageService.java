@@ -83,6 +83,24 @@ public interface MessageService
         ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters);
 
     /**
+     * Creates a message in reply to an existing message.
+     *
+     * @param content the message content
+     * @param syntax the syntax of the content of the message
+     * @param originalMessage the existing message this message replies to
+     * @param authorReference the author reference
+     * @param notify {@code true} if the notifications for the message creation can be sent, {@code false}
+     *     otherwise
+     * @param configurationParameters parameters used for data storage configuration
+     * @return the create message
+     */
+    default Optional<Message> createReplyTo(String content, Syntax syntax, Message originalMessage,
+        ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters)
+    {
+        return Optional.empty();
+    }
+
+    /**
      * Get a message by its unique reference.
      *
      * @param reference the reference

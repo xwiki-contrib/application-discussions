@@ -50,6 +50,8 @@ public class Message
 
     private final MessageContent messageContent;
 
+    private MessageReference replyTo;
+
     /**
      * Default constructor.
      *
@@ -69,6 +71,24 @@ public class Message
         this.createDate = createDate;
         this.updateDate = updateDate;
         this.discussion = discussion;
+    }
+
+    /**
+     * Constructor when replying to a message.
+     *
+     * @param reference the reference
+     * @param messageContent the content of the message and its syntax
+     * @param actorReference the actor reference
+     * @param createDate date of creation of the message
+     * @param updateDate date of the last update of the message
+     * @param discussion the discussion of the message
+     * @param replyTo the message this message replies to
+     */
+    public Message(MessageReference reference, MessageContent messageContent, ActorReference actorReference,
+        Date createDate, Date updateDate, Discussion discussion, MessageReference replyTo)
+    {
+        this(reference, messageContent, actorReference, createDate, updateDate, discussion);
+        this.replyTo = replyTo;
     }
 
     /**
@@ -127,6 +147,14 @@ public class Message
         return this.messageContent.getSyntax();
     }
 
+    /**
+     * @return the reference of the message this message replies to, or {@code null}.
+     */
+    public MessageReference getReplyTo()
+    {
+        return replyTo;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -147,6 +175,7 @@ public class Message
             .append(this.createDate, message.createDate)
             .append(this.updateDate, message.updateDate)
             .append(this.discussion, message.discussion)
+            .append(this.replyTo, message.replyTo)
             .isEquals();
     }
 
@@ -160,6 +189,7 @@ public class Message
             .append(this.createDate)
             .append(this.updateDate)
             .append(this.discussion)
+            .append(this.replyTo)
             .toHashCode();
     }
 
@@ -174,6 +204,7 @@ public class Message
             .append("createDate", this.getCreateDate())
             .append("updateDate", this.getUpdateDate())
             .append("discussion", this.getDiscussion())
+            .append("replyTo", this.getReplyTo())
             .build();
     }
 }
