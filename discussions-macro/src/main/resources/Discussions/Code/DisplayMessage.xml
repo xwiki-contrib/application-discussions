@@ -45,7 +45,9 @@
   #set ($contentField = $messageClass.get('content'))
   #initRequiredSkinExtensions()
   ## TODO: duplicate of getRequiredSkinExtensions from display_macro.vm
-  $doc.displayEdit($contentField, '', $messageObj)
+  #set ($editor = $doc.displayEdit($contentField, '', $messageObj))
+  ## This is a hack to ensure that the wiki editor does not break the html macro. 
+  $!editor.replace('{{', '&amp;#123;&amp;#123;')
   #set ($macro.importStrings = [])
   #foreach ($entry in $requiredSkinExtensionsMap.entrySet())
     #set ($macro.importString = $xwiki.get($entry.key).importString)
