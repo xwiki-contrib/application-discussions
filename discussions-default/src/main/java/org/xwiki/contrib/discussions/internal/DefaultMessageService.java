@@ -243,7 +243,7 @@ public class DefaultMessageService implements MessageService
             MessageReference replyToReference = null;
             if (!StringUtils.isEmpty(bo.getStringValue(REPLY_TO_NAME))) {
                 replyToReference = this.discussionReferencesResolver
-                    .resolve(bo.getStringValue(REFERENCE_NAME), MessageReference.class);
+                    .resolve(bo.getStringValue(REPLY_TO_NAME), MessageReference.class);
             }
             return new Message(
                 messageReference,
