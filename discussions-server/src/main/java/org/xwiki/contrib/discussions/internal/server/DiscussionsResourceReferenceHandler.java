@@ -59,6 +59,7 @@ import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
 import org.xwiki.csrf.CSRFToken;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
@@ -167,26 +168,39 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                 throw new ResourceReferenceHandlerException("Error while sending error response", e);
             }
         } else {
-            switch (discussionsResourceReference.getActionType()) {
-                case CREATE:
-                    try {
-                        handleCreate(discussionsResourceReference, request, response);
-                    } catch (IOException e) {
-                        throw new ResourceReferenceHandlerException("Error when handling discussion create action", e);
-                    }
-                    break;
-                case READ:
-                    handleRead(discussionsResourceReference);
-                    break;
-                case UPDATE:
-                    handleUpdate(discussionsResourceReference);
-                    break;
-                case DELETE:
-                    handleDelete(discussionsResourceReference, request, response);
-                    break;
-                default:
-                    handleNext(reference, chain);
-                    return;
+            XWikiContext context = this.contextProvider.get();
+            WikiReference currentWiki = null;
+            if (discussionsResourceReference.getWikiReference() != null) {
+                currentWiki = context.getWikiReference();
+                context.setWikiReference(discussionsResourceReference.getWikiReference());
+            }
+            try {
+                switch (discussionsResourceReference.getActionType()) {
+                    case CREATE:
+                        try {
+                            handleCreate(discussionsResourceReference, request, response);
+                        } catch (IOException e) {
+                            throw new ResourceReferenceHandlerException("Error when handling discussion create action",
+                                e);
+                        }
+                        break;
+                    case READ:
+                        handleRead(discussionsResourceReference);
+                        break;
+                    case UPDATE:
+                        handleUpdate(discussionsResourceReference);
+                        break;
+                    case DELETE:
+                        handleDelete(discussionsResourceReference, request, response);
+                        break;
+                    default:
+                        handleNext(reference, chain);
+                        return;
+                }
+            } finally {
+                if (currentWiki != null) {
+                    context.setWikiReference(currentWiki);
+                }
             }
         }
 

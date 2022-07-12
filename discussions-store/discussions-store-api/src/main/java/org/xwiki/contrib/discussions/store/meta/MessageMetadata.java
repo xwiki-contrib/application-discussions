@@ -165,7 +165,7 @@ public class MessageMetadata
      */
     public EntityReference getMessageXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
+        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
             XCLASS_NAME);
     }
 

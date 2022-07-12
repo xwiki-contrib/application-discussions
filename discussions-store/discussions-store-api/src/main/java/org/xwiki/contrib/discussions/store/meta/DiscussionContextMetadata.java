@@ -167,7 +167,7 @@ public class DiscussionContextMetadata
      */
     public DocumentReference getDiscussionContextXClass()
     {
-        return new DocumentReference(this.xcontextProvider.get().getMainXWiki(), XCLASS_SPACES,
+        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
             XCLASS_NAME);
     }
 

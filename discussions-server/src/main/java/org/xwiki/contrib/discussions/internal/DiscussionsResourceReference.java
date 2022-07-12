@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.resource.AbstractResourceReference;
 import org.xwiki.resource.ResourceType;
 
@@ -36,6 +37,8 @@ public class DiscussionsResourceReference extends AbstractResourceReference
 
     private final DiscussionsActionType actionType;
 
+    private final WikiReference wikiReference;
+
     /**
      * Default constructor.
      *
@@ -44,9 +47,23 @@ public class DiscussionsResourceReference extends AbstractResourceReference
      */
     public DiscussionsResourceReference(DiscussionsActionType actionType, DiscussionsEntityType discussionsEntityType)
     {
+        this(null, actionType, discussionsEntityType);
+    }
+
+    /**
+     * Default constructor.
+     *
+     * @param wikiReference the wiki where the reference should be handled
+     * @param actionType the discussions action type
+     * @param discussionsEntityType the discussions entity type
+     */
+    public DiscussionsResourceReference(WikiReference wikiReference, DiscussionsActionType actionType,
+        DiscussionsEntityType discussionsEntityType)
+    {
         this.setType(new ResourceType("discussions"));
         this.actionType = actionType;
         this.discussionsEntityType = discussionsEntityType;
+        this.wikiReference = wikiReference;
     }
 
     /**
@@ -63,6 +80,14 @@ public class DiscussionsResourceReference extends AbstractResourceReference
     public DiscussionsEntityType getDiscussionsEntityType()
     {
         return this.discussionsEntityType;
+    }
+
+    /**
+     * @return the wiki where the reference should be handled
+     */
+    public WikiReference getWikiReference()
+    {
+        return wikiReference;
     }
 
     @Override
@@ -82,6 +107,7 @@ public class DiscussionsResourceReference extends AbstractResourceReference
             .appendSuper(super.equals(o))
             .append(this.discussionsEntityType, that.discussionsEntityType)
             .append(this.actionType, that.actionType)
+            .append(wikiReference, that.wikiReference)
             .isEquals();
     }
 
@@ -92,6 +118,7 @@ public class DiscussionsResourceReference extends AbstractResourceReference
             .appendSuper(super.hashCode())
             .append(this.discussionsEntityType)
             .append(this.actionType)
+            .append(this.wikiReference)
             .toHashCode();
     }
 }

@@ -29,6 +29,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.internal.DiscussionsActionType;
 import org.xwiki.contrib.discussions.internal.DiscussionsEntityType;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceType;
 import org.xwiki.resource.UnsupportedResourceReferenceException;
@@ -67,10 +68,21 @@ public class DiscussionsResourceReferenceResolver extends AbstractResourceRefere
             throw new UnsupportedResourceReferenceException("Unknown entity");
         }
 
-        DiscussionsActionType actionType = getActionType(segments.get(0));
-        DiscussionsEntityType discussionsEntityType = getEntityType(segments.get(1));
+        WikiReference wikiReference = null;
+        String actionTypeString;
+        String entityType;
+        if ("wiki".equals(segments.get(0))) {
+            wikiReference = new WikiReference(segments.get(1));
+            actionTypeString = segments.get(2);
+            entityType = segments.get(3);
+        } else {
+            actionTypeString = segments.get(0);
+            entityType = segments.get(1);
+        }
+        DiscussionsActionType actionType = getActionType(actionTypeString);
+        DiscussionsEntityType discussionsEntityType = getEntityType(entityType);
 
-        return new DiscussionsResourceReference(actionType, discussionsEntityType);
+        return new DiscussionsResourceReference(wikiReference, actionType, discussionsEntityType);
     }
 
     private DiscussionsActionType getActionType(String actionTypeSegment) throws UnsupportedResourceReferenceException
