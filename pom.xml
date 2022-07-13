@@ -29,7 +29,7 @@
   </parent>
 
   <artifactId>application-discussions</artifactId>
-  <version>2.0-SNAPSHOT</version>
+  <version>2.0-rc-4</version>
   <packaging>pom</packaging>
   <name>Discussions - Parent</name>
   <description>Parent POM of the discussions application.</description>
@@ -59,7 +59,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/application-discussions.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-discussions.git</developerConnection>
     <url>https://github.com/xwiki-contrib/application-discussions/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>application-discussions-2.0-rc-4</tag>
   </scm>
   <properties>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
