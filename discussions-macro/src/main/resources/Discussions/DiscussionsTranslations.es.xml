@@ -38,7 +38,7 @@
   <hidden>true</hidden>
   <content>discussions.application.name=Debates
 discussions.discussion.messages.title=Mensajes
-discussions.discussion.messages.empty=No hay ningún mensaje.
+discussions.discussion.messages.empty=No hay ningún mensaje!
 discussions.discussion.notAllowed.view=No tiene permitido ver este debate.
 discussions.discussion.newMessage.form.title=Mensaje nuevo
 discussions.discussion.deleteMessage.form.title=Eliminar un mensaje
