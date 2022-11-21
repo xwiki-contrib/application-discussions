@@ -37,6 +37,7 @@ import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
+import org.xwiki.contrib.discussions.store.MessageHolderReferenceService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
@@ -92,9 +93,6 @@ class DefaultMessageStoreServiceTest
     private QueryManager queryManager;
 
     @MockComponent
-    private RandomGeneratorService randomGeneratorService;
-
-    @MockComponent
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @MockComponent
@@ -102,6 +100,9 @@ class DefaultMessageStoreServiceTest
 
     @MockComponent
     private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
+
+    @MockComponent
+    private MessageHolderReferenceService messageHolderReferenceService;
 
     @Mock
     private XWikiContext xWikiContext;
@@ -126,22 +127,20 @@ class DefaultMessageStoreServiceTest
 
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         BaseObject messageBaseObject = mock(BaseObject.class);
-        DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "randomString");
         DocumentReference messageXClassDocumentReference = new DocumentReference("xwiki", "XWiki", "MessageClass");
         XWikiDocument document = mock(XWikiDocument.class);
-        SpaceReference value = new SpaceReference("xwiki", "Discussions", "Message");
-        when(discussionStoreConfiguration.getMessageSpaceStorageLocation(parameters, discussionReference))
-            .thenReturn(value);
-
-        when(document.getDocumentReference()).thenReturn(discussionDocumentReference);
-        when(document.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
-        when(this.randomGeneratorService.randomString(10)).thenReturn("randomString", "randomString2");
-        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
-        when(this.xWiki.getDocument(new DocumentReference("randomString", value), this.xWikiContext))
+        DocumentReference messageDocumentHolderReference = new DocumentReference("xwiki", "Discussion", "Message1");
+        when(this.messageHolderReferenceService.getNextMessageHolderReference(discussionReference, parameters))
+            .thenReturn(messageDocumentHolderReference);
+        when(this.xWiki.getDocument(messageDocumentHolderReference, this.xWikiContext))
             .thenReturn(document);
+        when(document.getDocumentReference()).thenReturn(messageDocumentHolderReference);
+
+        when(document.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
+        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
         when(document.isNew()).thenReturn(true);
 
-        MessageReference messageReference = new MessageReference("hint", "randomString");
+        MessageReference messageReference = new MessageReference("hint", "Message1");
         when(this.discussionReferencesSerializer.serialize(messageReference)).thenReturn("randomString;hint=hint");
         when(this.discussionReferencesSerializer.serialize(discussionReference))
             .thenReturn("discussionReference;hint=hint");

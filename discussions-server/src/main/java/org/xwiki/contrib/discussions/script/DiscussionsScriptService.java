@@ -47,6 +47,8 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextReferenc
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.QueryStringService;
+import org.xwiki.contrib.discussions.store.MessageHolderReferenceService;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.script.service.ScriptService;
@@ -99,6 +101,9 @@ public class DiscussionsScriptService implements ScriptService
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
+    private MessageHolderReferenceService messageHolderReferenceService;
 
     /**
      * Creates a discussion context.
@@ -224,6 +229,26 @@ public class DiscussionsScriptService implements ScriptService
         } else {
             return null;
         }
+    }
+
+    /**
+     * Retrieve the reference of the next message to be created: this reference should be used for temporary
+     * attachments uploads.
+     *
+     * @param serializedDiscussionReference the discussion for which to obtain a new message holder reference
+     * @param storeConfigurationParameters the related configuration parameters
+     * @return a reference to be used for displaying the message editor
+     * @since 2.1
+     * @see MessageHolderReferenceService
+     */
+    @Unstable
+    public DocumentReference getNextMessageHolderReference(String serializedDiscussionReference,
+        Map<String, Object> storeConfigurationParameters)
+    {
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(serializedDiscussionReference, DiscussionReference.class);
+        return this.messageHolderReferenceService.getNextMessageHolderReference(discussionReference,
+            new DiscussionStoreConfigurationParameters(storeConfigurationParameters));
     }
 
     /**

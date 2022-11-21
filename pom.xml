@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>12.10.6</version>
+    <version>14.10-SNAPSHOT</version>
   </parent>
 
   <artifactId>application-discussions</artifactId>
@@ -64,6 +64,8 @@
   <properties>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
     <xwiki.issueManagement.jira.id>DISCUSSION</xwiki.issueManagement.jira.id>
+    <!-- FIXME: remove before release -->
+    <xwiki.revapi.skip>true</xwiki.revapi.skip>
   </properties>
 
   <modules>
@@ -93,36 +95,6 @@
         <configuration>
           <analysisConfiguration>
             <revapi.ignore>
-              <item>
-                <code>java.method.numberOfParametersChanged</code>
-                <old>method void org.xwiki.contrib.discussions.DiscussionsRightService::setRead(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference)</old>
-                <new>method void org.xwiki.contrib.discussions.DiscussionsRightService::setRead(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference, org.xwiki.security.authorization.RuleState)</new>
-                <justification>Unstable API: Add the possibility to allow or deny a right in the API.</justification>
-              </item>
-              <item>
-                <code>java.method.numberOfParametersChanged</code>
-                <old>method void org.xwiki.contrib.discussions.DiscussionsRightService::setWrite(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference)</old>
-                <new>method void org.xwiki.contrib.discussions.DiscussionsRightService::setWrite(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference, org.xwiki.security.authorization.RuleState)</new>
-                <justification>Unstable API: Add the possibility to allow or deny a right in the API.</justification>
-              </item>
-              <item>
-                <code>java.method.numberOfParametersChanged</code>
-                <old>method void org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService::setDiscussionRightToUser(org.xwiki.contrib.discussions.domain.references.DiscussionReference, org.xwiki.model.reference.DocumentReference, java.lang.String)</old>
-                <new>method void org.xwiki.contrib.discussions.store.DiscussionsRightsStoreService::setDiscussionRightToUser(org.xwiki.contrib.discussions.domain.references.DiscussionReference, org.xwiki.model.reference.DocumentReference, java.lang.String, org.xwiki.security.authorization.RuleState)</new>
-                <justification>Unstable API: Add the possibility to allow or deny a right in the API.</justification>
-              </item>
-              <item>
-                <code>java.method.numberOfParametersChanged</code>
-                <old>method void org.xwiki.contrib.discussions.script.DiscussionRightsScriptService::setRead(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference)</old>
-                <new>method void org.xwiki.contrib.discussions.script.DiscussionRightsScriptService::setRead(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference, boolean)</new>
-                <justification>Unstable API: Add the possibility to allow or deny a right in the API.</justification>
-              </item>
-              <item>
-                <code>java.method.numberOfParametersChanged</code>
-                <old>method void org.xwiki.contrib.discussions.script.DiscussionRightsScriptService::setWrite(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference)</old>
-                <new>method void org.xwiki.contrib.discussions.script.DiscussionRightsScriptService::setWrite(org.xwiki.contrib.discussions.domain.Discussion, org.xwiki.model.reference.DocumentReference, boolean)</new>
-                <justification>Unstable API: Add the possibility to allow or deny a right in the API.</justification>
-              </item>
             </revapi.ignore>
           </analysisConfiguration>
         </configuration>

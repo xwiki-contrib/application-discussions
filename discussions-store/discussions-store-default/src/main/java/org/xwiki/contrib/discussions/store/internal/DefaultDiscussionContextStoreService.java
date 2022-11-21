@@ -36,7 +36,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityRe
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
-import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
@@ -44,7 +43,6 @@ import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -85,19 +83,16 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     private DiscussionContextMetadata discussionContextMetadata;
 
     @Inject
-    private RandomGeneratorService randomGeneratorService;
-
-    @Inject
     private QueryManager queryManager;
-
-    @Inject
-    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
 
     @Inject
     private ContextualLocalizationManager localizationManager;
+
+    @Inject
+    private PageHolderReferenceFactory pageHolderReferenceFactory;
 
     @Override
     public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
@@ -296,40 +291,19 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
         DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         XWikiDocument document;
-        synchronized (this) {
-            document = generatePage(applicationHint, name, contextEntityReference, configurationParameters);
-
-            while (!document.isNew()) {
-                document = generatePage(applicationHint, name, contextEntityReference, configurationParameters);
-            }
-            XWikiContext context = getContext();
-            document.setHidden(true);
-            context.getWiki().saveDocument(document, context);
-        }
+        XWikiContext context = getContext();
+        DocumentReference documentReference = this.pageHolderReferenceFactory.createPageHolderReference(
+            PageHolderReferenceFactory.DiscussionEntity.DISCUSSION_CONTEXT, name, applicationHint,
+            contextEntityReference, configurationParameters);
+        document = context.getWiki().getDocument(documentReference, context);
+        document.setHidden(true);
+        context.getWiki().saveDocument(document, context);
         return document;
     }
 
     private XWikiContext getContext()
     {
         return this.xcontextProvider.get();
-    }
-
-    private XWikiDocument generatePage(String applicationHint, String name,
-        DiscussionContextEntityReference contextEntityReference,
-        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
-    {
-        String generatedString = this.randomGeneratorService.randomString();
-
-        DiscussionStoreConfiguration discussionStoreConfiguration =
-            this.discussionStoreConfigurationFactory.getDiscussionStoreConfiguration(applicationHint);
-
-        SpaceReference discussionContextSpace = discussionStoreConfiguration
-            .getDiscussionContextSpaceStorageLocation(configurationParameters, contextEntityReference);
-        DocumentReference documentReference =
-            new DocumentReference(String.format("%s-%s", name, generatedString), discussionContextSpace);
-
-        XWikiContext context = getContext();
-        return context.getWiki().getDocument(documentReference, context);
     }
 
     private void save(BaseObject discussionContext, boolean minor, String translationKey)

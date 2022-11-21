@@ -34,7 +34,6 @@ import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.Query;
-import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -42,7 +41,6 @@ import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -71,9 +69,6 @@ class DefaultDiscussionStoreServiceTest
 
     @MockComponent
     private QueryManager queryManager;
-
-    @MockComponent
-    private RandomGeneratorService randomGeneratorService;
 
     @MockComponent
     private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;

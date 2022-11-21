@@ -34,6 +34,14 @@ import org.xwiki.stability.Unstable;
 public class DiscussionStoreConfigurationParameters extends LinkedHashMap<String, Object>
 {
     /**
+     * Key of the configuration listing the attachments temporary uploaded as part of a message creation.
+     *
+     * @since 2.1
+     */
+    @Unstable
+    public static final String TEMPORARY_UPLOADED_ATTACHMENTS = "temporaryUploadedAttachments";
+
+    /**
      * Default constructor.
      */
     public DiscussionStoreConfigurationParameters()
