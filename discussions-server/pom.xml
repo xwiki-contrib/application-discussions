@@ -54,6 +54,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>discussions-store-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-resource-api</artifactId>
       <version>${platform.version}</version>

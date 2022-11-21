@@ -20,9 +20,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.4" reference="Discussions.Code.DisplayMessage" locale="">
+<xwikidoc version="1.4" reference="Discussions.Code.MessageEditor" locale="">
   <web>Discussions.Code</web>
-  <name>DisplayMessage</name>
+  <name>MessageEditor</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
@@ -38,27 +38,17 @@
   <hidden>true</hidden>
   <content>{{velocity output='false'}}
 #template('display_macros.vm')
-#macro (displayMessageContentField) 
+#macro (displayMessageEditor $discussionReference $storeConfigurationParameters)
   #set ($docMessageClass = $xwiki.getDocument('Discussions.Code.MessageClass'))
+  #set ($nextMessageReference = $services.discussions.getNextMessageHolderReference($discussionReference, $storeConfigurationParameters))
+  #set ($messageDoc = $xwiki.getDocument($nextMessageReference))
   #set ($messageClass = $docMessageClass.getxWikiClass())
-  #set ($messageObj = $doc.newObject('Discussions.Code.MessageClass'))
+  #set ($messageObj = $messageDoc.newObject('Discussions.Code.MessageClass'))
   #set ($contentField = $messageClass.get('content'))
-  #initRequiredSkinExtensions()
-  ## TODO: duplicate of getRequiredSkinExtensions from display_macro.vm
+
   #set ($editor = $doc.displayEdit($contentField, '', $messageObj))
   ## This is a hack to ensure that the wiki editor does not break the html macro. 
   $!editor.replace('{{', '&amp;#123;&amp;#123;')
-  #set ($macro.importStrings = [])
-  #foreach ($entry in $requiredSkinExtensionsMap.entrySet())
-    #set ($macro.importString = $xwiki.get($entry.key).importString)
-    ## Remove the always used skin extensions, keep only those that have been requested by the display macros above.
-    #set ($discard = $macro.importStrings.add($!stringtool.removeStart($macro.importString, $entry.value).trim()))
-  #end
-  #set ($macro.importStrings = $stringtool.join($macro.importStrings, ''))
-  #set ($discard = $response.setHeader('X-XWIKI-HTML-HEAD', $macro.importStrings))
-#end
-{{/velocity}}{{velocity}}#if ($request.showContentField == 'show')
-{{html}}#displayMessageContentField(){{/html}}
 #end
 {{/velocity}}</content>
 </xwikidoc>

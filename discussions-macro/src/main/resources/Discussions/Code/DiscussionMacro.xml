@@ -359,7 +359,7 @@
       <async_enabled>0</async_enabled>
     </property>
     <property>
-      <code>{{include reference='Discussions.Code.DisplayMessage' /}}
+      <code>{{include reference='Discussions.Code.MessageEditor' /}}
 
 {{velocity}}
 #set ($reference = $wikimacro.parameters.reference)
@@ -500,7 +500,7 @@ $services.localization.render('discussions.discussion.usersList.public')
     &lt;form method="post" action="$url" class="message-form"&gt;
     &lt;div class="form-group"&gt;
     ##$doc.displayEdit($contentField, '', $messageObj)
-    #displayMessageContentField()
+    #displayMessageEditor($reference {})
     &lt;/div&gt;
     &lt;button type="submit" class='btn btn-primary message-submit-button'&gt;Submit&lt;/button&gt;
     &lt;input type="hidden" value="$escapetool.xml($reference)" name="discussionReference" /&gt;

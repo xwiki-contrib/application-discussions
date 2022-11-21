@@ -30,25 +30,24 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
-import org.xwiki.contrib.discussions.store.DiscussionStoreConfiguration;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.store.MessageHolderReferenceService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.store.TemporaryAttachmentSessionsManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -89,19 +88,16 @@ public class DefaultMessageStoreService implements MessageStoreService
     private QueryManager queryManager;
 
     @Inject
-    private RandomGeneratorService randomGeneratorService;
-
-    @Inject
     private DocumentReferenceResolver<String> documentReferenceResolver;
-
-    @Inject
-    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
 
     @Inject
-    private DiscussionReferencesResolver discussionReferencesResolver;
+    private MessageHolderReferenceService messageHolderReferenceService;
+
+    @Inject
+    private TemporaryAttachmentSessionsManager temporaryAttachmentSessionsManager;
 
     @Override
     public Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
@@ -140,24 +136,15 @@ public class DefaultMessageStoreService implements MessageStoreService
                 authorReferenceDoc = null;
             }
             document.setAuthorReference(authorReferenceDoc);
+            document.setSyntax(syntax);
             BaseObject messageBaseObject = document.newXObject(this.messageMetadata.getMessageXClass(), context);
-            String messageName = document.getDocumentReference().getName();
+            DocumentReference messageHolderReference = document.getDocumentReference();
+            String messageName = messageHolderReference.getName();
             MessageReference messageReference = new MessageReference(applicationHint, messageName);
             String serializedReference = this.discussionReferencesSerializer.serialize(messageReference);
-            messageBaseObject.set(REFERENCE_NAME, serializedReference, context);
-            messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
-            messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference.getReference(), context);
-            messageBaseObject.set(CONTENT_NAME, content, context);
-            document.setSyntax(syntax);
-            messageBaseObject.set(DISCUSSION_REFERENCE_NAME,
-                this.discussionReferencesSerializer.serialize(discussionReference), context);
-            Date now = new Date();
-            messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
-            messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
-            if (originalMessage != null) {
-                messageBaseObject.set(REPLY_TO_NAME, this.discussionReferencesSerializer.serialize(originalMessage),
-                    context);
-            }
+            setMessageObject(messageBaseObject, content, authorReference, discussionReference, originalMessage,
+                authorType, serializedReference);
+            this.handleTemporaryUploadedAttachments(configurationParameters, document);
             context.getWiki().saveDocument(document, context);
 
             result = Optional.of(messageReference);
@@ -168,6 +155,40 @@ public class DefaultMessageStoreService implements MessageStoreService
                 content, authorReference, authorReference, discussionReference, getRootCauseMessage(e));
         }
         return result;
+    }
+
+    private void setMessageObject(BaseObject messageBaseObject, String content, ActorReference authorReference,
+        DiscussionReference discussionReference, MessageReference originalMessage, String authorType,
+        String serializedReference)
+    {
+        XWikiContext context = this.xcontextProvider.get();
+        messageBaseObject.set(REFERENCE_NAME, serializedReference, context);
+        messageBaseObject.set(AUTHOR_TYPE_NAME, authorType, context);
+        messageBaseObject.set(AUTHOR_REFERENCE_NAME, authorReference.getReference(), context);
+        messageBaseObject.set(CONTENT_NAME, content, context);
+
+        messageBaseObject.set(DISCUSSION_REFERENCE_NAME,
+            this.discussionReferencesSerializer.serialize(discussionReference), context);
+        Date now = new Date();
+        messageBaseObject.setDateValue(CREATE_DATE_NAME, now);
+        messageBaseObject.setDateValue(UPDATE_DATE_NAME, now);
+        if (originalMessage != null) {
+            messageBaseObject.set(REPLY_TO_NAME, this.discussionReferencesSerializer.serialize(originalMessage),
+                context);
+        }
+    }
+
+    private void handleTemporaryUploadedAttachments(DiscussionStoreConfigurationParameters configurationParameters,
+        XWikiDocument document)
+    {
+        // handle temporary uploaded attachments
+        if (configurationParameters
+            .containsKey(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS)) {
+            List<String> temporaryUploadedAttachments = (List<String>) configurationParameters
+                .get(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS);
+            this.temporaryAttachmentSessionsManager
+                .attachTemporaryAttachmentsInDocument(document, temporaryUploadedAttachments);
+        }
     }
 
     @Override
@@ -312,30 +333,13 @@ public class DefaultMessageStoreService implements MessageStoreService
         DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         XWikiDocument document;
-        synchronized (this) {
-            document = generatePage(discussionReference, configurationParameters);
-
-            while (!document.isNew()) {
-                document = generatePage(discussionReference, configurationParameters);
-            }
-            document.setHidden(true);
-            XWikiContext context = this.xcontextProvider.get();
-            context.getWiki().saveDocument(document, context);
-        }
+        DocumentReference messageHolder = this.messageHolderReferenceService
+            .getNextMessageHolderReference(discussionReference, configurationParameters);
+        XWikiContext context = xcontextProvider.get();
+        document = context.getWiki().getDocument(messageHolder, context);
+        document.setHidden(true);
+        context.getWiki().saveDocument(document, context);
+        this.messageHolderReferenceService.consumeReference(discussionReference, messageHolder);
         return document;
-    }
-
-    private XWikiDocument generatePage(DiscussionReference discussionReference,
-        DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
-    {
-        String generatedString = this.randomGeneratorService.randomString(10);
-        DiscussionStoreConfiguration discussionStoreConfiguration = this.discussionStoreConfigurationFactory
-            .getDiscussionStoreConfiguration(discussionReference.getApplicationHint());
-        SpaceReference messageSpace = discussionStoreConfiguration
-            .getMessageSpaceStorageLocation(configurationParameters, discussionReference);
-        DocumentReference documentReference = new DocumentReference(generatedString, messageSpace);
-
-        XWikiContext context = this.xcontextProvider.get();
-        return context.getWiki().getDocument(documentReference, context);
     }
 }

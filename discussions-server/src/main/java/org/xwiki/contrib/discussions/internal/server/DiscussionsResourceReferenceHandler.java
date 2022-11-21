@@ -68,10 +68,13 @@ import org.xwiki.resource.ResourceReferenceHandlerChain;
 import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
 import org.xwiki.resource.annotations.Authenticate;
+import org.xwiki.wiki.descriptor.WikiDescriptorManager;
+import org.xwiki.wiki.manager.WikiManagerException;
 import org.xwiki.wysiwyg.converter.HTMLConverter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.web.EditForm;
 
 import static java.util.Collections.singletonList;
 import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
@@ -143,6 +146,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     @Inject
     private EntityReferenceSerializer<String> entityReferenceSerializer;
 
+    @Inject
+    private WikiDescriptorManager wikiDescriptorManager;
+
     @Override
     public List<ResourceType> getSupportedResourceReferences()
     {
@@ -171,6 +177,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             XWikiContext context = this.contextProvider.get();
             WikiReference currentWiki = null;
             if (discussionsResourceReference.getWikiReference() != null) {
+                this.checkWiki(discussionsResourceReference);
                 currentWiki = context.getWikiReference();
                 context.setWikiReference(discussionsResourceReference.getWikiReference());
             }
@@ -205,6 +212,23 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         }
 
         handleNext(reference, chain);
+    }
+
+    private void checkWiki(DiscussionsResourceReference discussionsResourceReference)
+        throws ResourceReferenceHandlerException
+    {
+        if (discussionsResourceReference.getWikiReference() != null) {
+            String wikiName = discussionsResourceReference.getWikiReference().getName();
+            try {
+                if (!this.wikiDescriptorManager.exists(wikiName)) {
+                    throw new ResourceReferenceHandlerException(
+                        String.format("The provided wiki [%s] does not exist.", wikiName));
+                }
+            } catch (WikiManagerException e) {
+                throw new ResourceReferenceHandlerException(
+                    String.format("Error while checking if wiki [%s] exists", wikiName), e);
+            }
+        }
     }
 
     private void handleDelete(DiscussionsResourceReference discussionsResourceReference, HttpServletRequest request,
@@ -297,10 +321,19 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
         }
     }
 
+    protected EditForm prepareForm(HttpServletRequest request)
+    {
+        EditForm editForm = new EditForm();
+        editForm.setRequest(request);
+        editForm.readRequest();
+        return editForm;
+    }
+
     private Optional<Message> createMessage(Discussion discussion, HttpServletRequest request)
     {
         String content = getContent(request);
         Syntax syntax = getSyntax(request);
+        EditForm editForm = this.prepareForm(request);
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         request.getParameterMap().forEach((key, value) -> {
             if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
@@ -308,6 +341,10 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                 parameters.put(parameterKey, value);
             }
         });
+
+        // Handle temporary uploads
+        List<String> temporaryUploadedFiles = editForm.getTemporaryUploadedFiles();
+        parameters.put(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS, temporaryUploadedFiles);
         Optional<Message> messageOptional;
 
         String serializedReplyTo = request.getParameter(REPLY_TO_PARAMETER);

@@ -50,7 +50,7 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-security-bridge</artifactId>
+      <artifactId>xwiki-platform-security-authorization-bridge</artifactId>
       <version>${platform.version}</version>
     </dependency>
     <dependency>
@@ -62,7 +62,6 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
