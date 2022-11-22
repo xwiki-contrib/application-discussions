@@ -45,10 +45,18 @@
   #set ($messageClass = $docMessageClass.getxWikiClass())
   #set ($messageObj = $messageDoc.newObject('Discussions.Code.MessageClass'))
   #set ($contentField = $messageClass.get('content'))
-
+  #initRequiredSkinExtensions()
   #set ($editor = $doc.displayEdit($contentField, '', $messageObj))
   ## This is a hack to ensure that the wiki editor does not break the html macro. 
   $!editor.replace('{{', '&amp;#123;&amp;#123;')
+  #set ($macro.importStrings = [])
+  #foreach ($entry in $requiredSkinExtensionsMap.entrySet())
+    #set ($macro.importString = $xwiki.get($entry.key).importString)
+    ## Remove the always used skin extensions, keep only those that have been requested by the display macros above.
+    #set ($discard = $macro.importStrings.add($!stringtool.removeStart($macro.importString, $entry.value).trim()))
+  #end
+  #set ($macro.importStrings = $stringtool.join($macro.importStrings, ''))
+  #set ($discard = $response.setHeader('X-XWIKI-HTML-HEAD', $macro.importStrings))
 #end
 {{/velocity}}</content>
 </xwikidoc>

@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,7 +42,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @version $Id$
  * @since 2.1
  */
-public class MessageHolderReferenceSession implements HttpSessionBindingListener
+public class MessageHolderReferenceSession implements HttpSessionBindingListener, Serializable
 {
     private final String sessionId;
 

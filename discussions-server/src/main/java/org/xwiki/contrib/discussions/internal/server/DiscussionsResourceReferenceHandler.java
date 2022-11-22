@@ -177,7 +177,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
             XWikiContext context = this.contextProvider.get();
             WikiReference currentWiki = null;
             if (discussionsResourceReference.getWikiReference() != null) {
-                this.checkWiki(discussionsResourceReference);
+                checkWiki(discussionsResourceReference);
                 currentWiki = context.getWikiReference();
                 context.setWikiReference(discussionsResourceReference.getWikiReference());
             }
@@ -217,17 +217,15 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private void checkWiki(DiscussionsResourceReference discussionsResourceReference)
         throws ResourceReferenceHandlerException
     {
-        if (discussionsResourceReference.getWikiReference() != null) {
-            String wikiName = discussionsResourceReference.getWikiReference().getName();
-            try {
-                if (!this.wikiDescriptorManager.exists(wikiName)) {
-                    throw new ResourceReferenceHandlerException(
-                        String.format("The provided wiki [%s] does not exist.", wikiName));
-                }
-            } catch (WikiManagerException e) {
+        String wikiName = discussionsResourceReference.getWikiReference().getName();
+        try {
+            if (!this.wikiDescriptorManager.exists(wikiName)) {
                 throw new ResourceReferenceHandlerException(
-                    String.format("Error while checking if wiki [%s] exists", wikiName), e);
+                    String.format("The provided wiki [%s] does not exist.", wikiName));
             }
+        } catch (WikiManagerException e) {
+            throw new ResourceReferenceHandlerException(
+                String.format("Error while checking if wiki [%s] exists", wikiName), e);
         }
     }
 
