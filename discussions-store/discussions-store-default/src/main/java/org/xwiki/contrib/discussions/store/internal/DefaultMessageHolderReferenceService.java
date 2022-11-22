@@ -44,7 +44,7 @@ import com.xpn.xwiki.XWikiContext;
 @Singleton
 public class DefaultMessageHolderReferenceService implements MessageHolderReferenceService
 {
-    static final String MESSAGE_HOLDER_REFERENCE_SESSION_ATTRIBUTE = "xwikiDiscussionsMessageHolderReferences";
+    private static final String MESSAGE_HOLDER_REFERENCE_SESSION_ATTRIBUTE = "xwikiDiscussionsMessageHolderReferences";
 
     @Inject
     private Provider<XWikiContext> contextProvider;
@@ -55,7 +55,7 @@ public class DefaultMessageHolderReferenceService implements MessageHolderRefere
     private HttpSession getCurrentSession()
     {
         XWikiContext context = this.contextProvider.get();
-        return context.getRequest().getHttpServletRequest().getSession();
+        return context.getRequest().getSession();
     }
 
     private Map<DiscussionReference, DocumentReference> getTemporaryReferencesMapForCurrentSession()
@@ -85,15 +85,10 @@ public class DefaultMessageHolderReferenceService implements MessageHolderRefere
         synchronized (this) {
             Map<DiscussionReference, DocumentReference> temporaryReferencesMapForCurrentSession =
                 this.getTemporaryReferencesMapForCurrentSession();
-            DocumentReference result;
-            if (!temporaryReferencesMapForCurrentSession.containsKey(discussionReference)) {
-                result =
-                    this.createTemporaryMessageReference(discussionReference, configurationParameters);
-                temporaryReferencesMapForCurrentSession.put(discussionReference, result);
-            } else {
-                result = temporaryReferencesMapForCurrentSession.get(discussionReference);
-            }
-            return result;
+            temporaryReferencesMapForCurrentSession.putIfAbsent(discussionReference,
+                createTemporaryMessageReference(discussionReference, configurationParameters)
+            );
+            return temporaryReferencesMapForCurrentSession.get(discussionReference);
         }
     }
 

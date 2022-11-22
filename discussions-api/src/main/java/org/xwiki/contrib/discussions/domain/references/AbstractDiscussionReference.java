@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.domain.references;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,7 +36,7 @@ import org.xwiki.stability.Unstable;
  * @since 2.0
  */
 @Unstable
-public abstract class AbstractDiscussionReference
+public abstract class AbstractDiscussionReference implements Serializable
 {
     private final String applicationHint;
     private final String reference;
