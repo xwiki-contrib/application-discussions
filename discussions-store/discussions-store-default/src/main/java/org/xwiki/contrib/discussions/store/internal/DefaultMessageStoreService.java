@@ -36,6 +36,7 @@ import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.server.DiscussionMessageRequestCreator;
 import org.xwiki.contrib.discussions.store.MessageHolderReferenceService;
 import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
@@ -183,9 +184,9 @@ public class DefaultMessageStoreService implements MessageStoreService
     {
         // handle temporary uploaded attachments
         if (configurationParameters
-            .containsKey(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS)) {
+            .containsKey(DiscussionMessageRequestCreator.TEMPORARY_UPLOADED_ATTACHMENTS)) {
             List<String> temporaryUploadedAttachments = (List<String>) configurationParameters
-                .get(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS);
+                .get(DiscussionMessageRequestCreator.TEMPORARY_UPLOADED_ATTACHMENTS);
             this.temporaryAttachmentSessionsManager
                 .attachTemporaryAttachmentsInDocument(document, temporaryUploadedAttachments);
         }
