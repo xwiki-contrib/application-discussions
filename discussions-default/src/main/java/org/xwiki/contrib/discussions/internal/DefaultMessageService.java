@@ -21,7 +21,6 @@ package org.xwiki.contrib.discussions.internal;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -204,13 +203,7 @@ public class DefaultMessageService implements MessageService
     public String renderContent(MessageReference messageReference)
     {
         return this.messageStoreService.getByReference(messageReference)
-            .map(it -> {
-                if (Objects.equals(it.getOwnerDocument().getSyntax(), Syntax.XHTML_1_0)) {
-                    return it.getLargeStringValue(CONTENT_NAME);
-                } else {
-                    return it.displayView(CONTENT_NAME, this.xcontextProvider.get());
-                }
-            })
+            .map(it -> it.getOwnerDocument().display(CONTENT_NAME, it, this.xcontextProvider.get()))
             .orElse("");
     }
 

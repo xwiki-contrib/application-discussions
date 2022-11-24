@@ -234,9 +234,8 @@ class DefaultMessageServiceTest
         BaseObject baseObject = mock(BaseObject.class);
         XWikiDocument xWikiDocument = mock(XWikiDocument.class);
         when(baseObject.getOwnerDocument()).thenReturn(xWikiDocument);
-        when(xWikiDocument.getSyntax()).thenReturn(XWIKI_2_1);
         when(this.messageStoreService.getByReference(messageReference)).thenReturn(Optional.of(baseObject));
-        when(baseObject.displayView(CONTENT_NAME, this.context)).thenReturn("html result");
+        when(xWikiDocument.display(CONTENT_NAME, baseObject, context)).thenReturn("html result");
         String actual = this.defaultMessageService.renderContent(messageReference);
         assertEquals("html result", actual);
     }
