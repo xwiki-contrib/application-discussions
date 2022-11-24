@@ -17,37 +17,50 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.discussions;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+package org.xwiki.contrib.discussions.server;
 
 import org.xwiki.stability.Unstable;
 
 /**
- * Parameters that are used for storage configuration.
+ * Exceptions thrown in case of problem when using server API.
  *
  * @version $Id$
- * @since 2.0
+ * @since 2.1
  */
 @Unstable
-public class DiscussionStoreConfigurationParameters extends LinkedHashMap<String, Object>
+public class DiscussionServerException extends Exception
 {
+    private final int statusCode;
+
     /**
-     * Default constructor.
+     * Default constructor to use when there's no parent exception.
+     *
+     * @param statusCode the http status code that should be answered
+     * @param msg the message of the exception
      */
-    public DiscussionStoreConfigurationParameters()
+    public DiscussionServerException(int statusCode, String msg)
     {
-        super();
+        this(statusCode, msg, null);
     }
 
     /**
-     * Constructor using a pre-defined list of parameters.
+     * Default constructor to use when there's a parent exception.
      *
-     * @param parameters data to copy in the current instance.
+     * @param statusCode the http status code that should be answered
+     * @param msg the message of the exception
+     * @param e the original error
      */
-    public DiscussionStoreConfigurationParameters(Map<String, Object> parameters)
+    public DiscussionServerException(int statusCode, String msg, Throwable e)
     {
-        super(parameters);
+        super(msg, e);
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return the http status code that should be answered
+     */
+    public int getStatusCode()
+    {
+        return statusCode;
     }
 }

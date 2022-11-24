@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
@@ -47,21 +45,14 @@ import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.container.servlet.ServletResponse;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
-import org.xwiki.contrib.discussions.DiscussionService;
-import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.MessageService;
-import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.domain.Message;
-import org.xwiki.contrib.discussions.domain.references.ActorReference;
-import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.contrib.discussions.internal.DiscussionsResourceReference;
+import org.xwiki.contrib.discussions.server.DiscussionMessageRequestCreator;
+import org.xwiki.contrib.discussions.server.DiscussionServerException;
 import org.xwiki.csrf.CSRFToken;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.WikiReference;
-import org.xwiki.rendering.parser.ParseException;
-import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
 import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
@@ -70,14 +61,11 @@ import org.xwiki.resource.ResourceType;
 import org.xwiki.resource.annotations.Authenticate;
 import org.xwiki.wiki.descriptor.WikiDescriptorManager;
 import org.xwiki.wiki.manager.WikiManagerException;
-import org.xwiki.wysiwyg.converter.HTMLConverter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.web.EditForm;
 
 import static java.util.Collections.singletonList;
-import static org.xwiki.rendering.syntax.Syntax.XWIKI_2_0;
 
 /**
  * Main handler for the Discussions.
@@ -102,19 +90,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private static final String REFERENCE_PARAM = "reference";
 
-    private static final String DISCUSSION_REFERENCE_PARAM = "discussionReference";
-
-    private static final String CONTENT_PARAMETER = "content";
-
-    private static final String REQUIRES_HTML_CONVERSION_PARAMETER = "RequiresHTMLConversion";
-
-    private static final String CONTENT_SYNTAX_PARAMETER = "content_syntax";
-
-    private static final String STORE_CONFIGURATION_PARAMETER_PREFIX = "storeConfiguration_";
-
     private static final String ASYNC_PARAMETER = "async";
-
-    private static final String REPLY_TO_PARAMETER = "replyTo";
 
     @Inject
     private Logger logger;
@@ -123,13 +99,7 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private MessageService messageService;
 
     @Inject
-    private DiscussionService discussionService;
-
-    @Inject
     private Container container;
-
-    @Inject
-    private HTMLConverter htmlConverter;
 
     @Inject
     private CSRFToken csrfToken;
@@ -144,10 +114,10 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private Provider<XWikiContext> contextProvider;
 
     @Inject
-    private EntityReferenceSerializer<String> entityReferenceSerializer;
+    private WikiDescriptorManager wikiDescriptorManager;
 
     @Inject
-    private WikiDescriptorManager wikiDescriptorManager;
+    private DiscussionMessageRequestCreator discussionMessageRequestCreator;
 
     @Override
     public List<ResourceType> getSupportedResourceReferences()
@@ -295,16 +265,9 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
 
     private void createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        String serializedReference = request.getParameter(DISCUSSION_REFERENCE_PARAM);
-        DiscussionReference discussionReference =
-            this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
-        Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
-        if (!discussionOptional.isPresent()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                String.format("Cannot find discussion with reference [%s]", serializedReference));
-        } else {
-            Optional<Message> messageOptional = this.createMessage(discussionOptional.get(), request);
-            if (!messageOptional.isPresent()) {
+        try {
+            Optional<Message> messageOptional = this.discussionMessageRequestCreator.createMessage(request);
+            if (messageOptional.isEmpty()) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
             } else {
                 if (isAsync(request)) {
@@ -316,58 +279,10 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
                     this.handleCreateMessageRedirect(request, response);
                 }
             }
+        } catch (DiscussionServerException e) {
+            response.sendError(e.getStatusCode(), e.getMessage());
+            this.logger.debug("Error when creating a message: [{}]", e.getMessage(), e.getCause());
         }
-    }
-
-    protected EditForm prepareForm(HttpServletRequest request)
-    {
-        EditForm editForm = new EditForm();
-        editForm.setRequest(request);
-        editForm.readRequest();
-        return editForm;
-    }
-
-    private Optional<Message> createMessage(Discussion discussion, HttpServletRequest request)
-    {
-        String content = getContent(request);
-        Syntax syntax = getSyntax(request);
-        EditForm editForm = this.prepareForm(request);
-        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-        request.getParameterMap().forEach((key, value) -> {
-            if (key.startsWith(STORE_CONFIGURATION_PARAMETER_PREFIX)) {
-                String parameterKey = key.substring(STORE_CONFIGURATION_PARAMETER_PREFIX.length());
-                parameters.put(parameterKey, value);
-            }
-        });
-
-        // Handle temporary uploads
-        List<String> temporaryUploadedFiles = editForm.getTemporaryUploadedFiles();
-        parameters.put(DiscussionStoreConfigurationParameters.TEMPORARY_UPLOADED_ATTACHMENTS, temporaryUploadedFiles);
-        Optional<Message> messageOptional;
-
-        String serializedReplyTo = request.getParameter(REPLY_TO_PARAMETER);
-        DocumentReference author = this.contextProvider.get().getAuthorReference();
-        String serializedAuthorReference = this.entityReferenceSerializer.serialize(author);
-        ActorReference actorReference = new ActorReference("user", serializedAuthorReference);
-
-        Message replyToMessage = null;
-        if (!StringUtils.isEmpty(serializedReplyTo)) {
-            MessageReference replyTo =
-                this.discussionReferencesResolver.resolve(serializedReplyTo, MessageReference.class);
-            Optional<Message> replyToReference = this.messageService.getByReference(replyTo);
-            if (replyToReference.isPresent()) {
-                replyToMessage = replyToReference.get();
-            }
-        }
-
-        if (replyToMessage == null) {
-            messageOptional = this.messageService
-                .create(content, syntax, discussion.getReference(), actorReference, true, parameters);
-        } else {
-            messageOptional = this.messageService
-                .createReplyTo(content, syntax, replyToMessage, actorReference, true, parameters);
-        }
-        return messageOptional;
     }
 
     /**
@@ -416,36 +331,6 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private boolean isAsync(HttpServletRequest request)
     {
         return "1".equals(request.getParameter(ASYNC_PARAMETER));
-    }
-
-    private Syntax getSyntax(HttpServletRequest request)
-    {
-        Syntax syntax;
-        if (request.getParameter(CONTENT_SYNTAX_PARAMETER) != null) {
-            try {
-                syntax = Syntax.valueOf(request.getParameter(CONTENT_SYNTAX_PARAMETER));
-            } catch (ParseException e) {
-                syntax = XWIKI_2_0;
-            }
-        } else {
-            syntax = XWIKI_2_0;
-        }
-        return syntax;
-    }
-
-    private String getContent(HttpServletRequest request)
-    {
-        String content = request.getParameter(CONTENT_PARAMETER);
-        String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
-        String syntax = request.getParameter(CONTENT_SYNTAX_PARAMETER);
-
-        String contentClean;
-        if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
-            contentClean = this.htmlConverter.fromHTML(content, syntax);
-        } else {
-            contentClean = content;
-        }
-        return contentClean;
     }
 
     private void redirect(HttpServletResponse response, String originalURL)

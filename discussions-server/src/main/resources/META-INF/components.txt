@@ -6,3 +6,4 @@ org.xwiki.contrib.discussions.internal.server.DiscussionsResourceReferenceResolv
 org.xwiki.contrib.discussions.internal.converters.DiscussionContextReferenceConverter
 org.xwiki.contrib.discussions.internal.converters.DiscussionReferenceConverter
 org.xwiki.contrib.discussions.internal.converters.MessageReferenceConverter
+org.xwiki.contrib.discussions.internal.server.DefaultDiscussionMessageRequestCreator
