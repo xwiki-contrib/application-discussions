@@ -20,7 +20,6 @@
 package org.xwiki.contrib.discussions.internal.server;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -46,7 +45,8 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.wysiwyg.converter.HTMLConverter;
+import org.xwiki.wysiwyg.converter.RequestParameterConversionResult;
+import org.xwiki.wysiwyg.converter.RequestParameterConverter;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.EditForm;
@@ -70,9 +70,6 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Inject
-    private HTMLConverter htmlConverter;
-
-    @Inject
     private MessageService messageService;
 
     @Inject
@@ -81,6 +78,9 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
     @Inject
     private EntityReferenceSerializer<String> entityReferenceSerializer;
 
+    @Inject
+    private RequestParameterConverter requestParameterConverter;
+
     @Override
     public Optional<Message> createMessage(HttpServletRequest request) throws DiscussionServerException
     {
@@ -88,20 +88,18 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         if (StringUtils.isBlank(serializedReference)) {
             throw new DiscussionServerException(HttpServletResponse.SC_BAD_REQUEST,
                 "The discussion reference has not been provided.");
-        } else {
-            DiscussionReference discussionReference =
-                this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
-            Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
-            if (!discussionOptional.isPresent()) {
-                throw new DiscussionServerException(HttpServletResponse.SC_NOT_FOUND,
-                    String.format("Cannot find discussion with reference [%s]", serializedReference));
-            } else {
-                return this.createMessage(discussionOptional.get(), request);
-            }
         }
+        DiscussionReference discussionReference =
+            this.discussionReferencesResolver.resolve(serializedReference, DiscussionReference.class);
+        Optional<Discussion> discussionOptional = this.discussionService.get(discussionReference);
+        Discussion discussion =
+            discussionOptional.orElseThrow(() -> new DiscussionServerException(HttpServletResponse.SC_NOT_FOUND,
+                String.format("Cannot find discussion with reference [%s]", serializedReference)));
+        return this.createMessage(discussion, request);
     }
 
     private Optional<Message> createMessage(Discussion discussion, HttpServletRequest request)
+        throws DiscussionServerException
     {
         String content = getContent(request);
         Syntax syntax = getSyntax(request);
@@ -117,7 +115,6 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         // Handle temporary uploads
         List<String> temporaryUploadedFiles = editForm.getTemporaryUploadedFiles();
         parameters.put(TEMPORARY_UPLOADED_ATTACHMENTS, temporaryUploadedFiles);
-        Optional<Message> messageOptional;
 
         String serializedReplyTo = request.getParameter(REPLY_TO_PARAMETER);
         DocumentReference author = this.contextProvider.get().getAuthorReference();
@@ -134,6 +131,7 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
             }
         }
 
+        Optional<Message> messageOptional;
         if (replyToMessage == null) {
             messageOptional = this.messageService
                 .create(content, syntax, discussion.getReference(), actorReference, true, parameters);
@@ -144,19 +142,16 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         return messageOptional;
     }
 
-    private String getContent(HttpServletRequest request)
+    private String getContent(HttpServletRequest request) throws DiscussionServerException
     {
-        String content = request.getParameter(CONTENT_PARAMETER);
-        String requiresHTMLConversion = request.getParameter(REQUIRES_HTML_CONVERSION_PARAMETER);
-        String syntax = request.getParameter(CONTENT_SYNTAX_PARAMETER);
-
-        String contentClean;
-        if (Objects.equals(requiresHTMLConversion, CONTENT_PARAMETER)) {
-            contentClean = this.htmlConverter.fromHTML(content, syntax);
-        } else {
-            contentClean = content;
+        RequestParameterConversionResult conversionResult = this.requestParameterConverter.convert(request);
+        // We throw an exception only in case of conversion errors on the content parameter:
+        // we don't care if there's other conversions errors as we do not need other parameters here.
+        if (conversionResult.getErrors().containsKey(CONTENT_PARAMETER)) {
+            throw new DiscussionServerException(HttpServletResponse.SC_BAD_REQUEST,
+                "Error when performing conversion of content.", conversionResult.getErrors().get(CONTENT_PARAMETER));
         }
-        return contentClean;
+        return conversionResult.getRequest().getParameter(CONTENT_PARAMETER);
     }
 
     private Syntax getSyntax(HttpServletRequest request)
