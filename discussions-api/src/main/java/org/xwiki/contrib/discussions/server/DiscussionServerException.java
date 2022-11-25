@@ -48,11 +48,11 @@ public class DiscussionServerException extends Exception
      *
      * @param statusCode the http status code that should be answered
      * @param msg the message of the exception
-     * @param e the original error
+     * @param cause the original error
      */
-    public DiscussionServerException(int statusCode, String msg, Throwable e)
+    public DiscussionServerException(int statusCode, String msg, Throwable cause)
     {
-        super(msg, e);
+        super(msg, cause);
         this.statusCode = statusCode;
     }
 
@@ -61,6 +61,6 @@ public class DiscussionServerException extends Exception
      */
     public int getStatusCode()
     {
-        return statusCode;
+        return this.statusCode;
     }
 }

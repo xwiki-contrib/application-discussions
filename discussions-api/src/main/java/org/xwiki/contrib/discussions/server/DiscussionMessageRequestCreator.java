@@ -50,16 +50,10 @@ public interface DiscussionMessageRequestCreator
     String CONTENT_PARAMETER = "content";
 
     /**
-     * Recommended request parameter defining the syntax of sent content. Default value is {@code XWiki/2.0} when the
+     * Recommended request parameter defining the syntax of sent content. Default value is {@code xwiki/2.0} when the
      * parameter is missing.
      */
     String CONTENT_SYNTAX_PARAMETER = "content_syntax";
-
-    /**
-     * Optional request parameters that needs to contain "{@code content}" value if the content needs to be converted
-     * from html.
-     */
-    String REQUIRES_HTML_CONVERSION_PARAMETER = "RequiresHTMLConversion";
 
     /**
      * Optional request parameters prefix for all values that needs to be used in
@@ -90,7 +84,7 @@ public interface DiscussionMessageRequestCreator
      * It <strong>might</strong> contain also those parameters:
      * <ul>
      *     <li>{@code content_syntax}: the syntax of the provided content. If the parameter is not sent, the content is
-     *     parsed as {@code XWiki/2.0}</li>
+     *     parsed as {@code xwiki/2.0}</li>
      *     <li>{@code requiresHTMLConversion}: should contains {@code content} if the content needs to be converted from
      *     html first (e.g. if it comes from the WYSIWYG editor). If the parameter is not provided the content won't be
      *     converted</li>
