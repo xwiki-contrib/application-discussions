@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>14.10-SNAPSHOT</version>
+    <version>14.10</version>
   </parent>
 
   <artifactId>application-discussions</artifactId>
@@ -64,8 +64,6 @@
   <properties>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
     <xwiki.issueManagement.jira.id>DISCUSSION</xwiki.issueManagement.jira.id>
-    <!-- FIXME: remove before release -->
-    <xwiki.revapi.skip>true</xwiki.revapi.skip>
   </properties>
 
   <modules>
@@ -94,8 +92,16 @@
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
           <analysisConfiguration>
-            <revapi.ignore>
-            </revapi.ignore>
+            <revapi.filter>
+              <archives>
+                <!-- We're ignoring all API incompatibilities from XWiki dependencies -->
+                <exclude>
+                  <item>org\.xwiki\.commons:.*:.*</item>
+                  <item>org\.xwiki\.rendering:.*:.*</item>
+                  <item>org\.xwiki\.platform:.*:.*</item>
+                </exclude>
+              </archives>
+            </revapi.filter>
           </analysisConfiguration>
         </configuration>
       </plugin>
