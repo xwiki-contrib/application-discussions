@@ -7,7 +7,7 @@ This application provides a framework to integrates contextual discussions in XW
 * [Issue Tracker](https://jira.xwiki.org/projects/DISCUSSION)
 * Communication: [Forum](https://forum.xwiki.org/), [Chat](https://dev.xwiki.org/xwiki/bin/view/Community/Chat)
 * [Development Practices](http://dev.xwiki.org/)
-* Minimal XWiki version supported: XWiki 12.10
+* Minimal XWiki version supported: XWiki 14.10
 * License: LGPL 2.1
 * Translations:
     * [Application Discussions - Discussions Macro - Page Properties](https://l10n.xwiki.org/projects/xwiki-contrib/application-discussions-discussions-ui-page-properties/)
