@@ -1,0 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.DiscussionsTranslations" locale="ja">
+  <web>Discussions</web>
+  <name>DiscussionsTranslations</name>
+  <language>ja</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Discussions.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.application.name=ディスカッション
+discussions.discussion.messages.title=メッセージ
+discussions.discussion.messages.empty=メッセージがありません！
+discussions.discussion.notAllowed.view=このディスカッションの閲覧は許可されていません。
+discussions.discussion.newMessage.form.title=新しいメッセージ
+discussions.discussion.deleteMessage.form.title=メッセージを削除
+discussions.discussion.deleteMessage.form.confirmation=このメッセージを削除してよろしいですか？
+discussions.discussion.deleteMessage.form.cancel=キャンセル
+discussions.discussion.deleteMessage.form.confirm=承認
+discussions.discussions.table.header.title=タイトル
+discussions.discussions.table.header.updateDate=最終更新
+discussions.discussions.table.header.messageCount=メッセージ数
+discussions.discussions.userstable.header.name=名称
+discussions.home.description=このスペースはディスカッションのアプリケーションのコードを含みます。
+discussions.home.discussionsTable.column.title=タイトル
+discussions.home.discussionsTable.column.creationDate=作成日
+discussions.home.discussionsTable.column.updateDate=更新日
+discussions.home.discussionsTable.column.discussionContexts=ディスカッションのコンテクスト
+discussions.home.discussionsTable.column.reference=参照
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=名称
+discussions.home.discussionContextsTable.column.entityReferenceType=構成要素の参照の種類
+discussions.home.discussionContextsTable.column.entityReference=構成要素の参照
+discussions.home.discussionContextsTable.column.creationDate=作成日
+discussions.home.discussionContextsTable.column.discussions=ディスカッション
+discussions.home.discussionContextsTable.column.reference=参照
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=ディスカッションのインデックス
+discussions.discussion.usersList.title=ユーザーの一覧
+discussions.discussion.usersList.public=このディスカッションは公開されています。
+</content>
+  </xwikidoc>

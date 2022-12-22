@@ -1,0 +1,58 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.MessageStream.MessageStreamTranslations" locale="ja">
+  <web>Discussions.MessageStream</web>
+  <name>MessageStreamTranslations</name>
+  <language>ja</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Main.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>MessageStreamTranslations</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.messagestream.isGuest.message=ディスカッションにアクセスするにはログインが必要です。
+discussions.messagestream.discussions.back=ディスカッションの一覧に戻る
+discussions.messagestream.title=ディスカッション
+discussions.messagestream.discussions.list=ディスカッションの一覧
+discussions.messagestream.discussions.createDiscussion=新しいディスカッションを開始。
+discussions.messagestream.createForm.title=ディスカッションを作成
+discussions.messagestream.createForm.recipient.label=受信者
+### Missing: discussions.messagestream.createForm.recipient.hint=The list of recipients of the discussions is calculated when the first message is sent. For instance, if a user follows you after a message is sent, this user will not be able to see it.
+discussions.messagestream.createForm.recipient.value.everybody=全員
+discussions.messagestream.createForm.recipient.value.followers=フォロワー
+discussions.messagestream.createForm.recipient.value.users=ユーザー
+discussions.messagestream.createForm.recipient.value.groups=グループ
+discussions.messagestream.createForm.users.label=ユーザー
+discussions.messagestream.createForm.groups.label=グループ
+discussions.messagestream.createForm.title.label=タイトル
+discussions.messagestream.createForm.content.label=最初のメッセージ
+discussions.messagestream.createForm.submit=ディスカッションを作成
+discussions.messagestream.createForm.cancel=キャンセル
+</content>
+  </xwikidoc>
