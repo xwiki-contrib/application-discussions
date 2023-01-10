@@ -107,7 +107,7 @@
                 <item>
                   <ignore>true</ignore>
                   <code>java.method.addedToInterface</code>
-                  <new>method boolean org.xwiki.contrib.discussions.DiscussionContextService::saveMetadata(org.xwiki.contrib.discussions.domain.DiscussionContext, java.lang.String, java.lang.String)</new>
+                  <new>method boolean org.xwiki.contrib.discussions.DiscussionContextService::saveMetadata(org.xwiki.contrib.discussions.domain.DiscussionContext, java.util.Map&lt;java.lang.String, java.lang.String&gt;)</new>
                   <justification>New API added for metadata handling.</justification>
                 </item>
               </differences>
