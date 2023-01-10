@@ -66,25 +66,24 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Override
-    public boolean readMetadata(DiscussionContext discussionContext)
+    public boolean loadMetadata(DiscussionContext discussionContext)
     {
-        Optional<String> discussionContextPage = this.findDiscussionContextPage(discussionContext.getReference());
-        boolean result = false;
-        if (discussionContextPage.isPresent()) {
-            DocumentReference documentReference = this.documentReferenceResolver.resolve(discussionContextPage.get());
-            result = this.readMetadata(documentReference, discussionContext);
-        }
-        return result;
+        return this.findDiscussionContextPage(discussionContext.getReference())
+            .map(discussionContextPage -> {
+                DocumentReference documentReference = this.documentReferenceResolver.resolve(discussionContextPage);
+                return loadMetadata(documentReference, discussionContext);
+            })
+            .orElse(false);
     }
 
     @Override
-    public boolean readMetadata(DocumentReference discussionContextPage, DiscussionContext discussionContext)
+    public boolean loadMetadata(DocumentReference discussionContextPage, DiscussionContext discussionContext)
     {
         XWikiContext context = this.xcontextProvider.get();
         boolean result = false;
         try {
             XWikiDocument document = context.getWiki().getDocument(discussionContextPage, context);
-            result = this.readMetadata(document, discussionContext);
+            result = this.loadMetadata(document, discussionContext);
         } catch (XWikiException e) {
             this.logger.error("Error while reading metadata objects from [{}]: [{}]", discussionContextPage,
                 ExceptionUtils.getRootCauseMessage(e));
@@ -94,7 +93,7 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     }
 
     @Override
-    public boolean readMetadata(XWikiDocument discussionContextDocument, DiscussionContext discussionContext)
+    public boolean loadMetadata(XWikiDocument discussionContextDocument, DiscussionContext discussionContext)
     {
         boolean result = false;
         List<BaseObject> xObjects =
@@ -113,11 +112,9 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     }
 
     @Override
-    public boolean saveMetadata(DiscussionContext discussionContext, String key, String value)
+    public boolean saveMetadata(DiscussionContext discussionContext, Map<String, String> values)
     {
         Optional<String> discussionContextPage = this.findDiscussionContextPage(discussionContext.getReference());
-        DocumentReference discussionContextMetadataXClass =
-            this.discussionContextMetadata.getDiscussionContextMetadataXClass();
         XWikiContext context = this.xcontextProvider.get();
         boolean result = false;
         if (discussionContextPage.isPresent()) {
@@ -125,23 +122,11 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
             DocumentReference documentReference = this.documentReferenceResolver.resolve(serializedContextPage);
             try {
                 XWikiDocument document = context.getWiki().getDocument(documentReference, context);
-                List<BaseObject> xObjects =
-                    document.getXObjects(discussionContextMetadataXClass);
-                BaseObject metadataObject = null;
-                for (BaseObject xObject : xObjects) {
-                    if (StringUtils.equals(xObject.getStringValue(DiscussionContextMetadata.METADATA_KEY), key)) {
-                        metadataObject = xObject;
-                        break;
-                    }
+                for (Map.Entry<String, String> entry : values.entrySet()) {
+                    this.updateMetadata(document, entry.getKey(), entry.getValue());
                 }
-                if (metadataObject == null) {
-                    int objectNumber = document.createXObject(discussionContextMetadataXClass, context);
-                    metadataObject = document.getXObject(discussionContextMetadataXClass, objectNumber);
-                    metadataObject.setStringValue(DiscussionContextMetadata.METADATA_KEY, key);
-                }
-                metadataObject.setLargeStringValue(DiscussionContextMetadata.METADATA_VALUE, value);
                 context.getWiki().saveDocument(document, "Add metadata", true, context);
-                discussionContext.getMetadata().put(key, value);
+                discussionContext.getMetadata().putAll(values);
                 result = true;
             } catch (XWikiException e) {
                 this.logger.error("Error while saving metadata value in page [{}]: [{}]", documentReference,
@@ -150,5 +135,26 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
             }
         }
         return result;
+    }
+
+    private void updateMetadata(XWikiDocument document, String key, String value) throws XWikiException
+    {
+        XWikiContext context = this.xcontextProvider.get();
+        DocumentReference discussionContextMetadataXClass =
+            this.discussionContextMetadata.getDiscussionContextMetadataXClass();
+        List<BaseObject> xObjects = document.getXObjects(discussionContextMetadataXClass);
+        BaseObject metadataObject = null;
+        for (BaseObject xObject : xObjects) {
+            if (StringUtils.equals(xObject.getStringValue(DiscussionContextMetadata.METADATA_KEY), key)) {
+                metadataObject = xObject;
+                break;
+            }
+        }
+        if (metadataObject == null) {
+            int objectNumber = document.createXObject(discussionContextMetadataXClass, context);
+            metadataObject = document.getXObject(discussionContextMetadataXClass, objectNumber);
+            metadataObject.setStringValue(DiscussionContextMetadata.METADATA_KEY, key);
+        }
+        metadataObject.setLargeStringValue(DiscussionContextMetadata.METADATA_VALUE, value);
     }
 }

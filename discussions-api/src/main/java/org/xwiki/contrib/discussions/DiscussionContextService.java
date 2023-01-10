@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.Discussion;
@@ -119,9 +120,8 @@ public interface DiscussionContextService
      * permanently.
      *
      * @param context the context for which to add the new metadata.
-     * @param key the key of the metadata to save
-     * @param value the value of the metadata
+     * @param values the map of values to save
      * @return {@code true} if the metadata was properly saved.
      */
-    boolean saveMetadata(DiscussionContext context, String key, String value);
+    boolean saveMetadata(DiscussionContext context, Map<String, String> values);
 }

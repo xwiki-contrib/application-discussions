@@ -147,11 +147,13 @@ public class DiscussionContextMetadata
 
     /**
      * Discussion context metadata key.
+     * @since 2.2
      */
     public static final String METADATA_KEY = "key";
 
     /**
      * Discussion context metadata value.
+     * @since 2.2
      */
     public static final String METADATA_VALUE = "value";
 
@@ -193,6 +195,7 @@ public class DiscussionContextMetadata
 
     /**
      * @return the reference of discussion context metadata xclass.
+     * @since 2.2
      */
     public DocumentReference getDiscussionContextMetadataXClass()
     {

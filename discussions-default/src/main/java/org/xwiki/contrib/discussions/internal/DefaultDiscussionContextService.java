@@ -20,6 +20,7 @@
 package org.xwiki.contrib.discussions.internal;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -100,14 +101,13 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Override
     public List<DiscussionContext> findByDiscussionReference(DiscussionReference reference)
     {
-        List<DiscussionContext> result = this.discussionContextStoreService.findByDiscussionReference(reference)
+        return this.discussionContextStoreService.findByDiscussionReference(reference)
             .stream()
             .map(this::mapBaseObject)
             .filter(Optional::isPresent)
             .map(Optional::get)
+            .peek(discussionContext -> this.discussionContextMetadataStoreService.loadMetadata(discussionContext))
             .collect(Collectors.toList());
-        result.forEach(discussionContext -> this.discussionContextMetadataStoreService.readMetadata(discussionContext));
-        return result;
     }
 
     @Override
@@ -125,9 +125,9 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
-    public boolean saveMetadata(DiscussionContext context, String key, String value)
+    public boolean saveMetadata(DiscussionContext context, Map<String, String> values)
     {
-        return this.discussionContextMetadataStoreService.saveMetadata(context, key, value);
+        return this.discussionContextMetadataStoreService.saveMetadata(context, values);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         if (baseObject.isPresent()) {
             Optional<DiscussionContext> discussionContext = baseObject.flatMap(this::mapBaseObject);
             discussionContext.ifPresent(
-                context -> this.discussionContextMetadataStoreService.readMetadata(baseObject.get().getOwnerDocument(),
+                context -> this.discussionContextMetadataStoreService.loadMetadata(baseObject.get().getOwnerDocument(),
                     context));
             return discussionContext;
         } else {
@@ -180,16 +180,13 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Override
     public Optional<DiscussionContext> get(DiscussionContextReference reference)
     {
-        Optional<BaseObject> baseObject = this.discussionContextStoreService.get(reference);
-        Optional<DiscussionContext> result = Optional.empty();
-        if (baseObject.isPresent()) {
-            result = baseObject.flatMap(this::mapBaseObject);
-            result.ifPresent(
-                context -> this.discussionContextMetadataStoreService.readMetadata(baseObject.get().getOwnerDocument(),
+        return this.discussionContextStoreService.get(reference).flatMap(baseObject -> {
+            Optional<DiscussionContext> discussionContext = mapBaseObject(baseObject);
+            discussionContext.ifPresent(
+                context -> this.discussionContextMetadataStoreService.loadMetadata(baseObject.getOwnerDocument(),
                     context));
-        }
-
-        return result;
+            return discussionContext;
+        });
     }
 
     private Optional<DiscussionContext> mapBaseObject(BaseObject baseObject)

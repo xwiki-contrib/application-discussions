@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.discussions.store;
 
+import java.util.Map;
+
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.model.reference.DocumentReference;
@@ -43,7 +45,7 @@ public interface DiscussionContextMetadataStoreService
      * @param discussionContext the context for which to read the metadata.
      * @return {@code true} if some metadata has been found and the discussion context has been modified.
      */
-    boolean readMetadata(DiscussionContext discussionContext);
+    boolean loadMetadata(DiscussionContext discussionContext);
 
     /**
      * Read the metadata for the given discussion context from the given reference.
@@ -53,7 +55,7 @@ public interface DiscussionContextMetadataStoreService
      * @param discussionContext the context for which to read the metadata.
      * @return {@code true} if some metadata has been found and the discussion context has been modified.
      */
-    boolean readMetadata(DocumentReference discussionContextPage, DiscussionContext discussionContext);
+    boolean loadMetadata(DocumentReference discussionContextPage, DiscussionContext discussionContext);
 
     /**
      * Read the metadata for the given discussion context from the given document.
@@ -63,7 +65,7 @@ public interface DiscussionContextMetadataStoreService
      * @param discussionContext the context for which to read the metadata.
      * @return {@code true} if some metadata has been found and the discussion context has been modified.
      */
-    boolean readMetadata(XWikiDocument discussionContextDocument, DiscussionContext discussionContext);
+    boolean loadMetadata(XWikiDocument discussionContextDocument, DiscussionContext discussionContext);
 
     /**
      * Save a new metadata to be added in the discussion context.
@@ -71,9 +73,8 @@ public interface DiscussionContextMetadataStoreService
      * permanently.
      *
      * @param discussionContext the context for which to add the new metadata.
-     * @param key the key of the metadata to save
-     * @param value the value of the metadata
+     * @param values the map of values to save
      * @return {@code true} if the metadata was properly saved.
      */
-    boolean saveMetadata(DiscussionContext discussionContext, String key, String value);
+    boolean saveMetadata(DiscussionContext discussionContext, Map<String, String> values);
 }
