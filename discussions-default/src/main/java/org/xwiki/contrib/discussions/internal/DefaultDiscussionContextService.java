@@ -38,6 +38,7 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextReferenc
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.events.DiscussionContextEvent;
 import org.xwiki.contrib.discussions.events.DiscussionEvent;
+import org.xwiki.contrib.discussions.store.DiscussionContextMetadataStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionStoreService;
 import org.xwiki.observation.ObservationManager;
@@ -77,6 +78,9 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Inject
     private DiscussionReferencesResolver discussionReferencesResolver;
 
+    @Inject
+    private DiscussionContextMetadataStoreService discussionContextMetadataStoreService;
+
     @Override
     public Optional<DiscussionContext> create(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
@@ -96,12 +100,14 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Override
     public List<DiscussionContext> findByDiscussionReference(DiscussionReference reference)
     {
-        return this.discussionContextStoreService.findByDiscussionReference(reference)
+        List<DiscussionContext> result = this.discussionContextStoreService.findByDiscussionReference(reference)
             .stream()
             .map(this::mapBaseObject)
             .filter(Optional::isPresent)
             .map(Optional::get)
             .collect(Collectors.toList());
+        result.forEach(discussionContext -> this.discussionContextMetadataStoreService.readMetadata(discussionContext));
+        return result;
     }
 
     @Override
@@ -119,6 +125,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
+    public boolean saveMetadata(DiscussionContext context, String key, String value)
+    {
+        return this.discussionContextMetadataStoreService.saveMetadata(context, key, value);
+    }
+
+    @Override
     public Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
         DiscussionStoreConfigurationParameters configurationParameters)
@@ -126,7 +138,11 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         Optional<BaseObject> baseObject =
             this.discussionContextStoreService.findByReference(entityReference);
         if (baseObject.isPresent()) {
-            return baseObject.flatMap(this::mapBaseObject);
+            Optional<DiscussionContext> discussionContext = baseObject.flatMap(this::mapBaseObject);
+            discussionContext.ifPresent(
+                context -> this.discussionContextMetadataStoreService.readMetadata(baseObject.get().getOwnerDocument(),
+                    context));
+            return discussionContext;
         } else {
             return this.create(applicationHint, name, description, entityReference, configurationParameters);
         }
@@ -164,8 +180,16 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     @Override
     public Optional<DiscussionContext> get(DiscussionContextReference reference)
     {
-        return this.discussionContextStoreService.get(reference)
-            .flatMap(this::mapBaseObject);
+        Optional<BaseObject> baseObject = this.discussionContextStoreService.get(reference);
+        Optional<DiscussionContext> result = Optional.empty();
+        if (baseObject.isPresent()) {
+            result = baseObject.flatMap(this::mapBaseObject);
+            result.ifPresent(
+                context -> this.discussionContextMetadataStoreService.readMetadata(baseObject.get().getOwnerDocument(),
+                    context));
+        }
+
+        return result;
     }
 
     private Optional<DiscussionContext> mapBaseObject(BaseObject baseObject)

@@ -145,6 +145,16 @@ public class DiscussionContextMetadata
      */
     public static final String DISCUSSIONS_NAME = "discussions";
 
+    /**
+     * Discussion context metadata key.
+     */
+    public static final String METADATA_KEY = "key";
+
+    /**
+     * Discussion context metadata value.
+     */
+    public static final String METADATA_VALUE = "value";
+
     /*
      * Constant to avoid string duplication.
      */
@@ -158,6 +168,8 @@ public class DiscussionContextMetadata
     private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
 
     private static final String XCLASS_NAME = "DiscussionContextClass";
+
+    private static final String METADATA_XCLASS_NAME = "DiscussionContextMetadataClass";
 
     @Inject
     private Provider<XWikiContext> xcontextProvider;
@@ -177,5 +189,14 @@ public class DiscussionContextMetadata
     public String getDiscussionContextXClassFullName()
     {
         return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
+    }
+
+    /**
+     * @return the reference of discussion context metadata xclass.
+     */
+    public DocumentReference getDiscussionContextMetadataXClass()
+    {
+        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
+            METADATA_XCLASS_NAME);
     }
 }
