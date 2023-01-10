@@ -112,4 +112,16 @@ public interface DiscussionContextService
      * @return {@code true} if the current user can view the discussion context, {@code false} otherwise
      */
     boolean canViewDiscussionContext(DiscussionContextReference reference);
+
+    /**
+     * Save a new metadata to be added in the discussion context.
+     * This method both puts the metadata in {@link DiscussionContext#getMetadata()} map and also persists it
+     * permanently.
+     *
+     * @param context the context for which to add the new metadata.
+     * @param key the key of the metadata to save
+     * @param value the value of the metadata
+     * @return {@code true} if the metadata was properly saved.
+     */
+    boolean saveMetadata(DiscussionContext context, String key, String value);
 }

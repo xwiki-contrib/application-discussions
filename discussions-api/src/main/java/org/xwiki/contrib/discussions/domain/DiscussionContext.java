@@ -19,6 +19,9 @@
  */
 package org.xwiki.contrib.discussions.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
@@ -43,6 +46,8 @@ public class DiscussionContext
 
     private final DiscussionContextEntityReference entityReference;
 
+    private final Map<String, String> metadata;
+
     /**
      * Default constructor.
      *
@@ -58,6 +63,7 @@ public class DiscussionContext
         this.name = name;
         this.description = description;
         this.entityReference = entityReference;
+        this.metadata = new HashMap<>();
     }
 
     /**
@@ -92,6 +98,14 @@ public class DiscussionContext
         return this.entityReference;
     }
 
+    /**
+     * @return the context metadata.
+     */
+    public Map<String, String> getMetadata()
+    {
+        return metadata;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -110,6 +124,7 @@ public class DiscussionContext
             .append(this.name, that.name)
             .append(this.description, that.description)
             .append(this.entityReference, that.entityReference)
+            .append(this.metadata, that.metadata)
             .isEquals();
     }
 
@@ -121,6 +136,7 @@ public class DiscussionContext
             .append(this.name)
             .append(this.description)
             .append(this.entityReference)
+            .append(this.metadata)
             .toHashCode();
     }
 

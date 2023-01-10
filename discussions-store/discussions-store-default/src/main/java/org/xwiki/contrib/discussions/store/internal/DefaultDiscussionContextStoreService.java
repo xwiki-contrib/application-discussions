@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
@@ -38,7 +39,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
-import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
@@ -61,17 +61,17 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.REFERENCE_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.UPDATE_DATE_NAME;
-import static org.xwiki.query.Query.XWQL;
 
 /**
  * Default implementation of {@link DiscussionContextStoreService}.
  *
  * @version $Id$
- * @since 1.0s
+ * @since 1.0
  */
 @Component
 @Singleton
-public class DefaultDiscussionContextStoreService implements DiscussionContextStoreService
+public class DefaultDiscussionContextStoreService extends AbstractDiscussionContextStore
+    implements DiscussionContextStoreService
 {
     @Inject
     private Logger logger;
@@ -135,33 +135,18 @@ public class DefaultDiscussionContextStoreService implements DiscussionContextSt
     @Override
     public Optional<BaseObject> get(DiscussionContextReference reference)
     {
-        try {
-            String discussionClass = this.discussionContextMetadata.getDiscussionContextXClassFullName();
-            List<String> execute =
-                this.queryManager
-                    .createQuery(
-                        String.format("FROM doc.object(%s) obj where obj.%s = :%s",
-                            discussionClass,
-                            DiscussionMetadata.REFERENCE_NAME,
-                            DiscussionMetadata.REFERENCE_NAME),
-                        XWQL)
-                    .bindValue(DiscussionMetadata.REFERENCE_NAME,
-                        this.discussionReferencesSerializer.serialize(reference))
-                    .execute();
-            if (execute == null || execute.isEmpty()) {
-                return Optional.empty();
+        Optional<String> discussionContextPage = this.findDiscussionContextPage(reference);
+        if (discussionContextPage.isPresent()) {
+            String page = discussionContextPage.get();
+            try {
+                return this.mapToBaseObject(page);
+            } catch (XWikiException e) {
+                this.logger.warn("Error when getting discussion context information from [{}]: [{}]", page,
+                    ExceptionUtils.getRootCauseMessage(e));
+                this.logger.debug("Full stack: ", e);
             }
-            if (execute.size() > 1) {
-                this.logger.debug("More than one discussion found for reference=[{}]", reference);
-            }
-            String result = execute.get(0);
-
-            return mapToBaseObject(result);
-        } catch (QueryException | XWikiException e) {
-            this.logger.warn("Failed to get the Discussion with reference=[{}]. Cause: [{}]", reference,
-                getRootCauseMessage(e));
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     private Optional<BaseObject> mapToBaseObject(String result) throws XWikiException
