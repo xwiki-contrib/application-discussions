@@ -44,16 +44,16 @@ import static org.xwiki.query.Query.XWQL;
 public abstract class AbstractDiscussionContextStore
 {
     @Inject
+    protected DiscussionContextMetadata discussionContextMetadata;
+
+    @Inject
+    protected QueryManager queryManager;
+
+    @Inject
+    protected DiscussionReferencesSerializer discussionReferencesSerializer;
+
+    @Inject
     private Logger logger;
-
-    @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @Inject
-    private QueryManager queryManager;
-
-    @Inject
-    private DiscussionReferencesSerializer discussionReferencesSerializer;
 
     protected Optional<String> findDiscussionContextPage(DiscussionContextReference reference)
     {
