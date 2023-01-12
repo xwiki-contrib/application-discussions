@@ -32,20 +32,17 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
-import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
-import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
-import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -78,15 +75,6 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
 
     @Inject
     private Provider<XWikiContext> xcontextProvider;
-
-    @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @Inject
-    private QueryManager queryManager;
-
-    @Inject
-    private DiscussionReferencesSerializer discussionReferencesSerializer;
 
     @Inject
     private ContextualLocalizationManager localizationManager;

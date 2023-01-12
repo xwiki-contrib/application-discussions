@@ -58,8 +58,8 @@ public class DiscussionContextMetadataXClassInitializer extends AbstractDiscussi
             document.setHidden(true);
             BaseClass xClass = document.getXClass();
             xClass.addTextField(DiscussionContextMetadata.METADATA_KEY, DiscussionContextMetadata.METADATA_KEY, 100);
-            xClass.addTextField(DiscussionContextMetadata.METADATA_VALUE, DiscussionContextMetadata.METADATA_VALUE,
-                Integer.MAX_VALUE);
+            xClass.addTextAreaField(DiscussionContextMetadata.METADATA_VALUE, DiscussionContextMetadata.METADATA_VALUE,
+                25, 50);
             needsUpdate = true;
         }
         if (initAuthorReference(document)) {

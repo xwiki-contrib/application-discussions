@@ -60,9 +60,6 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @Inject
     private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Override
