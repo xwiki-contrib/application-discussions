@@ -22,18 +22,30 @@ package org.xwiki.contrib.discussions.internal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
+import org.xwiki.contrib.discussions.store.DiscussionContextMetadataStoreService;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 import org.xwiki.test.junit5.mockito.MockComponent;
 
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.REFERENCE_NAME;
 
 /**
  * Test of {@link DefaultDiscussionContextService}.
@@ -52,6 +64,12 @@ class DefaultDiscussionContextServiceTest
 
     @MockComponent
     private DiscussionsRightService discussionsRightService;
+
+    @MockComponent
+    private DiscussionReferencesResolver discussionReferencesResolver;
+
+    @MockComponent
+    private DiscussionContextMetadataStoreService discussionContextMetadataStoreService;
 
     @Test
     void createCreateFail()
@@ -87,5 +105,41 @@ class DefaultDiscussionContextServiceTest
                 , "name", "description",
                 new DiscussionContextEntityReference("referenceType", "entityReference"))),
             discussionContext);
+    }
+
+    @Test
+    void get()
+    {
+        DiscussionContextReference reference = mock(DiscussionContextReference.class);
+        when(this.discussionContextStoreService.get(reference)).thenReturn(Optional.empty());
+
+        assertEquals(Optional.empty(), this.defaultDiscussionContextService.get(reference));
+
+        BaseObject baseObject = mock(BaseObject.class);
+        when(this.discussionContextStoreService.get(reference)).thenReturn(Optional.of(baseObject));
+
+        when(baseObject.getStringValue(REFERENCE_NAME)).thenReturn("someReference");
+        when(this.discussionReferencesResolver.resolve("someReference", DiscussionContextReference.class))
+            .thenReturn(reference);
+
+        String contextName = "someName";
+        String description = "some description";
+        String entityReferenceType = "someType";
+        String entityReferenceName = "42foo";
+        when(baseObject.getStringValue(NAME_NAME)).thenReturn(contextName);
+        when(baseObject.getStringValue(DESCRIPTION_NAME)).thenReturn(description);
+        when(baseObject.getStringValue(ENTITY_REFERENCE_TYPE_NAME)).thenReturn(entityReferenceType);
+        when(baseObject.getStringValue(ENTITY_REFERENCE_NAME)).thenReturn(entityReferenceName);
+
+        DiscussionContext expectedContext = new DiscussionContext(reference,
+            contextName,
+            description,
+            new DiscussionContextEntityReference(entityReferenceType, entityReferenceName));
+
+        XWikiDocument ownerDoc = mock(XWikiDocument.class);
+        when(baseObject.getOwnerDocument()).thenReturn(ownerDoc);
+
+        assertEquals(Optional.of(expectedContext), this.defaultDiscussionContextService.get(reference));
+        verify(this.discussionContextMetadataStoreService).loadMetadata(ownerDoc, expectedContext);
     }
 }
