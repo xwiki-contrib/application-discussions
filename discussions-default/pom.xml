@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>2.2</version>
+    <version>2.3-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
   <artifactId>discussions-default</artifactId>
-  <version>2.2</version>
+  <version>2.3-SNAPSHOT</version>
   <name>Discussions - Default</name>
   <description>Default implementation of the discussions API.</description>
 
