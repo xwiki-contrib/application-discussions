@@ -117,7 +117,7 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         parameters.put(TEMPORARY_UPLOADED_ATTACHMENTS, temporaryUploadedFiles);
 
         String serializedReplyTo = request.getParameter(REPLY_TO_PARAMETER);
-        DocumentReference author = this.contextProvider.get().getAuthorReference();
+        DocumentReference author = this.contextProvider.get().getUserReference();
         String serializedAuthorReference = this.entityReferenceSerializer.serialize(author);
         ActorReference actorReference = new ActorReference("user", serializedAuthorReference);
 
