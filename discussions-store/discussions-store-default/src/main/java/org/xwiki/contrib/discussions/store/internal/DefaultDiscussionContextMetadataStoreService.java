@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -60,6 +61,7 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
+    @Named("current")
     private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Override
