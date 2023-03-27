@@ -76,6 +76,8 @@ public class DocumentRedirectionManager
             String redirection = null;
             if (redirectionObject instanceof String) {
                 redirection = (String) redirectionObject;
+            } else if (redirectionObject instanceof String[]) {
+                redirection = ((String[]) redirectionObject)[0];
             } else if (redirectionObject instanceof EntityReference) {
                 redirection = this.entityReferenceSerializer.serialize((EntityReference) redirectionObject);
             }
