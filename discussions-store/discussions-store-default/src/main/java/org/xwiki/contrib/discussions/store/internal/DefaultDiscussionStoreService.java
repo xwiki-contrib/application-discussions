@@ -95,6 +95,9 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     @Inject
     private PageHolderReferenceFactory pageHolderReferenceFactory;
 
+    @Inject
+    private DocumentRedirectionManager documentRedirectionManager;
+
     @Override
     public Optional<DiscussionReference> create(String applicationHint, String title, String description,
         String mainDocument, DiscussionStoreConfigurationParameters configurationParameters)
@@ -115,6 +118,8 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             object.setDateValue(CREATION_DATE_NAME, value);
             object.setStringValue(MAIN_DOCUMENT_NAME, mainDocument);
             document.setHidden(true);
+
+            this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
             result = Optional.of(reference);
         } catch (XWikiException e) {
