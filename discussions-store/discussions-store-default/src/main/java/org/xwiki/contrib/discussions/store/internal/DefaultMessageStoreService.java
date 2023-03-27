@@ -100,6 +100,9 @@ public class DefaultMessageStoreService implements MessageStoreService
     @Inject
     private TemporaryAttachmentSessionsManager temporaryAttachmentSessionsManager;
 
+    @Inject
+    private DocumentRedirectionManager documentRedirectionManager;
+
     @Override
     public Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, String title,
@@ -146,6 +149,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             setMessageObject(messageBaseObject, content, authorReference, discussionReference, originalMessage,
                 authorType, serializedReference);
             this.handleTemporaryUploadedAttachments(configurationParameters, document);
+            this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
 
             result = Optional.of(messageReference);

@@ -11,3 +11,4 @@ org.xwiki.contrib.discussions.store.internal.DiscussionStoreConfigurationFactory
 org.xwiki.contrib.discussions.store.internal.DefaultMessageHolderReferenceService
 org.xwiki.contrib.discussions.store.internal.PageHolderReferenceFactory
 org.xwiki.contrib.discussions.store.internal.DefaultDiscussionContextMetadataStoreService
+org.xwiki.contrib.discussions.store.internal.DocumentRedirectionManager
