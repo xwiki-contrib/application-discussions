@@ -104,6 +104,9 @@ class DefaultMessageStoreServiceTest
     @MockComponent
     private MessageHolderReferenceService messageHolderReferenceService;
 
+    @MockComponent
+    private DocumentRedirectionManager documentRedirectionManager;
+
     @Mock
     private XWikiContext xWikiContext;
 
@@ -154,6 +157,7 @@ class DefaultMessageStoreServiceTest
         verify(messageBaseObject).set(AUTHOR_REFERENCE_NAME, "authorReference", this.xWikiContext);
         verify(messageBaseObject).set(CONTENT_NAME, "content", this.xWikiContext);
         verify(messageBaseObject).set(DISCUSSION_REFERENCE_NAME, "discussionReference;hint=hint", this.xWikiContext);
+        verify(this.documentRedirectionManager).handleCreatingRedirection(document, parameters);
     }
 
     @Test
