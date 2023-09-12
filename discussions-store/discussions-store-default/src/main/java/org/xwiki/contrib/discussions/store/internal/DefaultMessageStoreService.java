@@ -103,6 +103,9 @@ public class DefaultMessageStoreService implements MessageStoreService
     @Inject
     private DocumentRedirectionManager documentRedirectionManager;
 
+    @Inject
+    private DocumentAuthorsManager documentAuthorsManager;
+
     @Override
     public Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, String title,
@@ -128,18 +131,10 @@ public class DefaultMessageStoreService implements MessageStoreService
         Optional<MessageReference> result = Optional.empty();
         try {
             String applicationHint = discussionReference.getApplicationHint();
-            XWikiDocument document = generateUniquePage(discussionReference, configurationParameters);
+            XWikiDocument document = generateUniquePage(discussionReference, authorReference, configurationParameters);
             // The title of the page
             document.setTitle(title);
             document.setHidden(true);
-            DocumentReference authorReferenceDoc;
-            String authorType = authorReference.getType();
-            if (authorType.equals("user")) {
-                authorReferenceDoc = this.documentReferenceResolver.resolve(authorReference.getReference());
-            } else {
-                authorReferenceDoc = null;
-            }
-            document.setAuthorReference(authorReferenceDoc);
             document.setSyntax(syntax);
             BaseObject messageBaseObject = document.newXObject(this.messageMetadata.getMessageXClass(), context);
             DocumentReference messageHolderReference = document.getDocumentReference();
@@ -147,7 +142,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             MessageReference messageReference = new MessageReference(applicationHint, messageName);
             String serializedReference = this.discussionReferencesSerializer.serialize(messageReference);
             setMessageObject(messageBaseObject, content, authorReference, discussionReference, originalMessage,
-                authorType, serializedReference);
+                authorReference.getType(), serializedReference);
             this.handleTemporaryUploadedAttachments(configurationParameters, document);
             this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
@@ -334,7 +329,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             });
     }
 
-    private XWikiDocument generateUniquePage(DiscussionReference discussionReference,
+    private XWikiDocument generateUniquePage(DiscussionReference discussionReference, ActorReference actorReference,
         DiscussionStoreConfigurationParameters configurationParameters) throws XWikiException
     {
         XWikiDocument document;
@@ -343,7 +338,7 @@ public class DefaultMessageStoreService implements MessageStoreService
         XWikiContext context = xcontextProvider.get();
         document = context.getWiki().getDocument(messageHolder, context);
         document.setHidden(true);
-        context.getWiki().saveDocument(document, context);
+        this.documentAuthorsManager.setDocumentAuthors(document.getAuthors(), actorReference, configurationParameters);
         this.messageHolderReferenceService.consumeReference(discussionReference, messageHolder);
         return document;
     }

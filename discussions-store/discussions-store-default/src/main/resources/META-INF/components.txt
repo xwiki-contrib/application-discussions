@@ -8,6 +8,7 @@ org.xwiki.contrib.discussions.store.internal.initializer.MessageXClassInitialize
 org.xwiki.contrib.discussions.store.internal.initializer.DiscussionContextMetadataXClassInitializer
 org.xwiki.contrib.discussions.store.internal.DefaultDiscussionStoreConfiguration
 org.xwiki.contrib.discussions.store.internal.DiscussionStoreConfigurationFactory
+org.xwiki.contrib.discussions.store.internal.DocumentAuthorsManager
 org.xwiki.contrib.discussions.store.internal.DefaultMessageHolderReferenceService
 org.xwiki.contrib.discussions.store.internal.PageHolderReferenceFactory
 org.xwiki.contrib.discussions.store.internal.DefaultDiscussionContextMetadataStoreService
