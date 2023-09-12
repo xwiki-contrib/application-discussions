@@ -85,6 +85,9 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     @Inject
     private DocumentRedirectionManager documentRedirectionManager;
 
+    @Inject
+    private DocumentAuthorsManager documentAuthorsManager;
+
     @Override
     public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
@@ -111,6 +114,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
             object.setDateValue(CREATION_DATE_NAME, new Date());
             object.setDateValue(UPDATE_DATE_NAME, new Date());
             document.setHidden(true);
+            this.documentAuthorsManager.setDocumentAuthors(document.getAuthors(), null, configurationParameters);
             this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
 

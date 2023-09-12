@@ -34,6 +34,24 @@ import org.xwiki.stability.Unstable;
 public class DiscussionStoreConfigurationParameters extends LinkedHashMap<String, Object>
 {
     /**
+     * Defines the creator to use for the discussion technical pages: a {@code UserReference} need to be used.
+     * @since 2.4
+     */
+    public static final String CREATOR_PARAMETER_KEY = "creator";
+
+    /**
+     * Defines the effective author to use for the discussion technical pages: a {@code UserReference} need to be used.
+     * @since 2.4
+     */
+    public static final String EFFECTIVE_AUTHOR_PARAMETER_KEY = "effectiveAuthor";
+
+    /**
+     * Defines the original author to use for the discussion technical pages: a {@code UserReference} need to be used.
+     * @since 2.4
+     */
+    public static final String ORIGINAL_AUTHOR_PARAMETER_KEY = "originalAuthor";
+
+    /**
      * Default constructor.
      */
     public DiscussionStoreConfigurationParameters()
