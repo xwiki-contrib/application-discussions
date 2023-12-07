@@ -28,9 +28,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.store.internal.initializer.DiscussionRedirectXClassInitializer;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.model.reference.LocalDocumentReference;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -47,9 +47,6 @@ import com.xpn.xwiki.objects.BaseObject;
 @Singleton
 public class DocumentRedirectionManager
 {
-    private static final LocalDocumentReference REDIRECT_CLASS_REFERENCE =
-        new LocalDocumentReference("XWiki", "RedirectClass");
-
     private static final String REDIRECTION_PARAMETER = "redirection";
 
     @Inject
@@ -85,7 +82,8 @@ public class DocumentRedirectionManager
             if (!StringUtils.isBlank(redirection)) {
                 try {
                     BaseObject redirectXObject =
-                        document.newXObject(REDIRECT_CLASS_REFERENCE, this.contextProvider.get());
+                        document.newXObject(DiscussionRedirectXClassInitializer.XCLASS_REFERENCE,
+                            this.contextProvider.get());
                     redirectXObject.setStringValue("location", redirection);
                 } catch (XWikiException e) {
                     this.logger.error("Error while trying to create redirection xobject in [{}]: [{}]",

@@ -167,7 +167,10 @@ public class DiscussionContextMetadata
      */
     public static final String DISCUSSIONS_PRETTY_NAME = DISCUSSIONS_STR;
 
-    private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
+    /**
+     * Spaces location for discussion code.
+     */
+    public static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
 
     private static final String XCLASS_NAME = "DiscussionContextClass";
 

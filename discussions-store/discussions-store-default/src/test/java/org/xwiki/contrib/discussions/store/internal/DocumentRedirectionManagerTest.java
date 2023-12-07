@@ -23,6 +23,7 @@ import javax.inject.Provider;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
+import org.xwiki.contrib.discussions.store.internal.initializer.DiscussionRedirectXClassInitializer;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.LocalDocumentReference;
@@ -49,9 +50,6 @@ import static org.mockito.Mockito.when;
 @ComponentTest
 class DocumentRedirectionManagerTest
 {
-    private static final LocalDocumentReference REDIRECT_CLASS_REFERENCE =
-        new LocalDocumentReference("XWiki", "RedirectClass");
-
     private static final String REDIRECTION_PARAMETER = "redirection";
 
     @InjectMockComponents
@@ -82,7 +80,8 @@ class DocumentRedirectionManagerTest
         when(this.contextProvider.get()).thenReturn(context);
 
         BaseObject redirectionObject = mock(BaseObject.class);
-        when(document.newXObject(REDIRECT_CLASS_REFERENCE, context)).thenReturn(redirectionObject);
+        when(document.newXObject(DiscussionRedirectXClassInitializer.XCLASS_REFERENCE, context))
+            .thenReturn(redirectionObject);
         this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
 
         verify(redirectionObject).setStringValue("location", redirection);
