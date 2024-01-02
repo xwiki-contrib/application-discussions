@@ -59,12 +59,12 @@ discussions.home.discussionsTable.column.reference=참조
 discussions.home.discussionContextsTable.column.name=이름
 discussions.home.discussionContextsTable.column.entityReferenceType=엔터티 참조 유형
 discussions.home.discussionContextsTable.column.entityReference=엔터티 참조
-discussions.home.discussionContextsTable.column.creationDate=변경 요청 에서 기존 변경 사항이 새로 고쳐졌습니다.
+discussions.home.discussionContextsTable.column.creationDate=변경 요청 에서 기존 변경 사항이 새로 고쳐졌습니다
 discussions.home.discussionContextsTable.column.discussions=토론
 discussions.home.discussionContextsTable.column.reference=참조
 ### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
 discussions.indexes.title=토론 색인
-discussions.discussion.usersList.title=삭제 진행 중...
-discussions.discussion.usersList.public=삭제 진행 중...
+discussions.discussion.usersList.title=사용자 목록
+discussions.discussion.usersList.public=이 토론은 공개됩니다.
 </content>
   </xwikidoc>
