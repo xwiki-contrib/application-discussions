@@ -1,0 +1,70 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.4" reference="Discussions.DiscussionsTranslations" locale="ko">
+  <web>Discussions</web>
+  <name>DiscussionsTranslations</name>
+  <language>ko</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>Discussions.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>discussions.application.name=토론
+discussions.discussion.messages.title=메시지
+discussions.discussion.messages.empty=메시지가 없습니다!
+discussions.discussion.notAllowed.view=이 토론을 볼 수 없습니다.
+discussions.discussion.newMessage.form.title=새로운 메시지
+discussions.discussion.deleteMessage.form.title=메시지 삭제
+discussions.discussion.deleteMessage.form.confirmation=이 메시지를 삭제하시겠습니까?
+discussions.discussion.deleteMessage.form.cancel=취소
+discussions.discussion.deleteMessage.form.confirm=확인하다
+discussions.discussions.table.header.title=제목
+discussions.discussions.table.header.updateDate=마지막 업데이트
+discussions.discussions.table.header.messageCount=메시지 수
+discussions.discussions.userstable.header.name=이름
+discussions.home.description=이 공간에는 토론 애플리케이션의 코드가 포함되어 있습니다.
+discussions.home.discussionsTable.column.title=제목
+discussions.home.discussionsTable.column.creationDate=생산 일
+discussions.home.discussionsTable.column.updateDate=업데이트 날짜
+discussions.home.discussionsTable.column.discussionContexts=토론 상황
+discussions.home.discussionsTable.column.reference=참조
+### Missing: discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.name=이름
+discussions.home.discussionContextsTable.column.entityReferenceType=엔터티 참조 유형
+discussions.home.discussionContextsTable.column.entityReference=엔터티 참조
+discussions.home.discussionContextsTable.column.creationDate=변경 요청 에서 기존 변경 사항이 새로 고쳐졌습니다.
+discussions.home.discussionContextsTable.column.discussions=토론
+discussions.home.discussionContextsTable.column.reference=참조
+### Missing: discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.indexes.title=토론 색인
+discussions.discussion.usersList.title=삭제 진행 중...
+discussions.discussion.usersList.public=삭제 진행 중...
+</content>
+  </xwikidoc>
