@@ -351,10 +351,11 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     {
         return get(discussionReference)
             .map(discussion -> {
-                List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
+                List listValue = new ArrayList(discussion.getListValue(DISCUSSION_CONTEXTS_NAME));
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionContextReference);
                 if (!listValue.contains(serializedReference)) {
                     listValue.add(serializedReference);
+                    discussion.setDBStringListValue(DISCUSSION_CONTEXTS_NAME, listValue);
                     save(discussion, true, "discussions.store.discussion.linkContext");
                     return true;
                 }
@@ -369,11 +370,12 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         return get(discussionReference)
             .map(
                 discussion -> {
-                    List listValue = discussion.getListValue(DISCUSSION_CONTEXTS_NAME);
+                    List listValue = new ArrayList(discussion.getListValue(DISCUSSION_CONTEXTS_NAME));
                     String serializedReference = this.discussionReferencesSerializer
                         .serialize(discussionContextReference);
                     if (listValue.contains(serializedReference)) {
                         listValue.remove(serializedReference);
+                        discussion.setDBStringListValue(DISCUSSION_CONTEXTS_NAME, listValue);
                         save(discussion, true, "discussions.store.discussion.unlinkContext");
                         return true;
                     }

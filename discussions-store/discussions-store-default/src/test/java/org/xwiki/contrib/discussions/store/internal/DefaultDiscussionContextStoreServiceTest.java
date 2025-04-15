@@ -19,8 +19,6 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,15 +26,15 @@ import javax.inject.Provider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
-import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
+import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
@@ -44,58 +42,60 @@ import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.DISCUSSION_CONTEXTS_NAME;
-import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE_DATE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DISCUSSIONS_NAME;
 
 /**
- * Tests for {@link DefaultDiscussionStoreService}.
+ * Tests for {@link DefaultDiscussionContextStoreService}.
  *
  * @version $Id$
- * @since 2.0
+ * @since 2.5.3
  */
 @ComponentTest
-class DefaultDiscussionStoreServiceTest
+class DefaultDiscussionContextStoreServiceTest
 {
-    private static final String GET_QUERY = "FROM doc.object(DiscussionClass) obj where obj.reference = :reference";
-    private static final String DISCUSSION_CLASS = "DiscussionClass";
+    private static final String GET_QUERY =
+        "FROM doc.object(DiscussionContextClass) obj where obj.reference = :reference";
+    private static final String DISCUSSION_CONTEXT_CLASS = "DiscussionContextClass";
 
     @InjectMockComponents
-    private DefaultDiscussionStoreService storeService;
+    private DefaultDiscussionContextStoreService service;
 
     @MockComponent
     private Provider<XWikiContext> xcontextProvider;
 
     @MockComponent
-    private DiscussionMetadata discussionMetadata;
+    private ContextualLocalizationManager localizationManager;
+
+    @MockComponent
+    private PageHolderReferenceFactory pageHolderReferenceFactory;
+
+    @MockComponent
+    private DocumentRedirectionManager documentRedirectionManager;
+
+    @MockComponent
+    private DocumentAuthorsManager documentAuthorsManager;
+
+    @MockComponent
+    private DiscussionContextMetadata discussionContextMetadata;
 
     @MockComponent
     private QueryManager queryManager;
 
     @MockComponent
-    private DiscussionStoreConfigurationFactory discussionStoreConfigurationFactory;
-
-    @MockComponent
     private DiscussionReferencesSerializer discussionReferencesSerializer;
-
-    @MockComponent
-    private DiscussionReferencesResolver discussionReferencesResolver;
-
-    @MockComponent
-    private ContextualLocalizationManager localizationManager;
 
     private XWikiContext context;
     private XWiki wiki;
-    private EntityReference discussionXClass;
+    private DocumentReference discussionContextClass;
 
     @BeforeEach
     void setup()
@@ -104,103 +104,99 @@ class DefaultDiscussionStoreServiceTest
         when(this.xcontextProvider.get()).thenReturn(this.context);
         this.wiki = mock(XWiki.class);
         when(this.context.getWiki()).thenReturn(this.wiki);
-        when(this.discussionMetadata.getDiscussionXClassFullName()).thenReturn(DISCUSSION_CLASS);
-        this.discussionXClass = mock(EntityReference.class);
-        when(this.discussionMetadata.getDiscussionXClass()).thenReturn(discussionXClass);
+        when(this.discussionContextMetadata.getDiscussionContextXClassFullName()).thenReturn(DISCUSSION_CONTEXT_CLASS);
+        this.discussionContextClass = mock(DocumentReference.class);
+        when(this.discussionContextMetadata.getDiscussionContextXClass()).thenReturn(discussionContextClass);
         when(this.localizationManager.getTranslationPlain(any()))
             .then(invocationOnMock -> invocationOnMock.getArgument(0));
     }
 
     @Test
-    void get() throws Exception
+    void get() throws QueryException, XWikiException
     {
-        DiscussionReference discussionReference = mock(DiscussionReference.class);
-        String discussionPageRef = "Foo.Bar";
-        Query query = mock(Query.class);
-        when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query);
-        when(this.discussionReferencesSerializer.serialize(discussionReference)).thenReturn("d1");
-        when(query.bindValue("reference", "d1")).thenReturn(query);
-        when(query.execute()).thenReturn(Collections.singletonList(discussionPageRef));
-
-        XWikiDocument document = mock(XWikiDocument.class);
-        when(this.wiki.getDocument(discussionPageRef, EntityType.DOCUMENT, this.context)).thenReturn(document);
-
-        BaseObject expectedObject = mock(BaseObject.class);
-        when(document.getXObject(discussionXClass)).thenReturn(expectedObject);
-
-        assertEquals(Optional.of(expectedObject), this.storeService.get(discussionReference));
-        verify(query).bindValue("reference", "d1");
-    }
-
-    @Test
-    void link() throws Exception
-    {
-        DiscussionReference discussionReference =
-            new DiscussionReference("foo", "myDiscussionReference");
         DiscussionContextReference discussionContextReference =
             new DiscussionContextReference("foo", "myDiscussionContextReference");
-
-        String serializedDiscussionReference = "foo:myDiscussionReference";
         String serializedDiscussionContextReference = "foo:myDiscussionContextReference";
-        when(this.discussionReferencesSerializer.serialize(discussionReference))
-            .thenReturn(serializedDiscussionReference);
         when(this.discussionReferencesSerializer.serialize(discussionContextReference))
             .thenReturn(serializedDiscussionContextReference);
 
         Query query1 = mock(Query.class);
         when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query1);
-        when(query1.bindValue("reference", serializedDiscussionReference)).thenReturn(query1);
+        when(query1.bindValue("reference", serializedDiscussionContextReference)).thenReturn(query1);
         String docName = "objDoc1";
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionXClass)).thenReturn(baseObject);
-        when(baseObject.getListValue(DISCUSSION_CONTEXTS_NAME)).thenReturn(List.of("ref1", "ref2"));
-        when(baseObject.getOwnerDocument()).thenReturn(docObj);
-
-        assertTrue(this.storeService.link(discussionReference, discussionContextReference));
-        verify(query1).bindValue("reference", serializedDiscussionReference);
-        verify(baseObject).setDBStringListValue(DISCUSSION_CONTEXTS_NAME,
-            List.of("ref1", "ref2", serializedDiscussionContextReference));
-        verify(baseObject).setDateValue(eq(UPDATE_DATE_NAME), any(Date.class));
-        verify(this.wiki).saveDocument(docObj, "discussions.store.discussion.linkContext", true,this.context);
+        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        assertEquals(Optional.of(baseObject), this.service.get(discussionContextReference));
+        verify(query1).bindValue("reference", serializedDiscussionContextReference);
     }
 
     @Test
-    void unlink() throws Exception
+    void link() throws QueryException, XWikiException
     {
         DiscussionReference discussionReference =
             new DiscussionReference("foo", "myDiscussionReference");
         DiscussionContextReference discussionContextReference =
             new DiscussionContextReference("foo", "myDiscussionContextReference");
-
-        String serializedDiscussionReference = "foo:myDiscussionReference";
         String serializedDiscussionContextReference = "foo:myDiscussionContextReference";
-        when(this.discussionReferencesSerializer.serialize(discussionReference))
-            .thenReturn(serializedDiscussionReference);
         when(this.discussionReferencesSerializer.serialize(discussionContextReference))
             .thenReturn(serializedDiscussionContextReference);
+        String serializedDiscussionReference = "foo:myDiscussionReference";
+        when(this.discussionReferencesSerializer.serialize(discussionReference))
+            .thenReturn(serializedDiscussionReference);
 
         Query query1 = mock(Query.class);
         when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query1);
-        when(query1.bindValue("reference", serializedDiscussionReference)).thenReturn(query1);
+        when(query1.bindValue("reference", serializedDiscussionContextReference)).thenReturn(query1);
         String docName = "objDoc1";
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionXClass)).thenReturn(baseObject);
-        when(baseObject.getListValue(DISCUSSION_CONTEXTS_NAME)).thenReturn(List.of("ref1",
-            serializedDiscussionContextReference, "ref2"));
+        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        when(baseObject.getListValue(DISCUSSIONS_NAME)).thenReturn(List.of("ref1", "ref2"));
         when(baseObject.getOwnerDocument()).thenReturn(docObj);
 
-        assertTrue(this.storeService.unlink(discussionReference, discussionContextReference));
-        verify(query1).bindValue("reference", serializedDiscussionReference);
-        verify(baseObject).setDBStringListValue(DISCUSSION_CONTEXTS_NAME,
-            List.of("ref1", "ref2"));
-        verify(baseObject).setDateValue(eq(UPDATE_DATE_NAME), any(Date.class));
-        verify(this.wiki).saveDocument(docObj, "discussions.store.discussion.unlinkContext", true,this.context);
+        assertTrue(this.service.link(discussionContextReference, discussionReference));
+        verify(query1).bindValue("reference", serializedDiscussionContextReference);
+        verify(baseObject).setDBStringListValue(DISCUSSIONS_NAME,
+            List.of("ref1", "ref2", serializedDiscussionReference));
+        verify(this.wiki).saveDocument(docObj, "discussions.store.discussionContext.linkDiscussion", true,this.context);
     }
 
+    @Test
+    void unlink() throws QueryException, XWikiException
+    {
+        DiscussionReference discussionReference =
+            new DiscussionReference("foo", "myDiscussionReference");
+        DiscussionContextReference discussionContextReference =
+            new DiscussionContextReference("foo", "myDiscussionContextReference");
+        String serializedDiscussionContextReference = "foo:myDiscussionContextReference";
+        when(this.discussionReferencesSerializer.serialize(discussionContextReference))
+            .thenReturn(serializedDiscussionContextReference);
+        String serializedDiscussionReference = "foo:myDiscussionReference";
+        when(this.discussionReferencesSerializer.serialize(discussionReference))
+            .thenReturn(serializedDiscussionReference);
+
+        Query query1 = mock(Query.class);
+        when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query1);
+        when(query1.bindValue("reference", serializedDiscussionContextReference)).thenReturn(query1);
+        String docName = "objDoc1";
+        when(query1.execute()).thenReturn(List.of(docName));
+        XWikiDocument docObj = mock(XWikiDocument.class);
+        when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
+        BaseObject baseObject = mock(BaseObject.class);
+        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        when(baseObject.getListValue(DISCUSSIONS_NAME)).thenReturn(
+            List.of("ref1", serializedDiscussionReference, "ref2"));
+        when(baseObject.getOwnerDocument()).thenReturn(docObj);
+
+        assertTrue(this.service.unlink(discussionContextReference, discussionReference));
+        verify(query1).bindValue("reference", serializedDiscussionContextReference);
+        verify(baseObject).setDBStringListValue(DISCUSSIONS_NAME, List.of("ref1", "ref2"));
+        verify(this.wiki).saveDocument(docObj, "discussions.store.discussionContext.unlinkDiscussion", true,
+            this.context);
+    }
 }

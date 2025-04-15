@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.discussions.store.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -157,10 +158,11 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     {
         return get(discussionContextReference)
             .map(discussionContext -> {
-                List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
+                List listValue = new ArrayList(discussionContext.getListValue(DISCUSSIONS_NAME));
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
                 if (!listValue.contains(serializedReference)) {
                     listValue.add(serializedReference);
+                    discussionContext.setDBStringListValue(DISCUSSIONS_NAME, listValue);
                     save(discussionContext, true, "discussions.store.discussionContext.linkDiscussion");
                     return true;
                 }
@@ -174,10 +176,11 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     {
         return get(discussionContextReference)
             .map(discussionContext -> {
-                List listValue = discussionContext.getListValue(DISCUSSIONS_NAME);
+                List listValue = new ArrayList(discussionContext.getListValue(DISCUSSIONS_NAME));
                 String serializedReference = this.discussionReferencesSerializer.serialize(discussionReference);
                 if (listValue.contains(serializedReference)) {
                     listValue.remove(serializedReference);
+                    discussionContext.setDBStringListValue(DISCUSSIONS_NAME, listValue);
                     save(discussionContext, true, "discussions.store.discussionContext.unlinkDiscussion");
                     return true;
                 }
