@@ -55,17 +55,18 @@ discussions.home.discussionsTable.column.creationDate=Creation Date
 discussions.home.discussionsTable.column.updateDate=Update Date
 discussions.home.discussionsTable.column.discussionContexts=Discussion Contexts
 discussions.home.discussionsTable.column.reference=Reference
-discussions.home.discussionsTable.column.emptyvalue=
+discussions.home.discussionsTable.column.emptyvalue=Display placeholder text for table columns
 discussions.home.discussionContextsTable.column.name=Name
 discussions.home.discussionContextsTable.column.entityReferenceType=Entity Reference Type
 discussions.home.discussionContextsTable.column.entityReference=Entity Reference
 discussions.home.discussionContextsTable.column.creationDate=Creation Date
 discussions.home.discussionContextsTable.column.discussions=Discussions
 discussions.home.discussionContextsTable.column.reference=Reference
-discussions.home.discussionContextsTable.column.emptyvalue=
+discussions.home.discussionContextsTable.column.emptyvalue=Display placeholder text for a column in the context table.
 discussions.indexes.title=Discussions Indexes
 discussions.discussion.usersList.title=Users List
-discussions.discussion.usersList.public=This discussion is public.</content>
+discussions.discussion.usersList.public=This discussion is public.
+</content>
   <object>
     <name>Discussions.DiscussionsTranslations</name>
     <number>0</number>
