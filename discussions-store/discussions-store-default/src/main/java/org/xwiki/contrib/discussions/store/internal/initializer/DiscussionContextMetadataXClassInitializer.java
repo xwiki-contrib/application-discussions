@@ -23,12 +23,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.PropertyInterface;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.TextAreaClass;
 
 /**
  * Initializer of the xclass used to store discussion context metadata.
@@ -59,8 +62,20 @@ public class DiscussionContextMetadataXClassInitializer extends AbstractDiscussi
             BaseClass xClass = document.getXClass();
             xClass.addTextField(DiscussionContextMetadata.METADATA_KEY, DiscussionContextMetadata.METADATA_KEY, 100);
             xClass.addTextAreaField(DiscussionContextMetadata.METADATA_VALUE, DiscussionContextMetadata.METADATA_VALUE,
-                25, 50);
+                25, 50, TextAreaClass.ContentType.PURE_TEXT);
             needsUpdate = true;
+        } else {
+            // Ensure that the content type is properly set
+            // FIXME: we should change all that to use an AbstractMandatoryClassInitializer
+            PropertyInterface metadataField = document.getXClass().get(DiscussionContextMetadata.METADATA_VALUE);
+            if (metadataField != null) {
+                TextAreaClass metadataFieldClass = (TextAreaClass) metadataField;
+                if (!StringUtils.equalsIgnoreCase(metadataFieldClass.getContentType(),
+                    TextAreaClass.ContentType.PURE_TEXT.toString())) {
+                    metadataFieldClass.setContentType(TextAreaClass.ContentType.PURE_TEXT);
+                }
+                needsUpdate = true;
+            }
         }
         if (initAuthorReference(document)) {
             needsUpdate = true;
@@ -69,6 +84,7 @@ public class DiscussionContextMetadataXClassInitializer extends AbstractDiscussi
         if (initCreatorReference(document)) {
             needsUpdate = true;
         }
+
         return needsUpdate;
     }
 }
