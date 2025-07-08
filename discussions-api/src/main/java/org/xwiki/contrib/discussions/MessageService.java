@@ -51,8 +51,8 @@ public interface MessageService
      * @param configurationParameters parameters used for data storage configuration
      * @return the created message
      */
-    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
-        DiscussionStoreConfigurationParameters configurationParameters);
+    Message create(String content, Syntax syntax, DiscussionReference discussionReference,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Creates a message for a specific user.
@@ -64,8 +64,9 @@ public interface MessageService
      * @param configurationParameters parameters used for data storage configuration
      * @return the create message
      */
-    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
-        ActorReference authorReference, DiscussionStoreConfigurationParameters configurationParameters);
+    Message create(String content, Syntax syntax, DiscussionReference discussionReference,
+        ActorReference authorReference, DiscussionStoreConfigurationParameters configurationParameters)
+        throws DiscussionException;
 
     /**
      * Creates a message for a specific user.
@@ -79,8 +80,9 @@ public interface MessageService
      * @param configurationParameters parameters used for data storage configuration
      * @return the create message
      */
-    Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
-        ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters);
+    Message create(String content, Syntax syntax, DiscussionReference discussionReference,
+        ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters)
+        throws DiscussionException;
 
     /**
      * Creates a message in reply to an existing message.
@@ -94,10 +96,11 @@ public interface MessageService
      * @param configurationParameters parameters used for data storage configuration
      * @return the create message
      */
-    default Optional<Message> createReplyTo(String content, Syntax syntax, Message originalMessage,
+    default Message createReplyTo(String content, Syntax syntax, Message originalMessage,
         ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters)
+        throws DiscussionException
     {
-        return Optional.empty();
+        return null;
     }
 
     /**

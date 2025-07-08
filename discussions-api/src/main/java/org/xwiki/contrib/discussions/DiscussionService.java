@@ -49,8 +49,8 @@ public interface DiscussionService
      * @param configurationParameters parameters used for data storage configuration
      * @return the created discussion
      */
-    Optional<Discussion> create(String applicationHint, String title, String description, String mainDocument,
-        DiscussionStoreConfigurationParameters configurationParameters);
+    Discussion create(String applicationHint, String title, String description, String mainDocument,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Search for a discussion linked to the provided list of discussion contexts. If it exists, it is directly
@@ -64,9 +64,9 @@ public interface DiscussionService
      * @param configurationParameters parameters used for data storage configuration
      * @return the created or found discussion
      */
-    Optional<Discussion> getOrCreate(String applicationHint, String title, String description,
+    Discussion getOrCreate(String applicationHint, String title, String description,
         List<DiscussionContextReference> discussionContexts,
-        DiscussionStoreConfigurationParameters configurationParameters);
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Search and retrieve a discussion by its reference.

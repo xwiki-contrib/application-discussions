@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
@@ -83,19 +84,16 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     private DiscussionContextMetadataStoreService discussionContextMetadataStoreService;
 
     @Override
-    public Optional<DiscussionContext> create(String applicationHint, String name, String description,
+    public DiscussionContext create(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
-        return this.discussionContextStoreService.create(applicationHint, name, description, entityReference,
-                configurationParameters)
-            .map(reference -> {
-                DiscussionContext discussionContext =
-                    new DiscussionContext(reference, name, description, entityReference);
-                this.observationManager.notify(
-                    new DiscussionContextEvent(CREATE), applicationHint, discussionContext);
-                return discussionContext;
-            });
+        DiscussionContextReference reference =
+            this.discussionContextStoreService.create(applicationHint, name, description, entityReference,
+                configurationParameters);
+        DiscussionContext discussionContext = new DiscussionContext(reference, name, description, entityReference);
+        this.observationManager.notify(new DiscussionContextEvent(CREATE), applicationHint, discussionContext);
+        return discussionContext;
     }
 
     @Override
@@ -104,8 +102,6 @@ public class DefaultDiscussionContextService implements DiscussionContextService
         return this.discussionContextStoreService.findByDiscussionReference(reference)
             .stream()
             .map(this::mapBaseObject)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
             .peek(discussionContext -> this.discussionContextMetadataStoreService.loadMetadata(discussionContext))
             .collect(Collectors.toList());
     }
@@ -131,17 +127,16 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
-    public Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
+    public DiscussionContext getOrCreate(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         Optional<BaseObject> baseObject =
             this.discussionContextStoreService.findByReference(entityReference);
         if (baseObject.isPresent()) {
-            Optional<DiscussionContext> discussionContext = baseObject.flatMap(this::mapBaseObject);
-            discussionContext.ifPresent(
-                context -> this.discussionContextMetadataStoreService.loadMetadata(baseObject.get().getOwnerDocument(),
-                    context));
+            DiscussionContext discussionContext = this.mapBaseObject(baseObject.get());
+            this.discussionContextMetadataStoreService
+                .loadMetadata(baseObject.get().getOwnerDocument(), discussionContext);
             return discussionContext;
         } else {
             return this.create(applicationHint, name, description, entityReference, configurationParameters);
@@ -181,21 +176,18 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     public Optional<DiscussionContext> get(DiscussionContextReference reference)
     {
         return this.discussionContextStoreService.get(reference).flatMap(baseObject -> {
-            Optional<DiscussionContext> discussionContext = mapBaseObject(baseObject);
-            discussionContext.ifPresent(
-                context -> this.discussionContextMetadataStoreService.loadMetadata(baseObject.getOwnerDocument(),
-                    context));
-            return discussionContext;
+            DiscussionContext discussionContext = mapBaseObject(baseObject);
+            this.discussionContextMetadataStoreService.loadMetadata(baseObject.getOwnerDocument(), discussionContext);
+            return Optional.of(discussionContext);
         });
     }
 
-    private Optional<DiscussionContext> mapBaseObject(BaseObject baseObject)
+    private DiscussionContext mapBaseObject(BaseObject baseObject)
     {
         DiscussionContextReference discussionContextReference =
             this.discussionReferencesResolver.resolve(baseObject.getStringValue(REFERENCE_NAME),
                 DiscussionContextReference.class);
-        return Optional
-            .of(new DiscussionContext(
+        return new DiscussionContext(
                 discussionContextReference,
                 baseObject.getStringValue(NAME_NAME),
                 baseObject.getStringValue(DESCRIPTION_NAME),
@@ -203,6 +195,6 @@ public class DefaultDiscussionContextService implements DiscussionContextService
                     baseObject.getStringValue(ENTITY_REFERENCE_TYPE_NAME),
                     baseObject.getStringValue(ENTITY_REFERENCE_NAME)
                 )
-            ));
+            );
     }
 }

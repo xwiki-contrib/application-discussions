@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
@@ -55,9 +56,9 @@ public interface MessageStoreService
      * @param configurationParameters parameters used for data storage configuration
      * @return the unique reference of the created message
      */
-    Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
+    BaseObject create(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, String title,
-        DiscussionStoreConfigurationParameters configurationParameters);
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Creates a message object in response to a message.
@@ -70,10 +71,11 @@ public interface MessageStoreService
      * @param configurationParameters parameters used for data storage configuration
      * @return the unique reference of the created message
      */
-    default Optional<MessageReference> createReplyTo(String content, Syntax syntax, ActorReference authorReference,
+    default BaseObject createReplyTo(String content, Syntax syntax, ActorReference authorReference,
         Message originalMessage, String title, DiscussionStoreConfigurationParameters configurationParameters)
+        throws DiscussionException
     {
-        return Optional.empty();
+        return null;
     }
 
     /**

@@ -108,5 +108,5 @@ public interface DiscussionMessageRequestCreator
      *         When not empty, it contains the actual created message.
      * @throws DiscussionServerException if the request cannot be properly proceed to create the message.
      */
-    Optional<Message> createMessage(HttpServletRequest request) throws DiscussionServerException;
+    Message createMessage(HttpServletRequest request) throws DiscussionServerException;
 }

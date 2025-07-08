@@ -22,6 +22,7 @@ package org.xwiki.contrib.discussions.internal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
@@ -72,38 +73,22 @@ class DefaultDiscussionContextServiceTest
     private DiscussionContextMetadataStoreService discussionContextMetadataStoreService;
 
     @Test
-    void createCreateFail()
+    void create() throws DiscussionException
     {
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(true);
         when(this.discussionContextStoreService.create("hint", "name", "description",
             new DiscussionContextEntityReference("referenceType", "entityReference"), parameters))
-            .thenReturn(Optional.empty());
+            .thenReturn(new DiscussionContextReference("hint", "reference"));
 
-        Optional<DiscussionContext> discussionContext =
-            this.defaultDiscussionContextService.create("hint", "name", "description",
-                new DiscussionContextEntityReference("referenceType", "entityReference"), parameters);
-
-        assertEquals(Optional.empty(), discussionContext);
-    }
-
-    @Test
-    void create()
-    {
-        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-        when(this.discussionsRightService.canCreateDiscussionContext()).thenReturn(true);
-        when(this.discussionContextStoreService.create("hint", "name", "description",
-            new DiscussionContextEntityReference("referenceType", "entityReference"), parameters))
-            .thenReturn(Optional.of(new DiscussionContextReference("hint", "reference")));
-
-        Optional<DiscussionContext> discussionContext =
+        DiscussionContext discussionContext =
             this.defaultDiscussionContextService.create("hint", "name", "description",
                 new DiscussionContextEntityReference("referenceType", "entityReference"), parameters);
 
         assertEquals(
-            Optional.of(new DiscussionContext(new DiscussionContextReference("hint", "reference")
+            new DiscussionContext(new DiscussionContextReference("hint", "reference")
                 , "name", "description",
-                new DiscussionContextEntityReference("referenceType", "entityReference"))),
+                new DiscussionContextEntityReference("referenceType", "entityReference")),
             discussionContext);
     }
 

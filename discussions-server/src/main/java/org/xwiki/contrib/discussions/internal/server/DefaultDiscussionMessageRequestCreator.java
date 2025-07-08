@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
@@ -82,7 +83,7 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
     private RequestParameterConverter requestParameterConverter;
 
     @Override
-    public Optional<Message> createMessage(HttpServletRequest request) throws DiscussionServerException
+    public Message createMessage(HttpServletRequest request) throws DiscussionServerException
     {
         String serializedReference = request.getParameter(DISCUSSION_REFERENCE_PARAM);
         if (StringUtils.isBlank(serializedReference)) {
@@ -95,11 +96,16 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         Discussion discussion =
             discussionOptional.orElseThrow(() -> new DiscussionServerException(HttpServletResponse.SC_NOT_FOUND,
                 String.format("Cannot find discussion with reference [%s]", serializedReference)));
-        return this.createMessage(discussion, request);
+        try {
+            return this.createMessage(discussion, request);
+        } catch (DiscussionException e) {
+            throw new DiscussionServerException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating "
+                + "the message", e);
+        }
     }
 
-    private Optional<Message> createMessage(Discussion discussion, HttpServletRequest request)
-        throws DiscussionServerException
+    private Message createMessage(Discussion discussion, HttpServletRequest request)
+        throws DiscussionServerException, DiscussionException
     {
         String content = getContent(request);
         Syntax syntax = getSyntax(request);
@@ -131,15 +137,15 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
             }
         }
 
-        Optional<Message> messageOptional;
+        Message message;
         if (replyToMessage == null) {
-            messageOptional = this.messageService
+            message = this.messageService
                 .create(content, syntax, discussion.getReference(), actorReference, true, parameters);
         } else {
-            messageOptional = this.messageService
+            message = this.messageService
                 .createReplyTo(content, syntax, replyToMessage, actorReference, true, parameters);
         }
-        return messageOptional;
+        return message;
     }
 
     private String getContent(HttpServletRequest request) throws DiscussionServerException
