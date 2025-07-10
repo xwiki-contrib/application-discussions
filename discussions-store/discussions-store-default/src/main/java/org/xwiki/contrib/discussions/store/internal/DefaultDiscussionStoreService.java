@@ -31,6 +31,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
@@ -102,10 +103,11 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     private DocumentAuthorsManager documentAuthorsManager;
 
     @Override
-    public Optional<DiscussionReference> create(String applicationHint, String title, String description,
-        String mainDocument, DiscussionStoreConfigurationParameters configurationParameters)
+    public BaseObject create(String applicationHint, String title, String description,
+        String mainDocument, DiscussionStoreConfigurationParameters configurationParameters) throws
+        DiscussionException
     {
-        Optional<DiscussionReference> result = Optional.empty();
+        BaseObject result;
         try {
             XWikiDocument document = generateUniquePage(applicationHint, title, configurationParameters);
             XWikiContext context = this.getContext();
@@ -124,11 +126,10 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             documentAuthorsManager.setDocumentAuthors(document.getAuthors(), null, configurationParameters);
             this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
-            result = Optional.of(reference);
+            result = object;
         } catch (XWikiException e) {
-            this.logger.warn("Failed to create a Discussion with title=[{}], description=[{}]. Cause: [{}]", title,
-                description,
-                getRootCauseMessage(e));
+            throw new DiscussionException(String.format("Failed to create a Discussion with title=[%s], "
+                + "description=[%s].", title, description), e);
         }
 
         return result;

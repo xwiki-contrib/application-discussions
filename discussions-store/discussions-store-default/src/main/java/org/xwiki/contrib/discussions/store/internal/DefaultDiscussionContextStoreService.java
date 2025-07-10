@@ -33,6 +33,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
@@ -90,11 +91,11 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     private DocumentAuthorsManager documentAuthorsManager;
 
     @Override
-    public Optional<DiscussionContextReference> create(String applicationHint, String name, String description,
+    public DiscussionContextReference create(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
-        Optional<DiscussionContextReference> result = Optional.empty();
+        DiscussionContextReference result;
         try {
             XWikiDocument document =
                 generateUniquePage(applicationHint, name, entityReference, configurationParameters);
@@ -119,11 +120,10 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
             this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
 
-            result = Optional.of(reference);
+            result = reference;
         } catch (XWikiException e) {
-            this.logger.warn(
-                "Failed to create a Discussion Context with name=[{}], description=[{}],  entityReference=[{}]. "
-                    + "Cause: [{}].", name, description, entityReference, getRootCauseMessage(e));
+            throw new DiscussionException(String.format("Failed to create a Discussion Context with name=[%s], "
+                + "description=[%s],  entityReference=[%s].", name, description, entityReference), e);
         }
 
         return result;

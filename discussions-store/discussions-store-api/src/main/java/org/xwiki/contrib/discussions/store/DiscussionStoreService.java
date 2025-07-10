@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
@@ -50,8 +51,8 @@ public interface DiscussionStoreService
      * @param configurationParameters parameters used for data storage configuration
      * @return the unique reference to the created discussion
      */
-    Optional<DiscussionReference> create(String applicationHint, String title, String description, String mainDocument,
-        DiscussionStoreConfigurationParameters configurationParameters);
+    BaseObject create(String applicationHint, String title, String description, String mainDocument,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Resolve a discussion by its reference.

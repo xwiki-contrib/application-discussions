@@ -31,6 +31,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
@@ -102,8 +103,8 @@ public class DefaultMessageService implements MessageService
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
-    public Optional<Message> create(String content, Syntax syntax, DiscussionReference discussionReference,
-        DiscussionStoreConfigurationParameters configurationParameters)
+    public Message create(String content, Syntax syntax, DiscussionReference discussionReference,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         DocumentReference author = this.xcontextProvider.get().getUserReference();
         String authorReference = this.entityReferenceSerializer.serialize(author);
@@ -112,51 +113,69 @@ public class DefaultMessageService implements MessageService
     }
 
     @Override
-    public Optional<Message> create(String content, Syntax syntax,
+    public Message create(String content, Syntax syntax,
         DiscussionReference discussionReference, ActorReference authorReference,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         return create(content, syntax, discussionReference, authorReference, true, configurationParameters);
     }
 
-    @Override
-    public Optional<Message> create(String content, Syntax syntax,
-        DiscussionReference discussionReference, ActorReference authorReference, boolean notify,
-        DiscussionStoreConfigurationParameters configurationParameters)
+    private void checkWriteAuthorization(DiscussionReference discussionReference) throws DiscussionException
     {
-        String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
-        return this.messageStoreService
-            .create(content, syntax, authorReference, discussionReference, title, configurationParameters)
-            .flatMap(reference -> {
-                this.discussionService.touch(discussionReference);
-                Optional<Message> messageOpt = getByReference(reference);
-                if (notify) {
-                    messageOpt
-                        .ifPresent(m -> this.observationManager
-                            .notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), m));
-                }
-                return messageOpt;
-            });
+        if (!this.discussionService.canWrite(discussionReference)) {
+            throw new DiscussionException(String.format("You don't have right to create a message in discussion [%s].",
+                discussionReference));
+        }
     }
 
     @Override
-    public Optional<Message> createReplyTo(String content, Syntax syntax, Message originalMessage,
-        ActorReference authorReference, boolean notify, DiscussionStoreConfigurationParameters configurationParameters)
+    public Message create(String content, Syntax syntax,
+        DiscussionReference discussionReference, ActorReference authorReference, boolean notify,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
+    {
+        checkWriteAuthorization(discussionReference);
+        String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
+        BaseObject baseObject =
+            this.messageStoreService.create(content, syntax, authorReference, discussionReference, title,
+                configurationParameters);
+        this.discussionService.touch(discussionReference);
+        Message result = createMessage(baseObject, discussionReference);
+        if (notify) {
+            this.observationManager.notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), result);
+        }
+        return result;
+    }
+
+    @Override
+    public Message createReplyTo(String content, Syntax syntax, Message originalMessage,
+        ActorReference authorReference, boolean notify,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         DiscussionReference discussionReference = originalMessage.getDiscussion().getReference();
+        checkWriteAuthorization(discussionReference);
         String title = this.discussionService.get(discussionReference).map(Discussion::getTitle).orElse("");
-        return this.messageStoreService
-            .createReplyTo(content, syntax, authorReference, originalMessage, title, configurationParameters)
-            .flatMap(reference -> {
-                this.discussionService.touch(discussionReference);
-                Optional<Message> messageOpt = getByReference(reference);
-                if (notify) {
-                    messageOpt
-                        .ifPresent(m -> this.observationManager
-                            .notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), m));
-                }
-                return messageOpt;
-            });
+        BaseObject baseObject =
+            this.messageStoreService.createReplyTo(content, syntax, authorReference, originalMessage, title,
+                configurationParameters);
+        this.discussionService.touch(discussionReference);
+        Message result = createMessage(baseObject, discussionReference);
+        if (notify) {
+            this.observationManager.notify(new MessageEvent(CREATE), discussionReference.getApplicationHint(), result);
+        }
+        return result;
+    }
+
+    private Message createMessage(BaseObject baseObject, DiscussionReference discussionReference)
+        throws DiscussionException
+    {
+        Optional<Message> message = this.discussionService.get(discussionReference)
+            .map(discussion -> convertToMessage(discussion).apply(baseObject));
+        if (message.isPresent()) {
+            return message.get();
+        } else {
+            throw new DiscussionException(String.format("Cannot find discussion with reference [%s]",
+                discussionReference));
+        }
     }
 
     @Override

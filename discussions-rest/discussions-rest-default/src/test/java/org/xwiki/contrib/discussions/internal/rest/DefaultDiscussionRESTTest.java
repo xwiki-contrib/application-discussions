@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
@@ -201,14 +202,13 @@ class DefaultDiscussionRESTTest
             .setStoreConfigurationParameters(parameters);
         Discussion discussion = new Discussion();
         when(this.discussionService.create("hint", "title", "description", "XWiki.Doc",
-            new DiscussionStoreConfigurationParameters(parameters))).thenReturn(Optional.of(
-            discussion));
+            new DiscussionStoreConfigurationParameters(parameters))).thenReturn(discussion);
         Discussion actual = this.target.create(createDiscussion);
         assertSame(discussion, actual);
     }
 
     @Test
-    void createException()
+    void createException() throws DiscussionException
     {
         Map<String, Object> parameters = Collections.singletonMap("foo", "nar");
         CreateDiscussion createDiscussion = new CreateDiscussion()
@@ -218,7 +218,7 @@ class DefaultDiscussionRESTTest
             .setApplicationHint("hint")
             .setStoreConfigurationParameters(parameters);
         when(this.discussionService.create("hint", "title", "description", "XWiki.Doc",
-            new DiscussionStoreConfigurationParameters(parameters))).thenReturn(Optional.empty());
+            new DiscussionStoreConfigurationParameters(parameters))).thenThrow(new DiscussionException("Error"));
         XWikiRestException throwable =
             assertThrows(XWikiRestException.class, () -> this.target.create(createDiscussion));
         assertEquals("Fail to create a discussion with title=[title], description=[description]",

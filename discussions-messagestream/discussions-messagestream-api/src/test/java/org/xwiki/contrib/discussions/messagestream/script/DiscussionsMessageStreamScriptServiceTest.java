@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
@@ -76,7 +77,7 @@ class DiscussionsMessageStreamScriptServiceTest
     private ContextualLocalizationManager localizationManager;
 
     @Test
-    void initializeContextPublic()
+    void initializeContextPublic() throws DiscussionException
     {
         DiscussionContext dc1 = new DiscussionContext(
             new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
@@ -107,15 +108,15 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
             "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc1));
+            .thenReturn(dc1);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
             "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc2));
+            .thenReturn(dc2);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Public context title",
             "Public context description", new DiscussionContextEntityReference("messagestream-user", "*"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc3));
+            .thenReturn(dc3);
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextPublic("Author");
         assertEquals(3, discussionContexts.size());
@@ -125,7 +126,7 @@ class DiscussionsMessageStreamScriptServiceTest
     }
 
     @Test
-    void initializeContextFollowers()
+    void initializeContextFollowers() throws DiscussionException
     {
         DocumentReference authorDR = new DocumentReference("xwiki", "XWiki", "Author");
         DiscussionContext dc1 = new DiscussionContext(
@@ -157,11 +158,11 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
             "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc1));
+            .thenReturn(dc1);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
             "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc2));
+            .thenReturn(dc2);
         when(this.resolver.resolve("Author")).thenReturn(authorDR);
         when(this.serializer.serialize(authorDR)).thenReturn("xwiki:XWiki.Author");
         when(this.discussionsFollowersService.getFollowers("xwiki:XWiki.Author")).thenReturn(Arrays.asList(
@@ -171,7 +172,7 @@ class DiscussionsMessageStreamScriptServiceTest
             "Followers context description",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.Follower"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc3));
+            .thenReturn(dc3);
 
         List<DiscussionContext> discussionContexts = this.target.initializeContextFollowers("Author");
         assertEquals(3, discussionContexts.size());
@@ -181,7 +182,7 @@ class DiscussionsMessageStreamScriptServiceTest
     }
 
     @Test
-    void initializeContextUsers()
+    void initializeContextUsers() throws DiscussionException
     {
         DiscussionContext dc1 = new DiscussionContext(
             new DiscussionContextReference(DISCUSSION_MESSAGESTREAM_HINT, "dc1"), "", "",
@@ -220,21 +221,21 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
             "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc1));
+            .thenReturn(dc1);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
             "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc2));
+            .thenReturn(dc2);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
             "User context description 1",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user1"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc3));
+            .thenReturn(dc3);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
             "User context description 2",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.user2"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc4));
+            .thenReturn(dc4);
 
         when(this.resolver.resolve("user1")).thenReturn(user1Reference);
         when(this.resolver.resolve("user2")).thenReturn(user2Reference);
@@ -293,11 +294,11 @@ class DiscussionsMessageStreamScriptServiceTest
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Emitter context title",
             "Emitter context description", new DiscussionContextEntityReference("messagestream-emitter", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc1));
+            .thenReturn(dc1);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "Personal context title",
             "Personal context description", new DiscussionContextEntityReference("messagestream-user", "Author"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc2));
+            .thenReturn(dc2);
         when(this.resolver.resolve("G1")).thenReturn(g1DR);
         when(this.resolver.resolve("G2")).thenReturn(g2DR);
         when(this.groupManager.getMembers(g1DR, true)).thenReturn(asList(u1DR));
@@ -308,12 +309,12 @@ class DiscussionsMessageStreamScriptServiceTest
             "User context description 1",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U1"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc3));
+            .thenReturn(dc3);
         when(this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, "User context title",
             "User context description 2",
             new DiscussionContextEntityReference("messagestream-user", "xwiki:XWiki.U2"),
             new DiscussionStoreConfigurationParameters()))
-            .thenReturn(Optional.of(dc4));
+            .thenReturn(dc4);
 
         List<DiscussionContext> discussionContexts =
             this.target.initializeContextGroups("Author", asList("G1", "", "G2"));

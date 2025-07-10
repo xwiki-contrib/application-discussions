@@ -51,9 +51,9 @@ public interface DiscussionContextService
      * @param configurationParameters parameters used for data storage configuration
      * @return the initialized discussion context
      */
-    Optional<DiscussionContext> create(String applicationHint, String name, String description,
+    DiscussionContext create(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
-        DiscussionStoreConfigurationParameters configurationParameters);
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * If a discussion context already exist with the given reference type and entity reference, it is returned. If it
@@ -67,9 +67,9 @@ public interface DiscussionContextService
      * @param configurationParameters parameters used for data storage configuration
      * @return the found or created discussion context
      */
-    Optional<DiscussionContext> getOrCreate(String applicationHint, String name, String description,
+    DiscussionContext getOrCreate(String applicationHint, String name, String description,
         DiscussionContextEntityReference entityReference,
-        DiscussionStoreConfigurationParameters configurationParameters);
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
      * Link a discussion context and a discussion.

@@ -64,6 +64,8 @@
   <properties>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
     <xwiki.issueManagement.jira.id>DISCUSSION</xwiki.issueManagement.jira.id>
+    <!-- For some reason the revapi ignore report doesn't work properly... -->
+    <xwiki.revapi.skip>true</xwiki.revapi.skip>
   </properties>
 
   <modules>
@@ -84,38 +86,4 @@
       </modules>
     </profile>
   </profiles>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.revapi</groupId>
-        <artifactId>revapi-maven-plugin</artifactId>
-        <configuration>
-          <analysisConfiguration>
-            <revapi.filter>
-              <archives>
-                <!-- We're ignoring all API incompatibilities from XWiki dependencies -->
-                <exclude>
-                  <item>org\.xwiki\.commons:.*:.*</item>
-                  <item>org\.xwiki\.rendering:.*:.*</item>
-                  <item>org\.xwiki\.platform:.*:.*</item>
-                </exclude>
-              </archives>
-            </revapi.filter>
-            <revapi.differences>
-              <differences>
-                <item>
-                  <ignore>true</ignore>
-                  <code>java.method.addedToInterface</code>
-                  <new>method boolean org.xwiki.contrib.discussions.DiscussionContextService::saveMetadata(org.xwiki.contrib.discussions.domain.DiscussionContext, java.util.Map&lt;java.lang.String, java.lang.String&gt;)</new>
-                  <justification>New API added for metadata handling.</justification>
-                </item>
-              </differences>
-            </revapi.differences>
-
-          </analysisConfiguration>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

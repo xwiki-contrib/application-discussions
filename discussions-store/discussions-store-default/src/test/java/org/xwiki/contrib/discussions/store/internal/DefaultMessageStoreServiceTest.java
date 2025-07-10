@@ -57,6 +57,7 @@ import com.xpn.xwiki.objects.BaseObject;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -148,9 +149,8 @@ class DefaultMessageStoreServiceTest
         when(this.discussionReferencesSerializer.serialize(discussionReference))
             .thenReturn("discussionReference;hint=hint");
 
-        Optional<MessageReference> reference = this.defaultMessageStoreService.create("content", XWIKI_2_1,
-            new ActorReference("authorType", "authorReference"), discussionReference, "TODO", parameters);
-        assertEquals(Optional.of(messageReference), reference);
+        assertSame(messageBaseObject,this.defaultMessageStoreService.create("content", XWIKI_2_1,
+            new ActorReference("authorType", "authorReference"), discussionReference, "TODO", parameters));
         assertEquals(0, this.logCapture.size());
         verify(messageBaseObject).set(REFERENCE_NAME, "randomString;hint=hint", this.xWikiContext);
         verify(messageBaseObject).set(AUTHOR_TYPE_NAME, "authorType", this.xWikiContext);

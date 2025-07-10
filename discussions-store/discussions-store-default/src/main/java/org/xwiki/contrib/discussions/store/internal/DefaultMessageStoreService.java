@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
@@ -107,28 +108,29 @@ public class DefaultMessageStoreService implements MessageStoreService
     private DocumentAuthorsManager documentAuthorsManager;
 
     @Override
-    public Optional<MessageReference> create(String content, Syntax syntax, ActorReference authorReference,
+    public BaseObject create(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, String title,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         return this.createMessage(content, syntax, authorReference, discussionReference, null, title,
             configurationParameters);
     }
 
     @Override
-    public Optional<MessageReference> createReplyTo(String content, Syntax syntax, ActorReference authorReference,
+    public BaseObject createReplyTo(String content, Syntax syntax, ActorReference authorReference,
         Message originalMessage, String title, DiscussionStoreConfigurationParameters configurationParameters)
+        throws DiscussionException
     {
         return this.createMessage(content, syntax, authorReference, originalMessage.getDiscussion().getReference(),
             originalMessage.getReference(), title, configurationParameters);
     }
 
-    private Optional<MessageReference> createMessage(String content, Syntax syntax, ActorReference authorReference,
+    private BaseObject createMessage(String content, Syntax syntax, ActorReference authorReference,
         DiscussionReference discussionReference, MessageReference originalMessage, String title,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         XWikiContext context = this.xcontextProvider.get();
-        Optional<MessageReference> result = Optional.empty();
+        BaseObject result;
         try {
             String applicationHint = discussionReference.getApplicationHint();
             XWikiDocument document = generateUniquePage(discussionReference, authorReference, configurationParameters);
@@ -147,12 +149,12 @@ public class DefaultMessageStoreService implements MessageStoreService
             this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
 
-            result = Optional.of(messageReference);
+            result = messageBaseObject;
         } catch (XWikiException e) {
-            this.logger.warn(
-                "Failed to create a Message with content=[{}], authorType=[{}], authorReference=[{}], "
-                    + "discussionReference=[{}]. Cause: [{}].",
-                content, authorReference, authorReference, discussionReference, getRootCauseMessage(e));
+            throw new DiscussionException(String.format("Failed to create a Message with content=[%s], "
+                    + "authorType=[%s], authorReference=[%s], "
+                    + "discussionReference=[%s].",
+                content, authorReference, authorReference, discussionReference), e);
         }
         return result;
     }

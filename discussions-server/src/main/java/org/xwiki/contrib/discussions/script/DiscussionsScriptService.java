@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
 import org.xwiki.contrib.discussions.DiscussionService;
@@ -118,11 +119,12 @@ public class DiscussionsScriptService implements ScriptService
      */
     public DiscussionContext createDiscussionContext(String applicationHint, String name, String description,
         String referenceType, String entityReference, Map<String, Object> storeConfigurationParameters)
+        throws DiscussionException
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
             return this.discussionContextService.create(applicationHint, name, description,
                 new DiscussionContextEntityReference(referenceType, entityReference),
-                new DiscussionStoreConfigurationParameters(storeConfigurationParameters)).orElse(null);
+                new DiscussionStoreConfigurationParameters(storeConfigurationParameters));
         } else {
             return null;
         }
@@ -141,12 +143,12 @@ public class DiscussionsScriptService implements ScriptService
      */
     public DiscussionContext getOrCreateDiscussionContext(String applicationHint, String name, String description,
         String referenceType, String entityReference, Map<String, Object> storeConfigurationParameters)
+        throws DiscussionException
     {
         if (this.discussionContextService.canCreateDiscussionContext()) {
             return this.discussionContextService.getOrCreate(applicationHint, name, description,
                     new DiscussionContextEntityReference(referenceType, entityReference),
-                    new DiscussionStoreConfigurationParameters(storeConfigurationParameters))
-                .orElse(null);
+                    new DiscussionStoreConfigurationParameters(storeConfigurationParameters));
         } else {
             return null;
         }
@@ -163,10 +165,10 @@ public class DiscussionsScriptService implements ScriptService
      * @return the created discussion
      */
     public Discussion createDiscussion(String applicationHint, String title, String description, String mainDocument,
-        Map<String, Object> storeConfigurationParameters)
+        Map<String, Object> storeConfigurationParameters) throws DiscussionException
     {
         return this.discussionService.create(applicationHint, title, description, mainDocument,
-            new DiscussionStoreConfigurationParameters(storeConfigurationParameters)).orElse(null);
+            new DiscussionStoreConfigurationParameters(storeConfigurationParameters));
     }
 
     /**
@@ -213,15 +215,14 @@ public class DiscussionsScriptService implements ScriptService
      * @return the created message
      */
     public Message createMessage(String content, String syntax, String reference,
-        Map<String, Object> storeConfigurationParameters)
+        Map<String, Object> storeConfigurationParameters) throws DiscussionException
     {
         DiscussionReference discussionReference =
             this.discussionReferencesResolver.resolve(reference, DiscussionReference.class);
         if (this.discussionService.canWrite(discussionReference)) {
             try {
                 return this.messageService.create(content, Syntax.valueOf(syntax), discussionReference,
-                        new DiscussionStoreConfigurationParameters(storeConfigurationParameters))
-                    .orElse(null);
+                        new DiscussionStoreConfigurationParameters(storeConfigurationParameters));
             } catch (ParseException e) {
                 this.logger.warn("Malformed syntax [{}]. Cause: [{}].", syntax, getRootCauseMessage(e));
                 return null;

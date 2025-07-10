@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -266,18 +265,14 @@ public class DiscussionsResourceReferenceHandler extends AbstractResourceReferen
     private void createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         try {
-            Optional<Message> messageOptional = this.discussionMessageRequestCreator.createMessage(request);
-            if (messageOptional.isEmpty()) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error when creating message");
+            Message message = this.discussionMessageRequestCreator.createMessage(request);
+            if (isAsync(request)) {
+                Map<String, String> answer = new LinkedHashMap<>();
+                answer.put("messageReference",
+                    this.discussionReferencesSerializer.serialize(message.getReference()));
+                this.answerJSON(response, HttpServletResponse.SC_OK, answer);
             } else {
-                if (isAsync(request)) {
-                    Map<String, String> answer = new LinkedHashMap<>();
-                    answer.put("messageReference",
-                        this.discussionReferencesSerializer.serialize(messageOptional.get().getReference()));
-                    this.answerJSON(response, HttpServletResponse.SC_OK, answer);
-                } else {
-                    this.handleCreateMessageRedirect(request, response);
-                }
+                this.handleCreateMessageRedirect(request, response);
             }
         } catch (DiscussionServerException e) {
             response.sendError(e.getStatusCode(), e.getMessage());

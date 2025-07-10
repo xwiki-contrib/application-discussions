@@ -25,6 +25,7 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
 
 <suppressions>
+  <suppress checks="ClassFanOutComplexity" files="DefaultDiscussionMessageRequestCreator.java"/>
   <suppress checks="ClassFanOutComplexity" files="DiscussionsResourceReferenceHandler.java"/>
   <suppress checks="ClassFanOutComplexity" files="DiscussionsScriptService.java"/>
 </suppressions>

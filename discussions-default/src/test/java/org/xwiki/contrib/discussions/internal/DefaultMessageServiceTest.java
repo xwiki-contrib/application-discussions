@@ -27,6 +27,7 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
@@ -52,6 +53,8 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.xwiki.contrib.discussions.store.meta.MessageMetadata.AUTHOR_REFERENCE_NAME;
@@ -116,22 +119,15 @@ class DefaultMessageServiceTest
     {
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
-        Discussion discussion = new Discussion(discussionReference, "title", "description", new Date(), null);
-        when(this.discussionService.get(discussionReference)).thenReturn(Optional.of(discussion));
-        BaseObject discussionBaseObject = mock(BaseObject.class);
-        when(this.discussionStoreService.get(discussionReference)).thenReturn(Optional.of(discussionBaseObject));
-        DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "DiscussionDoc");
-        when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
-        setDiscussionWriteRight(discussionDocumentReference, false);
+        when(this.discussionService.canWrite(discussionReference)).thenReturn(false);
 
-        Optional<Message> message =
-            this.defaultMessageService.create("content", XWIKI_2_1, discussionReference, parameters);
-
-        assertEquals(Optional.empty(), message);
+        DiscussionException exception = assertThrows(DiscussionException.class, () ->
+            this.defaultMessageService.create("content", XWIKI_2_1, discussionReference, parameters));
+        assertTrue(exception.getMessage().startsWith("You don't have right to create a message in discussion"));
     }
 
     @Test
-    void createAllowed()
+    void createAllowed() throws DiscussionException
     {
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
@@ -141,16 +137,13 @@ class DefaultMessageServiceTest
         when(this.discussionStoreService.get(discussionReference)).thenReturn(Optional.of(discussionBaseObject));
         DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "DiscussionDoc");
         when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
-        setDiscussionWriteRight(discussionDocumentReference, true);
-        setDiscussionReadRight(discussionDocumentReference, true);
+        when(this.discussionService.canWrite(discussionReference)).thenReturn(true);
         MessageReference messageReference = new MessageReference("hint", "messageReference");
+        BaseObject messageBaseObject = mock(BaseObject.class);
         when(this.messageStoreService
             .create("content", XWIKI_2_1, new ActorReference("user", USER_REFERENCE), discussionReference, "title",
                 parameters))
-            .thenReturn(Optional.of(messageReference));
-        BaseObject messageBaseObject = mock(BaseObject.class);
-        when(this.messageStoreService.getByReference(messageReference))
-            .thenReturn(Optional.of(messageBaseObject));
+            .thenReturn(messageBaseObject);
 
         when(messageBaseObject.getStringValue(REFERENCE_NAME)).thenReturn("messageReference");
         when(referencesResolver.resolve("messageReference", MessageReference.class)).thenReturn(messageReference);
@@ -167,22 +160,22 @@ class DefaultMessageServiceTest
         when(messageBaseObject.getStringValue(DISCUSSION_REFERENCE_NAME)).thenReturn("reference");
         when(referencesResolver.resolve("reference", DiscussionReference.class)).thenReturn(discussionReference);
 
-        Optional<Message> message = this.defaultMessageService.create("content", XWIKI_2_1, discussionReference,
+        Message message = this.defaultMessageService.create("content", XWIKI_2_1, discussionReference,
             parameters);
 
-        assertEquals(
-            Optional.of(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),
+        assertEquals(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),
                 new ActorReference("AUTHOR_TYPE_NAME", "AUTHOR_REFERENCE_NAME"),
-                createDate, updateDate, discussion)),
+                createDate, updateDate, discussion),
             message);
     }
 
     @Test
-    void createReplyTo()
+    void createReplyTo() throws DiscussionException
     {
         Message originalMessage = mock(Message.class);
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         DiscussionReference discussionReference = new DiscussionReference("hint", "reference");
+        when(this.discussionService.canWrite(discussionReference)).thenReturn(true);
         Discussion discussion = new Discussion(discussionReference, "title", "description", new Date(), "XWiki.Doc");
         when(originalMessage.getDiscussion()).thenReturn(discussion);
         when(this.discussionService.get(discussionReference)).thenReturn(Optional.of(discussion));
@@ -190,15 +183,14 @@ class DefaultMessageServiceTest
         when(this.discussionStoreService.get(discussionReference)).thenReturn(Optional.of(discussionBaseObject));
         DocumentReference discussionDocumentReference = new DocumentReference("xwiki", "XWiki", "DiscussionDoc");
         when(discussionBaseObject.getDocumentReference()).thenReturn(discussionDocumentReference);
-        setDiscussionWriteRight(discussionDocumentReference, true);
-        setDiscussionReadRight(discussionDocumentReference, true);
         MessageReference messageReference = new MessageReference("hint", "messageReference");
         ActorReference actorReference = new ActorReference("user", USER_REFERENCE);
+        BaseObject messageBaseObject = mock(BaseObject.class);
         when(this.messageStoreService
             .createReplyTo("content", XWIKI_2_1, actorReference, originalMessage, "title",
                 parameters))
-            .thenReturn(Optional.of(messageReference));
-        BaseObject messageBaseObject = mock(BaseObject.class);
+            .thenReturn(messageBaseObject);
+
         when(this.messageStoreService.getByReference(messageReference))
             .thenReturn(Optional.of(messageBaseObject));
 
@@ -217,13 +209,12 @@ class DefaultMessageServiceTest
         when(messageBaseObject.getStringValue(DISCUSSION_REFERENCE_NAME)).thenReturn("reference");
         when(referencesResolver.resolve("reference", DiscussionReference.class)).thenReturn(discussionReference);
 
-        Optional<Message> message = this.defaultMessageService.createReplyTo("content", XWIKI_2_1, originalMessage,
+        Message message = this.defaultMessageService.createReplyTo("content", XWIKI_2_1, originalMessage,
             actorReference, true, parameters);
 
-        assertEquals(
-            Optional.of(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),
+        assertEquals(new Message(messageReference, new MessageContent("CONTENT_NAME", XWIKI_2_1),
                 new ActorReference("AUTHOR_TYPE_NAME", "AUTHOR_REFERENCE_NAME"),
-                createDate, updateDate, discussion)),
+                createDate, updateDate, discussion),
             message);
     }
 
@@ -277,15 +268,5 @@ class DefaultMessageServiceTest
         Optional<Message> actual =
             this.defaultMessageService.getByEntity(entityReference);
         assertEquals(Optional.of(message), actual);
-    }
-
-    private void setDiscussionWriteRight(DocumentReference discussionDocumentReference, boolean b)
-    {
-        when(this.discussionsRightService.canWriteDiscussion(discussionDocumentReference)).thenReturn(b);
-    }
-
-    private void setDiscussionReadRight(DocumentReference discussionDocumentReference, boolean b)
-    {
-        when(this.discussionsRightService.canReadDiscussion(discussionDocumentReference)).thenReturn(b);
     }
 }

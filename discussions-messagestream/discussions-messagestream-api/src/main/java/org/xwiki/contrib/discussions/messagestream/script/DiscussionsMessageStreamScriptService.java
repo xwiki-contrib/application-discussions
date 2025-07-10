@@ -21,6 +21,7 @@ package org.xwiki.contrib.discussions.messagestream.script;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,11 +32,13 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.DiscussionContextService;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.messagestream.internal.DiscussionsFollowersService;
 import org.xwiki.localization.ContextualLocalizationManager;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.script.service.ScriptService;
@@ -92,7 +95,7 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
      * @param author the user reference of the author of the discussion
      * @return the list of discussion contexts to attach to the public discussion
      */
-    public List<DiscussionContext> initializeContextPublic(String author)
+    public List<DiscussionContext> initializeContextPublic(String author) throws DiscussionException
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
@@ -100,10 +103,11 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
             this.localizationManager.getTranslationPlain("discussion.messagestream.context.public.title", author);
         String description =
             this.localizationManager.getTranslationPlain("discussion.messagestream.context.public.description", author);
-        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+        DiscussionContext discussionContext =
+            this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
                 new DiscussionContextEntityReference(MESSAGESTREAM_USER, "*"),
-                new DiscussionStoreConfigurationParameters())
-            .ifPresent(discussionContexts::add);
+                new DiscussionStoreConfigurationParameters());
+        discussionContexts.add(discussionContext);
         return discussionContexts;
     }
 
@@ -113,7 +117,7 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
      * @param author the user reference of the author of the discussion
      * @return the list of discussion contexts to attach to the public discussion
      */
-    public List<DiscussionContext> initializeContextFollowers(String author)
+    public List<DiscussionContext> initializeContextFollowers(String author) throws DiscussionException
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
@@ -123,10 +127,11 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
         String description = this.localizationManager
             .getTranslationPlain("discussion.messagestream.context.followers.description", author);
         for (String follower : this.discussionsFollowersService.getFollowers(serializedAuthor)) {
-            this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+            DiscussionContext discussionContext =
+                this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
                     new DiscussionContextEntityReference(MESSAGESTREAM_USER, follower),
-                    new DiscussionStoreConfigurationParameters())
-                .ifPresent(discussionContexts::add);
+                    new DiscussionStoreConfigurationParameters());
+            discussionContexts.add(discussionContext);
         }
         return discussionContexts;
     }
@@ -138,7 +143,7 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
      * @param users the selected list of users
      * @return the list of discussion contexts to attach to the public discussion
      */
-    public List<DiscussionContext> initializeContextUsers(String author, List<String> users)
+    public List<DiscussionContext> initializeContextUsers(String author, List<String> users) throws DiscussionException
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
@@ -149,10 +154,11 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
                 String description = this.localizationManager
                     .getTranslationPlain(USERS_CONTEXT_DESCRIPTION_KEY, author, user);
                 String serialize = this.serializer.serialize(this.resolver.resolve(user));
-                this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+                DiscussionContext discussionContext =
+                    this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
                         new DiscussionContextEntityReference(MESSAGESTREAM_USER, serialize),
-                        new DiscussionStoreConfigurationParameters())
-                    .ifPresent(discussionContexts::add);
+                        new DiscussionStoreConfigurationParameters());
+                discussionContexts.add(discussionContext);
             }
         }
         return discussionContexts;
@@ -166,11 +172,12 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
      * @return the list of discussion contexts to attach to the public discussion
      */
     public List<DiscussionContext> initializeContextGroups(String author, List<String> groups)
+        throws DiscussionException
     {
         ArrayList<DiscussionContext> discussionContexts = new ArrayList<>();
         initializeAuthor(author, discussionContexts);
 
-        groups.stream()
+        Set<DocumentReference> groupReferences = groups.stream()
             .filter(it -> !"".equals(it))
             .flatMap(it -> {
                 try {
@@ -180,41 +187,45 @@ public class DiscussionsMessageStreamScriptService implements ScriptService
                         getRootCauseMessage(e));
                     return Stream.empty();
                 }
-            }).collect(Collectors.toSet()).forEach(it -> {
-                String serializedUser = this.serializer.serialize(it);
-                String title =
-                    this.localizationManager.getTranslationPlain(USERS_CONTEXT_TITLE_KEY);
-                String description = this.localizationManager
-                    .getTranslationPlain(USERS_CONTEXT_DESCRIPTION_KEY, author, serializedUser);
-                this.discussionContextService
-                    .getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
-                        new DiscussionContextEntityReference(MESSAGESTREAM_USER, serializedUser),
-                        new DiscussionStoreConfigurationParameters())
-                    .ifPresent(discussionContexts::add);
-            });
+            }).collect(Collectors.toSet());
+        for (DocumentReference group : groupReferences) {
+            String serializedUser = this.serializer.serialize(group);
+            String title =
+                this.localizationManager.getTranslationPlain(USERS_CONTEXT_TITLE_KEY);
+            String description = this.localizationManager
+                .getTranslationPlain(USERS_CONTEXT_DESCRIPTION_KEY, author, serializedUser);
+            DiscussionContext discussionContext = this.discussionContextService
+                .getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+                    new DiscussionContextEntityReference(MESSAGESTREAM_USER, serializedUser),
+                    new DiscussionStoreConfigurationParameters());
+            discussionContexts.add(discussionContext);
+        }
         return discussionContexts;
     }
 
     private void initializeAuthor(String author, ArrayList<DiscussionContext> discussionContexts)
+        throws DiscussionException
     {
         String title =
             this.localizationManager.getTranslationPlain("discussion.messagestream.context.emitter.title", author);
         String description = this.localizationManager
             .getTranslationPlain("discussion.messagestream.context.emitter.description", author);
 
-        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+        DiscussionContext discussionContext =
+            this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
                 new DiscussionContextEntityReference(MESSAGESTREAM_EMITTER, author),
-                new DiscussionStoreConfigurationParameters())
-            .ifPresent(discussionContexts::add);
+                new DiscussionStoreConfigurationParameters());
+        discussionContexts.add(discussionContext);
 
         title =
             this.localizationManager.getTranslationPlain("discussion.messagestream.context.personal.title", author);
         description = this.localizationManager
             .getTranslationPlain("discussion.messagestream.context.personal.description", author);
 
-        this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
+        discussionContext =
+            this.discussionContextService.getOrCreate(DISCUSSION_MESSAGESTREAM_HINT, title, description,
                 new DiscussionContextEntityReference(MESSAGESTREAM_USER, author),
-                new DiscussionStoreConfigurationParameters())
-            .ifPresent(discussionContexts::add);
+                new DiscussionStoreConfigurationParameters());
+        discussionContexts.add(discussionContext);
     }
 }

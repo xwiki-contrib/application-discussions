@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionService;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
@@ -77,38 +78,38 @@ public class DefaultDiscussionService implements DiscussionService
     private DiscussionReferencesResolver discussionReferencesResolver;
 
     @Override
-    public Optional<Discussion> create(String applicationHint, String title, String description, String mainDocument,
-        DiscussionStoreConfigurationParameters configurationParameters)
+    public Discussion create(String applicationHint, String title, String description, String mainDocument,
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
-        Optional<Discussion> discussion =
-            this.discussionStoreService.create(applicationHint, title, description, mainDocument,
-                configurationParameters).flatMap(this::get);
-        discussion.ifPresent(d -> this.observationManager.notify(new DiscussionEvent(CREATE), applicationHint, d));
+        BaseObject baseObject = this.discussionStoreService.create(applicationHint, title, description, mainDocument,
+            configurationParameters);
+        Discussion discussion = this.mapBaseObject(baseObject);
+        this.observationManager.notify(new DiscussionEvent(CREATE), applicationHint, discussion);
         return discussion;
     }
 
     @Override
-    public Optional<Discussion> getOrCreate(String applicationHint, String title, String description,
+    public Discussion getOrCreate(String applicationHint, String title, String description,
         List<DiscussionContextReference> discussionContexts,
-        DiscussionStoreConfigurationParameters configurationParameters)
+        DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException
     {
         List<BaseObject> byDiscussionContexts =
             this.discussionStoreService.findByDiscussionContexts(discussionContexts);
+        Discussion result = null;
         if (byDiscussionContexts.isEmpty()) {
-            Optional<DiscussionReference> discussionReferenceOpt =
+            BaseObject baseObject =
                 this.discussionStoreService.create(applicationHint, title, description, null, configurationParameters);
-            discussionReferenceOpt.ifPresent(discussionReference -> discussionContexts.forEach(
-                discussionContextReference -> {
-                    this.discussionStoreService.link(discussionReference, discussionContextReference);
-                    this.discussionContextStoreService.link(discussionContextReference, discussionReference);
-                }));
-            return discussionReferenceOpt.flatMap(this::get);
+            result = this.mapBaseObject(baseObject);
+            DiscussionReference discussionReference = result.getReference();
+            discussionContexts.forEach(discussionContextReference -> {
+                this.discussionStoreService.link(discussionReference, discussionContextReference);
+                this.discussionContextStoreService.link(discussionContextReference, discussionReference);
+            });
+        } else {
+            BaseObject baseObject = byDiscussionContexts.get(0);
+            result = this.mapBaseObject(baseObject);
         }
-        BaseObject baseObject = byDiscussionContexts.get(0);
-
-        DiscussionReference discussionReference = this.discussionReferencesResolver
-            .resolve(baseObject.getStringValue(REFERENCE_NAME), DiscussionReference.class);
-        return this.get(discussionReference);
+        return result;
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesResolver;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.DiscussionsRightService;
@@ -87,21 +88,7 @@ class DefaultDiscussionServiceTest
     }
 
     @Test
-    void createCreateFail()
-    {
-        DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
-        when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
-        when(this.discussionStoreService.create("hint", "title", "description", null, parameters))
-            .thenReturn(Optional.empty());
-
-        Optional<Discussion> discussion =
-            this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc", parameters);
-
-        assertEquals(Optional.empty(), discussion);
-    }
-
-    @Test
-    void create()
+    void create() throws DiscussionException
     {
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         Date updateDate = new Date();
@@ -121,14 +108,14 @@ class DefaultDiscussionServiceTest
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
         when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
         when(this.discussionStoreService.create("hint", "title", "description", "XWiki.Doc", parameters))
-            .thenReturn(Optional.of(this.discussionReference));
+            .thenReturn(baseObject);
         when(this.discussionStoreService.get(this.discussionReference))
             .thenReturn(Optional.of(baseObject));
 
-        Optional<Discussion> discussionOpt =
+        Discussion obtainedDiscussion =
             this.defaultDiscussionService.create("hint", "title", "description", "XWiki.Doc", parameters);
 
-        assertEquals(Optional.of(discussion), discussionOpt);
+        assertEquals(discussion, obtainedDiscussion);
     }
 
     @Test
@@ -246,7 +233,7 @@ class DefaultDiscussionServiceTest
     }
 
     @Test
-    void getOrCreate()
+    void getOrCreate() throws DiscussionException
     {
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         Date updateDate = new Date();
@@ -266,7 +253,7 @@ class DefaultDiscussionServiceTest
         when(this.discussionsRightService.canCreateDiscussion()).thenReturn(true);
         when(this.discussionsRightService.canReadDiscussion(value)).thenReturn(true);
         when(this.discussionStoreService.create("hint", "title", "description", null, parameters))
-            .thenReturn(Optional.of(this.discussionReference));
+            .thenReturn(baseObject);
         when(this.discussionStoreService.get(this.discussionReference))
             .thenReturn(Optional.of(baseObject));
 
@@ -276,10 +263,10 @@ class DefaultDiscussionServiceTest
 
         when(this.discussionStoreService.findByDiscussionContexts(contextReferenceList))
             .thenReturn(Collections.emptyList());
-        Optional<Discussion> discussionOpt = this.defaultDiscussionService
+        Discussion obtainedDiscussion = this.defaultDiscussionService
             .getOrCreate("hint", "title", "description", contextReferenceList, parameters);
 
-        assertEquals(Optional.of(discussion), discussionOpt);
+        assertEquals(discussion, obtainedDiscussion);
         verify(this.discussionStoreService).findByDiscussionContexts(contextReferenceList);
         verify(this.discussionStoreService).link(this.discussionReference, ref1);
         verify(this.discussionStoreService).link(this.discussionReference, ref2);
