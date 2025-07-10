@@ -90,10 +90,8 @@ public class DefaultDiscussionsRightStoreService implements DiscussionsRightsSto
                 List<BaseObject> xObjects =
                     document.getXObjects(rightsClassReference);
                 String userReference;
-                String groupReference;
                 Optional<BaseObject> rightsObject;
                 userReference = this.serializer.serialize(user);
-                groupReference = null;
                 rightsObject = xObjects.stream()
                     .filter(obj -> UsersClass.getListFromString(obj.getStringValue(USERS_FIELD_NAME))
                         .stream()

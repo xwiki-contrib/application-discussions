@@ -39,10 +39,10 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityRe
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.DiscussionContextStoreService;
+import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 
@@ -100,10 +100,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
             XWikiDocument document =
                 generateUniquePage(applicationHint, name, entityReference, configurationParameters);
             XWikiContext context = this.getContext();
-            EntityReference discussionContextXClass = this.discussionContextMetadata.getDiscussionContextXClass();
-            BaseObject object = document.newXObject(discussionContextXClass, context);
-            object.setXClassReference(this.discussionContextMetadata.getDiscussionContextXClass());
-
+            BaseObject object = document.newXObject(DiscussionContextMetadata.XCLASS_REFERENCE, context);
             object.set(NAME_NAME, name, context);
             object.set(DESCRIPTION_NAME, description, context);
             object.set(ENTITY_REFERENCE_TYPE_NAME, entityReference.getType(), context);
@@ -150,7 +147,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     {
         XWikiDocument document = this.xcontextProvider.get().getWiki()
             .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
-        return Optional.of(document.getXObject(this.discussionContextMetadata.getDiscussionContextXClass()));
+        return Optional.of(document.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE));
     }
 
     @Override
@@ -209,7 +206,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
                     + "and entity_reference_field.id.name = '%s' "
                     + "and type_field.value = :type "
                     + "and entity_reference_field.value = :entityReference ",
-                this.discussionContextMetadata.getDiscussionContextXClassFullName(), REFERENCE_NAME,
+                DiscussionContextMetadata.XCLASS_FULLNAME, REFERENCE_NAME,
                 ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_NAME),
                 Query.HQL)
                 .bindValue("type", entityReference.getType())
@@ -238,8 +235,6 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     public List<BaseObject> findByDiscussionReference(DiscussionReference reference)
     {
         try {
-            String className =
-                this.discussionContextMetadata.getDiscussionContextXClassFullName();
             return this.queryManager.createQuery(String.format("select doc.fullName "
                     + "from XWikiDocument as doc, "
                     + "BaseObject as obj, "
@@ -249,7 +244,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
                     + "and discussions.id.id=obj.id "
                     + "and discussions.name = '%s' "
                     + "and :reference in elements(discussions.list) ",
-                className, DISCUSSIONS_NAME), Query.HQL)
+                DiscussionContextMetadata.XCLASS_FULLNAME, DISCUSSIONS_NAME), Query.HQL)
                 .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                 .<String>execute()
                 .stream()

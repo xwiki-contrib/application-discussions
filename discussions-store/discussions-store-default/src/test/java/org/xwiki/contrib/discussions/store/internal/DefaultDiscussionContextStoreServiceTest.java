@@ -32,7 +32,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -63,8 +62,8 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
 class DefaultDiscussionContextStoreServiceTest
 {
     private static final String GET_QUERY =
-        "FROM doc.object(DiscussionContextClass) obj where obj.reference = :reference";
-    private static final String DISCUSSION_CONTEXT_CLASS = "DiscussionContextClass";
+        String.format("FROM doc.object(%s) obj where obj.reference = :reference",
+            DiscussionContextMetadata.XCLASS_FULLNAME);
 
     @InjectMockComponents
     private DefaultDiscussionContextStoreService service;
@@ -85,9 +84,6 @@ class DefaultDiscussionContextStoreServiceTest
     private DocumentAuthorsManager documentAuthorsManager;
 
     @MockComponent
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @MockComponent
     private QueryManager queryManager;
 
     @MockComponent
@@ -95,7 +91,6 @@ class DefaultDiscussionContextStoreServiceTest
 
     private XWikiContext context;
     private XWiki wiki;
-    private DocumentReference discussionContextClass;
 
     @BeforeEach
     void setup()
@@ -104,9 +99,6 @@ class DefaultDiscussionContextStoreServiceTest
         when(this.xcontextProvider.get()).thenReturn(this.context);
         this.wiki = mock(XWiki.class);
         when(this.context.getWiki()).thenReturn(this.wiki);
-        when(this.discussionContextMetadata.getDiscussionContextXClassFullName()).thenReturn(DISCUSSION_CONTEXT_CLASS);
-        this.discussionContextClass = mock(DocumentReference.class);
-        when(this.discussionContextMetadata.getDiscussionContextXClass()).thenReturn(discussionContextClass);
         when(this.localizationManager.getTranslationPlain(any()))
             .then(invocationOnMock -> invocationOnMock.getArgument(0));
     }
@@ -128,7 +120,7 @@ class DefaultDiscussionContextStoreServiceTest
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         assertEquals(Optional.of(baseObject), this.service.get(discussionContextReference));
         verify(query1).bindValue("reference", serializedDiscussionContextReference);
     }
@@ -155,7 +147,7 @@ class DefaultDiscussionContextStoreServiceTest
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         when(baseObject.getListValue(DISCUSSIONS_NAME)).thenReturn(List.of("ref1", "ref2"));
         when(baseObject.getOwnerDocument()).thenReturn(docObj);
 
@@ -188,7 +180,7 @@ class DefaultDiscussionContextStoreServiceTest
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionContextClass)).thenReturn(baseObject);
+        when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         when(baseObject.getListValue(DISCUSSIONS_NAME)).thenReturn(
             List.of("ref1", serializedDiscussionReference, "ref2"));
         when(baseObject.getOwnerDocument()).thenReturn(docObj);

@@ -1,3 +1,0 @@
-org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
-org.xwiki.contrib.discussions.store.meta.DiscussionMetadata
-org.xwiki.contrib.discussions.store.meta.MessageMetadata

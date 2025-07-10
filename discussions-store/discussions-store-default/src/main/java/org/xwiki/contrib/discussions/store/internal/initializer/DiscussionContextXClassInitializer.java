@@ -19,15 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store.internal.initializer;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
-import org.xwiki.model.reference.EntityReference;
 
-import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.doc.AbstractMandatoryClassInitializer;
 import com.xpn.xwiki.objects.classes.BaseClass;
 
 import static com.xpn.xwiki.objects.classes.ListClass.DISPLAYTYPE_INPUT;
@@ -63,50 +61,33 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata
 @Component
 @Singleton
 @Named("Discussions.Code.DiscussionContextClass")
-public class DiscussionContextXClassInitializer extends AbstractDiscussionContextXClassInitializer
+public class DiscussionContextXClassInitializer extends AbstractMandatoryClassInitializer
 {
     private static final String STATIC_LISTS_SEPARATOR = ",";
 
-    @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @Override
-    public EntityReference getDocumentReference()
+    /**
+     * Default constructor.
+     */
+    public DiscussionContextXClassInitializer()
     {
-        return this.discussionContextMetadata.getDiscussionContextXClass();
+        super(DiscussionContextMetadata.XCLASS_REFERENCE);
     }
 
     @Override
-    public boolean updateDocument(XWikiDocument document)
+    protected void createClass(BaseClass xClass)
     {
-        boolean needsUpdate = false;
-        if (document.isNew()) {
-            document.setHidden(true);
-            BaseClass xClass = document.getXClass();
-            int textSize = Integer.MAX_VALUE;
-            xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
-            xClass.addTextField(ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_TYPE_PRETTY_NAME, textSize);
-            xClass.addTextField(ENTITY_REFERENCE_NAME, ENTITY_REFERENCE_PRETTY_NAME, textSize);
-            xClass.addTextField(NAME_NAME, NAME_PRETTY_NAME, textSize);
-            xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
-            xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
-            xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
-            xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
-                STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
-            xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
-            xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
-                STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
-            needsUpdate = true;
-        }
-
-        if (initAuthorReference(document)) {
-            needsUpdate = true;
-        }
-
-        if (initCreatorReference(document)) {
-            needsUpdate = true;
-        }
-
-        return needsUpdate;
+        int textSize = Integer.MAX_VALUE;
+        xClass.addTextField(REFERENCE_NAME, REFERENCE_PRETTY_NAME, textSize);
+        xClass.addTextField(ENTITY_REFERENCE_TYPE_NAME, ENTITY_REFERENCE_TYPE_PRETTY_NAME, textSize);
+        xClass.addTextField(ENTITY_REFERENCE_NAME, ENTITY_REFERENCE_PRETTY_NAME, textSize);
+        xClass.addTextField(NAME_NAME, NAME_PRETTY_NAME, textSize);
+        xClass.addTextAreaField(DESCRIPTION_NAME, DESCRIPTION_PRETTY_NAME, 10, 10, WYSIWYG);
+        xClass.addDateField(CREATION_DATE_NAME, CREATION_DATE_PRETTY_NAME);
+        xClass.addDateField(UPDATE_DATE_NAME, UPDATE_DATE_PRETTY_NAME);
+        xClass.addStaticListField(STATES_NAME, STATES_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
+        xClass.addBooleanField(PINED_NAME, PINED_PRETTY_NAME);
+        xClass.addStaticListField(DISCUSSIONS_NAME, DISCUSSIONS_PRETTY_NAME, 1, true, true, "", DISPLAYTYPE_INPUT,
+            STATIC_LISTS_SEPARATOR, "", FREE_TEXT_ALLOWED, false);
     }
 }

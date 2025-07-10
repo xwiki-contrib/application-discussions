@@ -43,7 +43,6 @@ import org.xwiki.contrib.discussions.store.MessageStoreService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
@@ -84,13 +83,7 @@ public class DefaultMessageStoreService implements MessageStoreService
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
-    private MessageMetadata messageMetadata;
-
-    @Inject
     private QueryManager queryManager;
-
-    @Inject
-    private DocumentReferenceResolver<String> documentReferenceResolver;
 
     @Inject
     private DiscussionReferencesSerializer discussionReferencesSerializer;
@@ -138,7 +131,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             document.setTitle(title);
             document.setHidden(true);
             document.setSyntax(syntax);
-            BaseObject messageBaseObject = document.newXObject(this.messageMetadata.getMessageXClass(), context);
+            BaseObject messageBaseObject = document.newXObject(MessageMetadata.XCLASS_REFERENCE, context);
             DocumentReference messageHolderReference = document.getDocumentReference();
             String messageName = messageHolderReference.getName();
             MessageReference messageReference = new MessageReference(applicationHint, messageName);
@@ -197,7 +190,6 @@ public class DefaultMessageStoreService implements MessageStoreService
     public List<BaseObject> getByDiscussion(DiscussionReference discussionReference, int offset, int limit)
     {
         try {
-            String messageClass = this.messageMetadata.getMessageXClassFullName();
             List<String> pageNames = this.queryManager.createQuery(String.format(
                 " select doc.fullName "
                     + "from XWikiDocument as doc , "
@@ -211,7 +203,7 @@ public class DefaultMessageStoreService implements MessageStoreService
                     + "and obj_discussionReference.id.name='%s' "
                     + "and obj_updateDate.id.name='%s' "
                     + "order by obj_updateDate.value",
-                messageClass, DISCUSSION_REFERENCE_NAME, UPDATE_DATE_NAME), Query.HQL)
+                MessageMetadata.XCLASS_FULLNAME, DISCUSSION_REFERENCE_NAME, UPDATE_DATE_NAME), Query.HQL)
                 .setOffset(offset)
                 .setLimit(limit)
                 .bindValue("discussionReference", this.discussionReferencesSerializer.serialize(discussionReference))
@@ -240,7 +232,7 @@ public class DefaultMessageStoreService implements MessageStoreService
             }
         }).filter(Optional::isPresent)
             .map(Optional::get)
-            .map(it -> it.getXObject(this.messageMetadata.getMessageXClass()))
+            .map(it -> it.getXObject(MessageMetadata.XCLASS_REFERENCE))
             .collect(Collectors.toList());
     }
 
@@ -248,7 +240,6 @@ public class DefaultMessageStoreService implements MessageStoreService
     public Optional<BaseObject> getByReference(MessageReference reference)
     {
         try {
-            String messageClass = this.messageMetadata.getMessageXClassFullName();
             List<String> pageNames = this.queryManager.createQuery(String.format(
                 " select doc.fullName "
                     + "from XWikiDocument as doc , "
@@ -259,7 +250,7 @@ public class DefaultMessageStoreService implements MessageStoreService
                     + "and obj.className='%s' "
                     + "and obj_reference.id.id=obj.id "
                     + "and obj_reference.id.name='%s' ",
-                messageClass, REFERENCE_NAME), Query.HQL)
+                MessageMetadata.XCLASS_FULLNAME, REFERENCE_NAME), Query.HQL)
                 .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                 .execute();
 
@@ -279,7 +270,7 @@ public class DefaultMessageStoreService implements MessageStoreService
         try {
             XWikiDocument document =
                 this.xcontextProvider.get().getWiki().getDocument(entityReference, this.xcontextProvider.get());
-            return Optional.of(document.getXObject(this.messageMetadata.getMessageXClass()));
+            return Optional.of(document.getXObject(MessageMetadata.XCLASS_REFERENCE));
         } catch (XWikiException e) {
             this.logger.warn(
                 "Failed to get the Message for entityReference=[{}]. Cause: [{}].",
@@ -291,7 +282,6 @@ public class DefaultMessageStoreService implements MessageStoreService
     @Override
     public long countByDiscussion(DiscussionReference discussionReference)
     {
-        String messageClass = this.messageMetadata.getMessageXClassFullName();
         long count;
         try {
             count = this.queryManager.createQuery(String.format(
@@ -303,7 +293,8 @@ public class DefaultMessageStoreService implements MessageStoreService
                     + "and doc.fullName=obj.name "
                     + "and obj.className='%s' "
                     + "and discussionReferenceField.id.id=obj.id "
-                    + "and discussionReferenceField.id.name='%s' ", messageClass, DISCUSSION_REFERENCE_NAME), Query.HQL)
+                    + "and discussionReferenceField.id.name='%s' ",
+                        MessageMetadata.XCLASS_FULLNAME, DISCUSSION_REFERENCE_NAME), Query.HQL)
                 .bindValue("discussionReference", this.discussionReferencesSerializer.serialize(discussionReference))
                 .<Long>execute()
                 .get(0);

@@ -79,9 +79,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     private Provider<XWikiContext> xcontextProvider;
 
     @Inject
-    private DiscussionMetadata discussionMetadata;
-
-    @Inject
     private QueryManager queryManager;
 
     @Inject
@@ -111,7 +108,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
         try {
             XWikiDocument document = generateUniquePage(applicationHint, title, configurationParameters);
             XWikiContext context = this.getContext();
-            BaseObject object = document.newXObject(this.discussionMetadata.getDiscussionXClass(), context);
+            BaseObject object = document.newXObject(DiscussionMetadata.XCLASS_REFERENCE, context);
             object.setStringValue(TITLE_NAME, title);
             object.setStringValue(DESCRIPTION_NAME, description);
             String pageName = document.getDocumentReference().getName();
@@ -139,12 +136,11 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     public Optional<BaseObject> get(DiscussionReference reference)
     {
         try {
-            String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
             List<String> execute =
                 this.queryManager
                     .createQuery(
                         String.format("FROM doc.object(%s) obj where obj.%s = :reference",
-                            discussionClass, REFERENCE_NAME),
+                            DiscussionMetadata.XCLASS_FULLNAME, REFERENCE_NAME),
                         XWQL)
                     .bindValue("reference", this.discussionReferencesSerializer.serialize(reference))
                     .execute();
@@ -168,13 +164,12 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     {
         XWikiDocument document = this.xcontextProvider.get().getWiki()
             .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
-        return Optional.of(document.getXObject(this.discussionMetadata.getDiscussionXClass()));
+        return Optional.of(document.getXObject(DiscussionMetadata.XCLASS_REFERENCE));
     }
 
     @Override
     public List<BaseObject> findByDiscussionContexts(List<DiscussionContextReference> discussionContextReferences)
     {
-        String discussionClass = this.discussionMetadata.getDiscussionXClassFullName();
         try {
             // Selects the discussions that are linked EXACTLY to the requested discussion contexts.
             List<List<String>> subResults = new ArrayList<>();
@@ -193,7 +188,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                         + "and str_field.id.id=obj.id "
                         + "and field.id.name='discussionContexts' "
                         + "and str_field.id.name='reference' ",
-                    discussionClass), Query.HQL)
+                        DiscussionMetadata.XCLASS_FULLNAME), Query.HQL)
                     .bindValue("discussionContextReference",
                         this.discussionReferencesSerializer.serialize(discussionContextReference))
                     .execute());
@@ -212,7 +207,7 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
                     + "and field.id.name='discussionContexts' "
                     + "and str_field.id.name='reference' "
                     + "GROUP BY str_field.value HAVING sum(size(field.list)) >= :contextsListSize",
-                discussionClass), Query.HQL)
+                    DiscussionMetadata.XCLASS_FULLNAME), Query.HQL)
                 .bindValue("contextsListSize", (long) discussionContextReferences.size()).execute());
 
             return intersection(subResults).stream()

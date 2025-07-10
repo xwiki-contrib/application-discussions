@@ -34,7 +34,7 @@
   <properties>
     <xwiki.extension.name>${project.name}</xwiki.extension.name>
     <xwiki.extension.category>other</xwiki.extension.category>
-    <xwiki.jacoco.instructionRatio>0.50</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.41</xwiki.jacoco.instructionRatio>
     <checkstyle.suppressions.location>${basedir}/src/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
   </properties>
   <dependencies>

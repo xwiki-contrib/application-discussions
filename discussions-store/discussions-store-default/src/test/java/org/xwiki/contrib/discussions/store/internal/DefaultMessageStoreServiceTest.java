@@ -41,8 +41,6 @@ import org.xwiki.contrib.discussions.store.MessageHolderReferenceService;
 import org.xwiki.contrib.discussions.store.meta.MessageMetadata;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.junit5.LogCaptureExtension;
@@ -88,9 +86,6 @@ class DefaultMessageStoreServiceTest
     private Provider<XWikiContext> xcontextProvider;
 
     @MockComponent
-    private MessageMetadata messageMetadata;
-
-    @MockComponent
     private QueryManager queryManager;
 
     @MockComponent
@@ -131,7 +126,6 @@ class DefaultMessageStoreServiceTest
 
         DiscussionStoreConfigurationParameters parameters = new DiscussionStoreConfigurationParameters();
         BaseObject messageBaseObject = mock(BaseObject.class);
-        DocumentReference messageXClassDocumentReference = new DocumentReference("xwiki", "XWiki", "MessageClass");
         XWikiDocument document = mock(XWikiDocument.class);
         DocumentReference messageDocumentHolderReference = new DocumentReference("xwiki", "Discussion", "Message1");
         when(this.messageHolderReferenceService.getNextMessageHolderReference(discussionReference, parameters))
@@ -140,8 +134,7 @@ class DefaultMessageStoreServiceTest
             .thenReturn(document);
         when(document.getDocumentReference()).thenReturn(messageDocumentHolderReference);
 
-        when(document.newXObject(messageXClassDocumentReference, this.xWikiContext)).thenReturn(messageBaseObject);
-        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClassDocumentReference);
+        when(document.newXObject(MessageMetadata.XCLASS_REFERENCE, this.xWikiContext)).thenReturn(messageBaseObject);
         when(document.isNew()).thenReturn(true);
 
         MessageReference messageReference = new MessageReference("hint", "Message1");
@@ -165,25 +158,22 @@ class DefaultMessageStoreServiceTest
     {
         Query query = mock(Query.class);
         List<Object> value = asList("r1", "r2");
-        DocumentReference messageXClass = new DocumentReference("xwiki", "XWiki", "MessageClass");
         XWikiDocument xWikiDocumentR1 = mock(XWikiDocument.class);
         XWikiDocument xWikiDocumentR2 = mock(XWikiDocument.class);
         BaseObject r1MessageObject = mock(BaseObject.class);
         BaseObject r2MessageObject = mock(BaseObject.class);
 
-        when(this.messageMetadata.getMessageXClassFullName()).thenReturn("Discussions.Code.MessageClass");
         when(this.queryManager.createQuery(any(), eq(Query.HQL))).thenReturn(query);
         when(query.setLimit(anyInt())).thenReturn(query);
         when(query.setOffset(anyInt())).thenReturn(query);
         when(query.bindValue(any(String.class), any())).thenReturn(query);
         when(query.execute()).thenReturn(value);
-        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClass);
         when(this.xWiki.getDocument("r1", EntityType.DOCUMENT, this.xWikiContext))
             .thenReturn(xWikiDocumentR1);
         when(this.xWiki.getDocument("r2", EntityType.DOCUMENT, this.xWikiContext))
             .thenReturn(xWikiDocumentR2);
-        when(xWikiDocumentR1.getXObject((EntityReference) messageXClass)).thenReturn(r1MessageObject);
-        when(xWikiDocumentR2.getXObject((EntityReference) messageXClass)).thenReturn(r2MessageObject);
+        when(xWikiDocumentR1.getXObject(MessageMetadata.XCLASS_REFERENCE)).thenReturn(r1MessageObject);
+        when(xWikiDocumentR2.getXObject(MessageMetadata.XCLASS_REFERENCE)).thenReturn(r2MessageObject);
 
         List<BaseObject> actual = this.defaultMessageStoreService
             .getByDiscussion(new DiscussionReference("hint", "discussionReference"), 0, 10);
@@ -197,9 +187,6 @@ class DefaultMessageStoreServiceTest
         MessageReference messageReference = new MessageReference("hint", "docRef1");
         when(this.discussionReferencesSerializer.serialize(messageReference)).thenReturn("reference");
         BaseObject messageBaseObject1 = mock(BaseObject.class);
-        when(this.messageMetadata.getMessageXClassFullName()).thenReturn("Discussions.Code.MessageClass");
-        DocumentReference messageXClass = new DocumentReference("xwiki", "XWiki", "MessageClass");
-        when(this.messageMetadata.getMessageXClass()).thenReturn(messageXClass);
         Query query = mock(Query.class);
         when(this.queryManager.createQuery(any(), any())).thenReturn(query);
         when(query.bindValue("reference", "reference")).thenReturn(query);
@@ -208,7 +195,7 @@ class DefaultMessageStoreServiceTest
         XWikiDocument xWikiDocument = mock(XWikiDocument.class);
         when(this.xWiki.getDocument("docRef1", EntityType.DOCUMENT, this.xWikiContext))
             .thenReturn(xWikiDocument);
-        when(xWikiDocument.getXObject((EntityReference) messageXClass)).thenReturn(messageBaseObject1);
+        when(xWikiDocument.getXObject(MessageMetadata.XCLASS_REFERENCE)).thenReturn(messageBaseObject1);
 
         when(this.discussionReferencesResolver.resolve("docRef1", MessageReference.class)).thenReturn(messageReference);
         Optional<BaseObject> actual = this.defaultMessageStoreService.getByReference(messageReference);

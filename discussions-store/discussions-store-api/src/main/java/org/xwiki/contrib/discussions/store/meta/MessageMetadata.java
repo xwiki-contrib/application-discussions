@@ -21,17 +21,8 @@ package org.xwiki.contrib.discussions.store.meta;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
-import org.xwiki.stability.Unstable;
-
-import com.xpn.xwiki.XWikiContext;
+import org.xwiki.model.reference.LocalDocumentReference;
 
 import static java.util.Arrays.asList;
 
@@ -46,134 +37,124 @@ import static java.util.Arrays.asList;
  * @version $Id$
  * @since 1.0
  */
-@Component(roles = { MessageMetadata.class })
-@Singleton
-@Unstable
-public class MessageMetadata
+public interface MessageMetadata
 {
     /**
      * Reference field name.
      */
-    public static final String REFERENCE_NAME = "reference";
+    String REFERENCE_NAME = "reference";
 
     /**
      * Reference field pretty name.
      */
-    public static final String REFERENCE_PRETTY_NAME = "Reference";
+    String REFERENCE_PRETTY_NAME = "Reference";
 
     /**
      * Content field name.
      */
-    public static final String CONTENT_NAME = "content";
+    String CONTENT_NAME = "content";
 
     /**
      * Content field pretty name.
      */
-    public static final String CONTENT_PRETTY_NAME = "Content";
+    String CONTENT_PRETTY_NAME = "Content";
 
     /**
      * Discussion reference field name.
      */
-    public static final String DISCUSSION_REFERENCE_NAME = "discussionReference";
+    String DISCUSSION_REFERENCE_NAME = "discussionReference";
 
     /**
      * Discussion reference field pretty name.
      */
-    public static final String DISCUSSION_REFERENCE_PRETTY_NAME = "Discussion Reference";
+    String DISCUSSION_REFERENCE_PRETTY_NAME = "Discussion Reference";
 
     /**
      * Author field name.
      */
-    public static final String AUTHOR_TYPE_NAME = "authorType";
+    String AUTHOR_TYPE_NAME = "authorType";
 
     /**
      * Author field pretty name.
      */
-    public static final String AUTHOR_TYPE_PRETTY_NAME = "Author Type";
+    String AUTHOR_TYPE_PRETTY_NAME = "Author Type";
 
     /**
      * Author field name.
      */
-    public static final String AUTHOR_REFERENCE_NAME = "authorReference";
+    String AUTHOR_REFERENCE_NAME = "authorReference";
 
     /**
      * Author field pretty name.
      */
-    public static final String AUTHOR_REFERENCE_PRETTY_NAME = "Author Reference";
+    String AUTHOR_REFERENCE_PRETTY_NAME = "Author Reference";
 
     /**
      * Update date field name.
      */
-    public static final String UPDATE_DATE_NAME = "updateDate";
+    String UPDATE_DATE_NAME = "updateDate";
 
     /**
      * Update date field pretty name.
      */
-    public static final String UPDATE_DATE_PRETTY_NAME = "Update Date";
+    String UPDATE_DATE_PRETTY_NAME = "Update Date";
 
     /**
      * Create date field name.
      */
-    public static final String CREATE_DATE_NAME = "createDate";
+    String CREATE_DATE_NAME = "createDate";
 
     /**
      * Create date field pretty name.
      */
-    public static final String CREATE_DATE_PRETTY_NAME = "Create Date";
+    String CREATE_DATE_PRETTY_NAME = "Create Date";
 
     /**
      * States field name.
      */
-    public static final String STATES_NAME = "states";
+    String STATES_NAME = "states";
 
     /**
      * States field pretty name.
      */
-    public static final String STATES_PRETTY_NAME = "States";
+    String STATES_PRETTY_NAME = "States";
 
     /**
      * Reply to field name.
      */
-    public static final String REPLY_TO_NAME = "replyTo";
+    String REPLY_TO_NAME = "replyTo";
 
     /**
      * Reply to field pretty name.
      */
-    public static final String REPLY_TO_PRETTY_NAME = "Reply To";
+    String REPLY_TO_PRETTY_NAME = "Reply To";
 
     /**
      * Pined field name.
      */
-    public static final String PINED_NAME = "pined";
+    String PINED_NAME = "pined";
 
     /**
      * Pined field pretty name.
      */
-    public static final String PINED_PRETTY_NAME = "Pined";
-
-    private static final String DISCUSSIONS_SPACE = "Discussions";
-
-    private static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_SPACE, "Code");
-
-    private static final String XCLASS_NAME = "MessageClass";
-
-    @Inject
-    private Provider<XWikiContext> xcontextProvider;
+    String PINED_PRETTY_NAME = "Pined";
+    /**
+     * Location of the xclass.
+     */
+    List<String> XCLASS_SPACES = asList("Discussions", "Code");
 
     /**
-     * @return the {@link DocumentReference} of the document holding the message XClass.
+     * XClass name.
      */
-    public EntityReference getMessageXClass()
-    {
-        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
-            XCLASS_NAME);
-    }
+    String XCLASS_NAME = "MessageClass";
 
     /**
-     * @return the full name of the message XClass
+     * XClass reference.
      */
-    public String getMessageXClassFullName()
-    {
-        return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
-    }
+    LocalDocumentReference XCLASS_REFERENCE = new LocalDocumentReference(XCLASS_SPACES, XCLASS_NAME);
+
+    /**
+     * Serialization of the xclass.
+     */
+    String XCLASS_FULLNAME = String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
 }

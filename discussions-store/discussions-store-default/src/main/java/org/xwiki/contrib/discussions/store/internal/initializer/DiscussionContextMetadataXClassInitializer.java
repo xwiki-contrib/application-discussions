@@ -19,17 +19,13 @@
  */
 package org.xwiki.contrib.discussions.store.internal.initializer;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
-import org.xwiki.model.reference.EntityReference;
 
-import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.PropertyInterface;
+import com.xpn.xwiki.doc.AbstractMandatoryClassInitializer;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.objects.classes.TextAreaClass;
 
@@ -42,49 +38,21 @@ import com.xpn.xwiki.objects.classes.TextAreaClass;
 @Component
 @Singleton
 @Named("Discussions.Code.DiscussionContextMetadataClass")
-public class DiscussionContextMetadataXClassInitializer extends AbstractDiscussionContextXClassInitializer
+public class DiscussionContextMetadataXClassInitializer extends AbstractMandatoryClassInitializer
 {
-    @Inject
-    private DiscussionContextMetadata discussionContextMetadata;
-
-    @Override
-    public EntityReference getDocumentReference()
+    /**
+     * Default constructor.
+     */
+    public DiscussionContextMetadataXClassInitializer()
     {
-        return this.discussionContextMetadata.getDiscussionContextMetadataXClass();
+        super(DiscussionContextMetadata.METADATA_XCLASS_REFERENCE);
     }
 
     @Override
-    public boolean updateDocument(XWikiDocument document)
+    protected void createClass(BaseClass xClass)
     {
-        boolean needsUpdate = false;
-        if (document.isNew()) {
-            document.setHidden(true);
-            BaseClass xClass = document.getXClass();
-            xClass.addTextField(DiscussionContextMetadata.METADATA_KEY, DiscussionContextMetadata.METADATA_KEY, 100);
-            xClass.addTextAreaField(DiscussionContextMetadata.METADATA_VALUE, DiscussionContextMetadata.METADATA_VALUE,
-                25, 50, TextAreaClass.ContentType.PURE_TEXT);
-            needsUpdate = true;
-        } else {
-            // Ensure that the content type is properly set
-            // FIXME: we should change all that to use an AbstractMandatoryClassInitializer
-            PropertyInterface metadataField = document.getXClass().get(DiscussionContextMetadata.METADATA_VALUE);
-            if (metadataField != null) {
-                TextAreaClass metadataFieldClass = (TextAreaClass) metadataField;
-                if (!StringUtils.equalsIgnoreCase(metadataFieldClass.getContentType(),
-                    TextAreaClass.ContentType.PURE_TEXT.toString())) {
-                    metadataFieldClass.setContentType(TextAreaClass.ContentType.PURE_TEXT);
-                }
-                needsUpdate = true;
-            }
-        }
-        if (initAuthorReference(document)) {
-            needsUpdate = true;
-        }
-
-        if (initCreatorReference(document)) {
-            needsUpdate = true;
-        }
-
-        return needsUpdate;
+        xClass.addTextField(DiscussionContextMetadata.METADATA_KEY, DiscussionContextMetadata.METADATA_KEY, 100);
+        xClass.addTextAreaField(DiscussionContextMetadata.METADATA_VALUE, DiscussionContextMetadata.METADATA_VALUE,
+            25, 50, TextAreaClass.ContentType.PURE_TEXT);
     }
 }

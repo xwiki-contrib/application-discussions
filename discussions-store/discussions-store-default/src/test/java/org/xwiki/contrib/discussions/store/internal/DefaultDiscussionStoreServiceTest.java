@@ -35,7 +35,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.meta.DiscussionMetadata;
 import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.junit5.mockito.ComponentTest;
@@ -66,7 +65,8 @@ import static org.xwiki.contrib.discussions.store.meta.DiscussionMetadata.UPDATE
 @ComponentTest
 class DefaultDiscussionStoreServiceTest
 {
-    private static final String GET_QUERY = "FROM doc.object(DiscussionClass) obj where obj.reference = :reference";
+    private static final String GET_QUERY =
+        String.format("FROM doc.object(%s) obj where obj.reference = :reference", DiscussionMetadata.XCLASS_FULLNAME);
     private static final String DISCUSSION_CLASS = "DiscussionClass";
 
     @InjectMockComponents
@@ -74,9 +74,6 @@ class DefaultDiscussionStoreServiceTest
 
     @MockComponent
     private Provider<XWikiContext> xcontextProvider;
-
-    @MockComponent
-    private DiscussionMetadata discussionMetadata;
 
     @MockComponent
     private QueryManager queryManager;
@@ -95,7 +92,6 @@ class DefaultDiscussionStoreServiceTest
 
     private XWikiContext context;
     private XWiki wiki;
-    private EntityReference discussionXClass;
 
     @BeforeEach
     void setup()
@@ -104,9 +100,6 @@ class DefaultDiscussionStoreServiceTest
         when(this.xcontextProvider.get()).thenReturn(this.context);
         this.wiki = mock(XWiki.class);
         when(this.context.getWiki()).thenReturn(this.wiki);
-        when(this.discussionMetadata.getDiscussionXClassFullName()).thenReturn(DISCUSSION_CLASS);
-        this.discussionXClass = mock(EntityReference.class);
-        when(this.discussionMetadata.getDiscussionXClass()).thenReturn(discussionXClass);
         when(this.localizationManager.getTranslationPlain(any()))
             .then(invocationOnMock -> invocationOnMock.getArgument(0));
     }
@@ -126,7 +119,7 @@ class DefaultDiscussionStoreServiceTest
         when(this.wiki.getDocument(discussionPageRef, EntityType.DOCUMENT, this.context)).thenReturn(document);
 
         BaseObject expectedObject = mock(BaseObject.class);
-        when(document.getXObject(discussionXClass)).thenReturn(expectedObject);
+        when(document.getXObject(DiscussionMetadata.XCLASS_REFERENCE)).thenReturn(expectedObject);
 
         assertEquals(Optional.of(expectedObject), this.storeService.get(discussionReference));
         verify(query).bindValue("reference", "d1");
@@ -155,7 +148,7 @@ class DefaultDiscussionStoreServiceTest
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionXClass)).thenReturn(baseObject);
+        when(docObj.getXObject(DiscussionMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         when(baseObject.getListValue(DISCUSSION_CONTEXTS_NAME)).thenReturn(List.of("ref1", "ref2"));
         when(baseObject.getOwnerDocument()).thenReturn(docObj);
 
@@ -190,7 +183,7 @@ class DefaultDiscussionStoreServiceTest
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
-        when(docObj.getXObject(this.discussionXClass)).thenReturn(baseObject);
+        when(docObj.getXObject(DiscussionMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         when(baseObject.getListValue(DISCUSSION_CONTEXTS_NAME)).thenReturn(List.of("ref1",
             serializedDiscussionContextReference, "ref2"));
         when(baseObject.getOwnerDocument()).thenReturn(docObj);

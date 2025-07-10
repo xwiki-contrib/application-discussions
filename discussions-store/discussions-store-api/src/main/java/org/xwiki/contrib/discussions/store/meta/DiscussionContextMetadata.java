@@ -21,16 +21,8 @@ package org.xwiki.contrib.discussions.store.meta;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.StringUtils;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.stability.Unstable;
-
-import com.xpn.xwiki.XWikiContext;
+import org.xwiki.model.reference.LocalDocumentReference;
 
 import static java.util.Arrays.asList;
 
@@ -45,164 +37,162 @@ import static java.util.Arrays.asList;
  * @version $Id$
  * @since 1.0
  */
-@Component(roles = { DiscussionContextMetadata.class })
-@Singleton
-@Unstable
-public class DiscussionContextMetadata
+public interface DiscussionContextMetadata
 {
     /**
      * Reference property name.
      */
-    public static final String REFERENCE_NAME = "reference";
+    String REFERENCE_NAME = "reference";
 
     /**
      * Reference property pretty name.
      */
-    public static final String REFERENCE_PRETTY_NAME = "Reference";
+    String REFERENCE_PRETTY_NAME = "Reference";
 
     /**
      * Entity reference type property name.
      */
-    public static final String ENTITY_REFERENCE_TYPE_NAME = "entityReferenceType";
+    String ENTITY_REFERENCE_TYPE_NAME = "entityReferenceType";
 
     /**
      * Entity reference type property pretty name.
      */
-    public static final String ENTITY_REFERENCE_TYPE_PRETTY_NAME = "Entity Reference Type";
+    String ENTITY_REFERENCE_TYPE_PRETTY_NAME = "Entity Reference Type";
 
     /**
      * Entity reference property name.
      */
-    public static final String ENTITY_REFERENCE_NAME = "entityReference";
+    String ENTITY_REFERENCE_NAME = "entityReference";
 
     /**
      * Entity reference property pretty name.
      */
-    public static final String ENTITY_REFERENCE_PRETTY_NAME = "Entity reference";
+    String ENTITY_REFERENCE_PRETTY_NAME = "Entity reference";
 
     /**
      * Name property name.
      */
-    public static final String NAME_NAME = "name";
+    String NAME_NAME = "name";
 
     /**
      * Name property pretty name.
      */
-    public static final String NAME_PRETTY_NAME = "Name";
+    String NAME_PRETTY_NAME = "Name";
 
     /**
      * Description property name.
      */
-    public static final String DESCRIPTION_NAME = "description";
+    String DESCRIPTION_NAME = "description";
 
     /**
      * Description property pretty name.
      */
-    public static final String DESCRIPTION_PRETTY_NAME = "Description";
+    String DESCRIPTION_PRETTY_NAME = "Description";
 
     /**
      * Creation date property name.
      */
-    public static final String CREATION_DATE_NAME = "creationDate";
+    String CREATION_DATE_NAME = "creationDate";
 
     /**
      * Creation date property pretty name.
      */
-    public static final String CREATION_DATE_PRETTY_NAME = "Creation Date";
+    String CREATION_DATE_PRETTY_NAME = "Creation Date";
 
     /**
      * Update date property name.
      */
-    public static final String UPDATE_DATE_NAME = "updateDate";
+    String UPDATE_DATE_NAME = "updateDate";
 
     /**
      * Update date property pretty name.
      */
-    public static final String UPDATE_DATE_PRETTY_NAME = "Update Date";
+    String UPDATE_DATE_PRETTY_NAME = "Update Date";
 
     /**
      * States property name.
      */
-    public static final String STATES_NAME = "states";
+    String STATES_NAME = "states";
 
     /**
      * States property pretty name.
      */
-    public static final String STATES_PRETTY_NAME = "States";
+    String STATES_PRETTY_NAME = "States";
 
     /**
      * Pined property name.
      */
-    public static final String PINED_NAME = "pined";
+    String PINED_NAME = "pined";
 
     /**
      * Pined property pretty name.
      */
-    public static final String PINED_PRETTY_NAME = "Pined";
+    String PINED_PRETTY_NAME = "Pined";
 
     /**
      * Discussions property name.
      */
-    public static final String DISCUSSIONS_NAME = "discussions";
+    String DISCUSSIONS_NAME = "discussions";
 
     /**
      * Discussion context metadata key.
      * @since 2.2
      */
-    public static final String METADATA_KEY = "key";
+    String METADATA_KEY = "key";
 
     /**
      * Discussion context metadata value.
      * @since 2.2
      */
-    public static final String METADATA_VALUE = "value";
+    String METADATA_VALUE = "value";
 
-    /*
+    /**
      * Constant to avoid string duplication.
      */
-    private static final String DISCUSSIONS_STR = "Discussions";
+    String DISCUSSIONS_STR = "Discussions";
 
     /**
      * Discussions property pretty name.
      */
-    public static final String DISCUSSIONS_PRETTY_NAME = DISCUSSIONS_STR;
+    String DISCUSSIONS_PRETTY_NAME = DISCUSSIONS_STR;
 
     /**
      * Spaces location for discussion code.
      */
-    public static final List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
-
-    private static final String XCLASS_NAME = "DiscussionContextClass";
-
-    private static final String METADATA_XCLASS_NAME = "DiscussionContextMetadataClass";
-
-    @Inject
-    private Provider<XWikiContext> xcontextProvider;
+    List<String> XCLASS_SPACES = asList(DISCUSSIONS_STR, "Code");
 
     /**
-     * @return the {@link DocumentReference} of the document holding the discussion context XClass
+     * Name of the xclass.
      */
-    public DocumentReference getDiscussionContextXClass()
-    {
-        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
-            XCLASS_NAME);
-    }
+    String XCLASS_NAME = "DiscussionContextClass";
 
     /**
-     * @return the full name of the discussion context XClass
+     * Name of the metadata xclass.
      */
-    public String getDiscussionContextXClassFullName()
-    {
-        return String.format("%s.%s", StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
-    }
+    String METADATA_XCLASS_NAME = "DiscussionContextMetadataClass";
 
     /**
-     * @return the reference of discussion context metadata xclass.
-     * @since 2.2
+     * Reference for the xlcass.
      */
-    public DocumentReference getDiscussionContextMetadataXClass()
-    {
-        return new DocumentReference(this.xcontextProvider.get().getWikiReference().getName(), XCLASS_SPACES,
-            METADATA_XCLASS_NAME);
-    }
+    LocalDocumentReference XCLASS_REFERENCE = new LocalDocumentReference(XCLASS_SPACES, XCLASS_NAME);
+
+    /**
+     * Format for the fullname class.
+     */
+    String FULLNAME_FORMAT = "%s.%s";
+    /**
+     * Serialized reference of the xclass.
+     */
+    String XCLASS_FULLNAME = String.format(FULLNAME_FORMAT, StringUtils.join(XCLASS_SPACES, '.'), XCLASS_NAME);
+
+    /**
+     * Reference for the metadata xclass.
+     */
+    LocalDocumentReference METADATA_XCLASS_REFERENCE = new LocalDocumentReference(XCLASS_SPACES, METADATA_XCLASS_NAME);
+
+    /**
+     * Serialized reference of the metadata xlcass.
+     */
+    String METADATA_XCLASS_FULLNAME =
+        String.format(FULLNAME_FORMAT, StringUtils.join(XCLASS_SPACES, '.'), METADATA_XCLASS_NAME);
 }

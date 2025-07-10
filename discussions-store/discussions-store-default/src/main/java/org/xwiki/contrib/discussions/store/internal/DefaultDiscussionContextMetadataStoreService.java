@@ -96,7 +96,7 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     {
         boolean result = false;
         List<BaseObject> xObjects =
-            discussionContextDocument.getXObjects(this.discussionContextMetadata.getDiscussionContextMetadataXClass());
+            discussionContextDocument.getXObjects(DiscussionContextMetadata.METADATA_XCLASS_REFERENCE);
         if (!xObjects.isEmpty()) {
             Map<String, String> metadataMap = discussionContext.getMetadata();
             metadataMap.clear();
@@ -139,9 +139,7 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
     private void updateMetadata(XWikiDocument document, String key, String value) throws XWikiException
     {
         XWikiContext context = this.xcontextProvider.get();
-        DocumentReference discussionContextMetadataXClass =
-            this.discussionContextMetadata.getDiscussionContextMetadataXClass();
-        List<BaseObject> xObjects = document.getXObjects(discussionContextMetadataXClass);
+        List<BaseObject> xObjects = document.getXObjects(DiscussionContextMetadata.METADATA_XCLASS_REFERENCE);
         BaseObject metadataObject = null;
         for (BaseObject xObject : xObjects) {
             if (StringUtils.equals(xObject.getStringValue(DiscussionContextMetadata.METADATA_KEY), key)) {
@@ -150,8 +148,8 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
             }
         }
         if (metadataObject == null) {
-            int objectNumber = document.createXObject(discussionContextMetadataXClass, context);
-            metadataObject = document.getXObject(discussionContextMetadataXClass, objectNumber);
+            int objectNumber = document.createXObject(DiscussionContextMetadata.METADATA_XCLASS_REFERENCE, context);
+            metadataObject = document.getXObject(DiscussionContextMetadata.METADATA_XCLASS_REFERENCE, objectNumber);
             metadataObject.setStringValue(DiscussionContextMetadata.METADATA_KEY, key);
         }
         metadataObject.setLargeStringValue(DiscussionContextMetadata.METADATA_VALUE, value);

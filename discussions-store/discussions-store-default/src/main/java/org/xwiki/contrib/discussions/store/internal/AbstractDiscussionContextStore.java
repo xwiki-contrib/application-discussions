@@ -44,9 +44,6 @@ import static org.xwiki.query.Query.XWQL;
 public abstract class AbstractDiscussionContextStore
 {
     @Inject
-    protected DiscussionContextMetadata discussionContextMetadata;
-
-    @Inject
     protected QueryManager queryManager;
 
     @Inject
@@ -58,12 +55,11 @@ public abstract class AbstractDiscussionContextStore
     protected Optional<String> findDiscussionContextPage(DiscussionContextReference reference)
     {
         try {
-            String discussionClass = this.discussionContextMetadata.getDiscussionContextXClassFullName();
             List<String> execute =
                 this.queryManager
                     .createQuery(
                         String.format("FROM doc.object(%s) obj where obj.%s = :%s",
-                            discussionClass,
+                            DiscussionContextMetadata.XCLASS_FULLNAME,
                             DiscussionMetadata.REFERENCE_NAME,
                             DiscussionMetadata.REFERENCE_NAME),
                         XWQL)
