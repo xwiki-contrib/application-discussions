@@ -24,13 +24,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
   <packaging>pom</packaging>
   <artifactId>discussions-store</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
 
   <name>Discussions - Store</name>
   <description>Root module of the store of the Discussions application.</description>

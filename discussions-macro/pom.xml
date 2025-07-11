@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
   <artifactId>discussions-macro</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <packaging>xar</packaging>
 
   <name>Discussions - Macro</name>
