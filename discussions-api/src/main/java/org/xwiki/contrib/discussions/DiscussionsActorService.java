@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.ActorDescriptor;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
-import org.xwiki.stability.Unstable;
 
 /**
  * Returns an actor descriptor from an actor reference.
@@ -33,7 +32,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Role
 public interface DiscussionsActorService
 {

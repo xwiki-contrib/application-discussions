@@ -23,7 +23,6 @@ import java.net.URI;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
 /**
@@ -32,7 +31,6 @@ import org.xwiki.text.XWikiToStringBuilder;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class ActorDescriptor
 {
     private String name;

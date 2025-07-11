@@ -19,8 +19,6 @@
  */
 package org.xwiki.contrib.discussions.events;
 
-import org.xwiki.stability.Unstable;
-
 /**
  * Lists the actions that can lead to the emission of an event. When a discussions event is sent, the type of action is
  * attached to the event.
@@ -28,7 +26,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public enum ActionType
 {
     /**

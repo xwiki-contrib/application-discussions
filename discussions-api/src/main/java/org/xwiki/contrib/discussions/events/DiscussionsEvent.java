@@ -20,7 +20,6 @@
 package org.xwiki.contrib.discussions.events;
 
 import org.xwiki.observation.event.Event;
-import org.xwiki.stability.Unstable;
 
 /**
  * Interface for the discussions events.
@@ -28,7 +27,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public interface DiscussionsEvent extends Event
 {
 }

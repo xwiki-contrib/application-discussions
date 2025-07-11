@@ -36,7 +36,6 @@ import org.xwiki.script.service.ScriptService;
 import org.xwiki.security.authorization.ContextualAuthorizationManager;
 import org.xwiki.security.authorization.Right;
 import org.xwiki.security.authorization.RuleState;
-import org.xwiki.stability.Unstable;
 
 /**
  * Script service dedicated to the discussions rights.
@@ -44,7 +43,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Component
 @Named("discussions.rights")
 @Singleton

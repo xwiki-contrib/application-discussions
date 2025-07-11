@@ -65,7 +65,6 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Named(DiscussionsScriptService.ROLEHINT)
 @Component
 @Singleton
@@ -407,7 +406,6 @@ public class DiscussionsScriptService implements ScriptService
      * @return a discussion linked to the request discussion context
      * @since 1.1
      */
-    @Unstable
     public Discussion getDiscussionByDiscussionContext(String entityType, String entityReference)
     {
         List<Discussion> discussions =

@@ -28,7 +28,6 @@ import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
-import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -38,7 +37,6 @@ import com.xpn.xwiki.objects.BaseObject;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Role
 public interface DiscussionContextStoreService
 {

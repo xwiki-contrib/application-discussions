@@ -25,7 +25,6 @@ import org.xwiki.contrib.discussions.domain.Message;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.security.authorization.RuleState;
-import org.xwiki.stability.Unstable;
 
 /**
  * Service to manage the rights of the discussions entities.
@@ -34,7 +33,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface DiscussionsRightService
 {
     /**

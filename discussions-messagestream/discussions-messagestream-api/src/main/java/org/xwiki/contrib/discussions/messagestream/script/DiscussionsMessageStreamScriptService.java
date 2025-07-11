@@ -42,7 +42,6 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.script.service.ScriptService;
-import org.xwiki.stability.Unstable;
 import org.xwiki.user.group.GroupException;
 import org.xwiki.user.group.GroupManager;
 
@@ -55,7 +54,6 @@ import static org.xwiki.contrib.discussions.messagestream.internal.DiscussionMes
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 @Named("discussions-messagestream")
 @Component
 @Singleton

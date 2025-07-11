@@ -25,7 +25,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityRe
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.internal.AbstractDiscussionStoreConfiguration;
 import org.xwiki.model.reference.SpaceReference;
-import org.xwiki.stability.Unstable;
 
 /**
  * Represents the configuration of a discussion store that can be implemented for any application using the discussion.
@@ -36,7 +35,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 2.0
  */
-@Unstable
 @Role
 public interface DiscussionStoreConfiguration
 {

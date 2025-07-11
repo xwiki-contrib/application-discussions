@@ -20,7 +20,6 @@
 package org.xwiki.contrib.discussions;
 
 import org.xwiki.component.annotation.Role;
-import org.xwiki.stability.Unstable;
 
 /**
  * Resolve a {@link DiscussionsActorService} according to the requested actor type.
@@ -29,7 +28,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface DiscussionsActorServiceResolver
 {
     /**

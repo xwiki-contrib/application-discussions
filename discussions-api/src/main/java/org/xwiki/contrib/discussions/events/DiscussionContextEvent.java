@@ -19,15 +19,11 @@
  */
 package org.xwiki.contrib.discussions.events;
 
-import org.xwiki.stability.Unstable;
-
 /**
  * Event sent when a discussion context is changed.
  *
  * @version $Id$
- * @since 1.0
  */
-@Unstable
 public class DiscussionContextEvent implements DiscussionsEvent
 {
     private final ActionType actionType;

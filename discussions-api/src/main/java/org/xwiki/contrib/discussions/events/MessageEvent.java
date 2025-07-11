@@ -21,7 +21,6 @@ package org.xwiki.contrib.discussions.events;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.xwiki.stability.Unstable;
 
 /**
  * Event sent when a message is changed.
@@ -35,7 +34,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class MessageEvent implements DiscussionsEvent
 {
     private final ActionType actionType;

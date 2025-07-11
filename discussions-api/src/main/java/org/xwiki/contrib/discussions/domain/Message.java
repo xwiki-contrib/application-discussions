@@ -26,7 +26,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.contrib.discussions.domain.references.ActorReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
 /**
@@ -35,7 +34,6 @@ import org.xwiki.text.XWikiToStringBuilder;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class Message
 {
     private final MessageReference reference;

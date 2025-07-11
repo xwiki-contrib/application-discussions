@@ -30,7 +30,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.stability.Unstable;
 
 /**
  * This service provides the operation to manipulate message objects.
@@ -39,7 +38,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface MessageService
 {
     /**

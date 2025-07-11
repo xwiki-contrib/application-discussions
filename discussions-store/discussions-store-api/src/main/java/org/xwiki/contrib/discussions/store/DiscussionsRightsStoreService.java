@@ -23,7 +23,6 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.security.authorization.RuleState;
-import org.xwiki.stability.Unstable;
 
 /**
  * API to manipulate the discussions rights.
@@ -32,7 +31,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface DiscussionsRightsStoreService
 {
     /**

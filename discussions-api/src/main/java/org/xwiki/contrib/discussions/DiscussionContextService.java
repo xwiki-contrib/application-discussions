@@ -29,7 +29,6 @@ import org.xwiki.contrib.discussions.domain.DiscussionContext;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
-import org.xwiki.stability.Unstable;
 
 /**
  * This service provides the operation to manipulate discussion context objects.
@@ -38,7 +37,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface DiscussionContextService
 {
     /**

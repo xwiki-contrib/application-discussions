@@ -23,7 +23,6 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.contrib.discussions.DiscussionStoreConfigurationParameters;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.stability.Unstable;
 
 /**
  * Component in charge of creating and manipulating the references of the document that will contain a new message.
@@ -35,7 +34,6 @@ import org.xwiki.stability.Unstable;
  * @version $Id$
  * @since 2.1
  */
-@Unstable
 @Role
 public interface MessageHolderReferenceService
 {

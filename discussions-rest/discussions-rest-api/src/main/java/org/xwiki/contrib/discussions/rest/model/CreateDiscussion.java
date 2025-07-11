@@ -21,15 +21,12 @@ package org.xwiki.contrib.discussions.rest.model;
 
 import java.util.Map;
 
-import org.xwiki.stability.Unstable;
-
 /**
  * Object used to wrap the values required to create a discussion.
  *
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class CreateDiscussion
 {
     private String applicationHint;

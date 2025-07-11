@@ -26,7 +26,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
-import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
 /**
@@ -35,7 +34,6 @@ import org.xwiki.text.XWikiToStringBuilder;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class DiscussionContext
 {
     private final DiscussionContextReference reference;

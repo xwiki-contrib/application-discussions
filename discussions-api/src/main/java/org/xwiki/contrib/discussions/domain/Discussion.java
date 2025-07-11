@@ -24,7 +24,6 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
-import org.xwiki.stability.Unstable;
 import org.xwiki.text.XWikiToStringBuilder;
 
 /**
@@ -33,7 +32,6 @@ import org.xwiki.text.XWikiToStringBuilder;
  * @version $Id$
  * @since 1.0
  */
-@Unstable
 public class Discussion
 {
     private DiscussionReference reference;

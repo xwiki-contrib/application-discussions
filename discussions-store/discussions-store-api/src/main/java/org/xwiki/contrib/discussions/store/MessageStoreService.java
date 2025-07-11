@@ -31,7 +31,6 @@ import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.domain.references.MessageReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -42,7 +41,6 @@ import com.xpn.xwiki.objects.BaseObject;
  * @since 1.0
  */
 @Role
-@Unstable
 public interface MessageStoreService
 {
     /**

@@ -29,7 +29,6 @@ import javax.ws.rs.core.Response;
 import org.xwiki.contrib.discussions.domain.Discussion;
 import org.xwiki.contrib.discussions.rest.model.CreateDiscussion;
 import org.xwiki.rest.XWikiRestException;
-import org.xwiki.stability.Unstable;
 
 /**
  * REST API for the Discussion CRUD.
@@ -38,7 +37,6 @@ import org.xwiki.stability.Unstable;
  * @since 1.0
  */
 @Path("/discussions")
-@Unstable
 public interface DiscussionREST
 {
     /**
