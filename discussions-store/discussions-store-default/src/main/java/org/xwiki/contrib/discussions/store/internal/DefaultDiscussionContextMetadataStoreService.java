@@ -120,7 +120,7 @@ public class DefaultDiscussionContextMetadataStoreService extends AbstractDiscus
             String serializedContextPage = discussionContextPage.get();
             DocumentReference documentReference = this.documentReferenceResolver.resolve(serializedContextPage);
             try {
-                XWikiDocument document = context.getWiki().getDocument(documentReference, context);
+                XWikiDocument document = context.getWiki().getDocument(documentReference, context).clone();
                 for (Map.Entry<String, String> entry : values.entrySet()) {
                     this.updateMetadata(document, entry.getKey(), entry.getValue());
                 }

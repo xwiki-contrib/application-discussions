@@ -146,7 +146,7 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     private Optional<BaseObject> mapToBaseObject(String result) throws XWikiException
     {
         XWikiDocument document = this.xcontextProvider.get().getWiki()
-            .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get());
+            .getDocument(result, EntityType.DOCUMENT, this.xcontextProvider.get()).clone();
         return Optional.of(document.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE));
     }
 

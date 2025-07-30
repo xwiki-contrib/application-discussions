@@ -116,6 +116,7 @@ class DefaultDiscussionStoreServiceTest
         when(query.execute()).thenReturn(Collections.singletonList(discussionPageRef));
 
         XWikiDocument document = mock(XWikiDocument.class);
+        when(document.clone()).thenReturn(document);
         when(this.wiki.getDocument(discussionPageRef, EntityType.DOCUMENT, this.context)).thenReturn(document);
 
         BaseObject expectedObject = mock(BaseObject.class);
@@ -123,6 +124,7 @@ class DefaultDiscussionStoreServiceTest
 
         assertEquals(Optional.of(expectedObject), this.storeService.get(discussionReference));
         verify(query).bindValue("reference", "d1");
+        verify(document).clone();
     }
 
     @Test
@@ -146,6 +148,7 @@ class DefaultDiscussionStoreServiceTest
         String docName = "objDoc1";
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
+        when(docObj.clone()).thenReturn(docObj);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
         when(docObj.getXObject(DiscussionMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
@@ -158,6 +161,7 @@ class DefaultDiscussionStoreServiceTest
             List.of("ref1", "ref2", serializedDiscussionContextReference));
         verify(baseObject).setDateValue(eq(UPDATE_DATE_NAME), any(Date.class));
         verify(this.wiki).saveDocument(docObj, "discussions.store.discussion.linkContext", true,this.context);
+        verify(docObj).clone();
     }
 
     @Test
@@ -181,6 +185,7 @@ class DefaultDiscussionStoreServiceTest
         String docName = "objDoc1";
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
+        when(docObj.clone()).thenReturn(docObj);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
         when(docObj.getXObject(DiscussionMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
@@ -194,6 +199,7 @@ class DefaultDiscussionStoreServiceTest
             List.of("ref1", "ref2"));
         verify(baseObject).setDateValue(eq(UPDATE_DATE_NAME), any(Date.class));
         verify(this.wiki).saveDocument(docObj, "discussions.store.discussion.unlinkContext", true,this.context);
+        verify(docObj).clone();
     }
 
 }

@@ -119,10 +119,12 @@ class DefaultDiscussionContextStoreServiceTest
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
+        when(docObj.clone()).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
         when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         assertEquals(Optional.of(baseObject), this.service.get(discussionContextReference));
         verify(query1).bindValue("reference", serializedDiscussionContextReference);
+        verify(docObj).clone();
     }
 
     @Test
@@ -146,6 +148,7 @@ class DefaultDiscussionContextStoreServiceTest
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
+        when(docObj.clone()).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
         when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
         when(baseObject.getListValue(DISCUSSIONS_NAME)).thenReturn(List.of("ref1", "ref2"));
@@ -156,6 +159,7 @@ class DefaultDiscussionContextStoreServiceTest
         verify(baseObject).setDBStringListValue(DISCUSSIONS_NAME,
             List.of("ref1", "ref2", serializedDiscussionReference));
         verify(this.wiki).saveDocument(docObj, "discussions.store.discussionContext.linkDiscussion", true,this.context);
+        verify(docObj).clone();
     }
 
     @Test
@@ -178,6 +182,7 @@ class DefaultDiscussionContextStoreServiceTest
         String docName = "objDoc1";
         when(query1.execute()).thenReturn(List.of(docName));
         XWikiDocument docObj = mock(XWikiDocument.class);
+        when(docObj.clone()).thenReturn(docObj);
         when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(docObj);
         BaseObject baseObject = mock(BaseObject.class);
         when(docObj.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
@@ -190,5 +195,6 @@ class DefaultDiscussionContextStoreServiceTest
         verify(baseObject).setDBStringListValue(DISCUSSIONS_NAME, List.of("ref1", "ref2"));
         verify(this.wiki).saveDocument(docObj, "discussions.store.discussionContext.unlinkDiscussion", true,
             this.context);
+        verify(docObj).clone();
     }
 }
