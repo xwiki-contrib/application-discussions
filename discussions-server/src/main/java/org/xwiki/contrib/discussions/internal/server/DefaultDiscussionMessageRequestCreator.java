@@ -154,10 +154,14 @@ public class DefaultDiscussionMessageRequestCreator implements DiscussionMessage
         // We throw an exception only in case of conversion errors on the content parameter:
         // we don't care if there's other conversions errors as we do not need other parameters here.
         if (conversionResult.getErrors().containsKey(CONTENT_PARAMETER)) {
-            throw new DiscussionServerException(HttpServletResponse.SC_BAD_REQUEST,
+            throw new DiscussionServerException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error when performing conversion of content.", conversionResult.getErrors().get(CONTENT_PARAMETER));
         }
-        return conversionResult.getRequest().getParameter(CONTENT_PARAMETER);
+        String contentValue = conversionResult.getRequest().getParameter(CONTENT_PARAMETER);
+        if (StringUtils.isBlank(contentValue)) {
+            throw new DiscussionServerException(HttpServletResponse.SC_BAD_REQUEST, "Missing content.");
+        }
+        return contentValue;
     }
 
     private Syntax getSyntax(HttpServletRequest request)
