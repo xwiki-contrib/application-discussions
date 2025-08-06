@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.1</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>discussions-rest</artifactId>
   </parent>
   <artifactId>discussions-rest-default</artifactId>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.0.1</version>
 
   <name>Discussions - Rest - Default</name>
   <description>Default implementation of the Rest API of the Discussions application.</description>
