@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>application-discussions</artifactId>
   </parent>
   <artifactId>discussions-rest</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Discussions - Rest</name>
