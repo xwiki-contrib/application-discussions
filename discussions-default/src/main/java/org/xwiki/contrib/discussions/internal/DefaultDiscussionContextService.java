@@ -144,6 +144,12 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
+    public boolean existsFor(DiscussionContextEntityReference entityReference)
+    {
+        return this.discussionContextStoreService.findByReference(entityReference).isPresent();
+    }
+
+    @Override
     public void link(DiscussionContext discussionContext, Discussion discussion)
     {
         DiscussionContextReference discussionContextReference = discussionContext.getReference();

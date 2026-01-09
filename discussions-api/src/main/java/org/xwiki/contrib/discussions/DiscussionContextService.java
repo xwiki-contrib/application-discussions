@@ -70,6 +70,17 @@ public interface DiscussionContextService
         DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
+     * Check if a {@link DiscussionContext} already exists for the given entity reference.
+     * @param entityReference the reference for which to check if a context already exists.
+     * @return {@code true} only if the context already exists
+     * @since 3.1.0
+     */
+    default boolean existsFor(DiscussionContextEntityReference entityReference)
+    {
+        return false;
+    }
+
+    /**
      * Link a discussion context and a discussion.
      *
      * @param discussionContext the discussion context
