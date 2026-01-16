@@ -94,9 +94,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
     private PageHolderReferenceFactory pageHolderReferenceFactory;
 
     @Inject
-    private DocumentRedirectionManager documentRedirectionManager;
-
-    @Inject
     private DocumentAuthorsManager documentAuthorsManager;
 
     @Override
@@ -121,7 +118,6 @@ public class DefaultDiscussionStoreService implements DiscussionStoreService
             object.setStringValue(MAIN_DOCUMENT_NAME, mainDocument);
             document.setHidden(true);
             documentAuthorsManager.setDocumentAuthors(document.getAuthors(), null, configurationParameters);
-            this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
             result = object;
         } catch (XWikiException e) {

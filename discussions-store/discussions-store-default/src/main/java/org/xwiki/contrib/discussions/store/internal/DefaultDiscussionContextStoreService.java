@@ -85,9 +85,6 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     private PageHolderReferenceFactory pageHolderReferenceFactory;
 
     @Inject
-    private DocumentRedirectionManager documentRedirectionManager;
-
-    @Inject
     private DocumentAuthorsManager documentAuthorsManager;
 
     @Override
@@ -114,7 +111,6 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
             object.setDateValue(UPDATE_DATE_NAME, new Date());
             document.setHidden(true);
             this.documentAuthorsManager.setDocumentAuthors(document.getAuthors(), null, configurationParameters);
-            this.documentRedirectionManager.handleCreatingRedirection(document, configurationParameters);
             context.getWiki().saveDocument(document, context);
 
             result = reference;
