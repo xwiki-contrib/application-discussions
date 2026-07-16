@@ -55,6 +55,20 @@ public interface DiscussionContextStoreService
         DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
+     * Update information of the context retrieved through the given reference.
+     * @param reference the reference of the context for which to update information
+     * @param name the updated name
+     * @param description the updated description
+     * @param entityReference the updated entity reference
+     * @throws DiscussionException if no context can be found or in case of problem to save the changes
+     * @since 3.2
+     */
+    default void updateExistingDiscussionContext(DiscussionContextReference reference, String name, String description,
+        DiscussionContextEntityReference entityReference) throws DiscussionException
+    {
+    }
+
+    /**
      * Returns a discussion context by its reference.
      *
      * @param reference the discussion context reference

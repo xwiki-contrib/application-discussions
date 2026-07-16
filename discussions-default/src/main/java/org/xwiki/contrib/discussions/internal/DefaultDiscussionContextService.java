@@ -144,6 +144,17 @@ public class DefaultDiscussionContextService implements DiscussionContextService
     }
 
     @Override
+    public void update(DiscussionContext discussionContext, String name, String description,
+        DiscussionContextEntityReference entityReference) throws DiscussionException
+    {
+        DiscussionContextReference reference = discussionContext.getReference();
+        this.discussionContextStoreService
+            .updateExistingDiscussionContext(reference, name, description, entityReference);
+        this.observationManager.notify(new DiscussionContextEvent(UPDATE), reference.getApplicationHint(),
+            discussionContext);
+    }
+
+    @Override
     public boolean existsFor(DiscussionContextEntityReference entityReference)
     {
         return this.discussionContextStoreService.findByReference(entityReference).isPresent();

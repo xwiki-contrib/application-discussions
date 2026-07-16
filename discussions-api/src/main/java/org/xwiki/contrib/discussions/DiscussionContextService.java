@@ -70,6 +70,20 @@ public interface DiscussionContextService
         DiscussionStoreConfigurationParameters configurationParameters) throws DiscussionException;
 
     /**
+     * Update the given discussion context with the new information and send an update event.
+     * @param discussionContext the context to update
+     * @param name the new name
+     * @param description the new description
+     * @param entityReference the new entity reference
+     * @throws DiscussionException in case of problem to perform the changes
+     * @since 3.2
+     */
+    default void update(DiscussionContext discussionContext, String name, String description,
+        DiscussionContextEntityReference entityReference) throws DiscussionException
+    {
+    }
+
+    /**
      * Check if a {@link DiscussionContext} already exists for the given entity reference.
      * @param entityReference the reference for which to check if a context already exists.
      * @return {@code true} only if the context already exists

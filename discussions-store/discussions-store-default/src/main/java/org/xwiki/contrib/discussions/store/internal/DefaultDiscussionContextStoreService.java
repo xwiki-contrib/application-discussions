@@ -123,6 +123,30 @@ public class DefaultDiscussionContextStoreService extends AbstractDiscussionCont
     }
 
     @Override
+    public void updateExistingDiscussionContext(DiscussionContextReference reference, String name, String description,
+        DiscussionContextEntityReference entityReference) throws DiscussionException
+    {
+        Optional<BaseObject> baseObjectOpt = this.get(reference);
+        if (baseObjectOpt.isPresent()) {
+            XWikiContext context = this.getContext();
+            BaseObject object = baseObjectOpt.get();
+            object.set(NAME_NAME, name, context);
+            object.set(DESCRIPTION_NAME, description, context);
+            object.set(ENTITY_REFERENCE_TYPE_NAME, entityReference.getType(), context);
+            object.set(ENTITY_REFERENCE_NAME, entityReference.getReference(), context);
+            try {
+                context.getWiki().saveDocument(object.getOwnerDocument(), "Update discussion context", true, context);
+            } catch (XWikiException e) {
+                throw new DiscussionException(String.format("Error while saving document to update discussion "
+                    + "context with reference [%s]", reference), e);
+            }
+        } else {
+            throw new DiscussionException(String.format("Cannot find any discussion context with reference [%s] to "
+                + "perform update.", reference));
+        }
+    }
+
+    @Override
     public Optional<BaseObject> get(DiscussionContextReference reference)
     {
         Optional<String> discussionContextPage = this.findDiscussionContextPage(reference);
