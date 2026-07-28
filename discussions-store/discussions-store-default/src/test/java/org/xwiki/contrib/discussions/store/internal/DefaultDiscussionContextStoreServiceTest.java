@@ -26,7 +26,9 @@ import javax.inject.Provider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xwiki.contrib.discussions.DiscussionException;
 import org.xwiki.contrib.discussions.DiscussionReferencesSerializer;
+import org.xwiki.contrib.discussions.domain.references.DiscussionContextEntityReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionContextReference;
 import org.xwiki.contrib.discussions.domain.references.DiscussionReference;
 import org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata;
@@ -45,12 +47,19 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DESCRIPTION_NAME;
 import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.DISCUSSIONS_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.ENTITY_REFERENCE_TYPE_NAME;
+import static org.xwiki.contrib.discussions.store.meta.DiscussionContextMetadata.NAME_NAME;
 
 /**
  * Tests for {@link DefaultDiscussionContextStoreService}.
@@ -196,5 +205,85 @@ class DefaultDiscussionContextStoreServiceTest
         verify(this.wiki).saveDocument(docObj, "discussions.store.discussionContext.unlinkDiscussion", true,
             this.context);
         verify(docObj).clone();
+    }
+
+    @Test
+    void updateExistingDiscussionContext() throws QueryException, XWikiException, DiscussionException
+    {
+        DiscussionContextReference reference = new DiscussionContextReference("foo", "myRef");
+        String serializedReference = "foo:myRef";
+        when(this.discussionReferencesSerializer.serialize(reference)).thenReturn(serializedReference);
+
+        Query query = mock(Query.class);
+        when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query);
+        when(query.bindValue("reference", serializedReference)).thenReturn(query);
+        String docName = "objDoc1";
+        when(query.execute()).thenReturn(List.of(docName));
+        XWikiDocument document = mock(XWikiDocument.class);
+        when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(document);
+        when(document.clone()).thenReturn(document);
+        BaseObject baseObject = mock(BaseObject.class);
+        when(document.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
+        when(baseObject.getOwnerDocument()).thenReturn(document);
+
+        DiscussionContextEntityReference entityReference = new DiscussionContextEntityReference("myType", "myEntity");
+        this.service.updateExistingDiscussionContext(reference, "myName", "myDescription", entityReference);
+
+        verify(baseObject).set(NAME_NAME, "myName", this.context);
+        verify(baseObject).set(DESCRIPTION_NAME, "myDescription", this.context);
+        verify(baseObject).set(ENTITY_REFERENCE_TYPE_NAME, "myType", this.context);
+        verify(baseObject).set(ENTITY_REFERENCE_NAME, "myEntity", this.context);
+        verify(this.wiki).saveDocument(document, "Update discussion context", true, this.context);
+    }
+
+    @Test
+    void updateExistingDiscussionContextNotFound() throws QueryException
+    {
+        DiscussionContextReference reference = new DiscussionContextReference("foo", "missingRef");
+        String serializedReference = "foo:missingRef";
+        when(this.discussionReferencesSerializer.serialize(reference)).thenReturn(serializedReference);
+
+        Query query = mock(Query.class);
+        when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query);
+        when(query.bindValue("reference", serializedReference)).thenReturn(query);
+        when(query.execute()).thenReturn(List.of());
+
+        DiscussionContextEntityReference entityReference = new DiscussionContextEntityReference("myType", "myEntity");
+        DiscussionException exception = assertThrows(DiscussionException.class,
+            () -> this.service.updateExistingDiscussionContext(reference, "myName", "myDescription", entityReference));
+        assertEquals(
+            String.format("Cannot find any discussion context with reference [%s] to perform update.", reference),
+            exception.getMessage());
+    }
+
+    @Test
+    void updateExistingDiscussionContextSaveFails() throws QueryException, XWikiException
+    {
+        DiscussionContextReference reference = new DiscussionContextReference("foo", "myRef");
+        String serializedReference = "foo:myRef";
+        when(this.discussionReferencesSerializer.serialize(reference)).thenReturn(serializedReference);
+
+        Query query = mock(Query.class);
+        when(this.queryManager.createQuery(GET_QUERY, Query.XWQL)).thenReturn(query);
+        when(query.bindValue("reference", serializedReference)).thenReturn(query);
+        String docName = "objDoc1";
+        when(query.execute()).thenReturn(List.of(docName));
+        XWikiDocument document = mock(XWikiDocument.class);
+        when(this.wiki.getDocument(docName, EntityType.DOCUMENT, this.context)).thenReturn(document);
+        when(document.clone()).thenReturn(document);
+        BaseObject baseObject = mock(BaseObject.class);
+        when(document.getXObject(DiscussionContextMetadata.XCLASS_REFERENCE)).thenReturn(baseObject);
+        when(baseObject.getOwnerDocument()).thenReturn(document);
+        XWikiException xWikiException = mock(XWikiException.class);
+        doThrow(xWikiException).when(this.wiki)
+            .saveDocument(document, "Update discussion context", true, this.context);
+
+        DiscussionContextEntityReference entityReference = new DiscussionContextEntityReference("myType", "myEntity");
+        DiscussionException exception = assertThrows(DiscussionException.class,
+            () -> this.service.updateExistingDiscussionContext(reference, "myName", "myDescription", entityReference));
+        assertEquals(
+            String.format("Error while saving document to update discussion context with reference [%s]", reference),
+            exception.getMessage());
+        assertEquals(xWikiException, exception.getCause());
     }
 }
