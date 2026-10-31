@@ -36,23 +36,23 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>### Missing: discussions.messagestream.isGuest.message=
-### Missing: discussions.messagestream.discussions.back=
-### Missing: discussions.messagestream.title=
-### Missing: discussions.messagestream.discussions.list=
-### Missing: discussions.messagestream.discussions.createDiscussion=
-### Missing: discussions.messagestream.createForm.title=
-### Missing: discussions.messagestream.createForm.recipient.label=
-### Missing: discussions.messagestream.createForm.recipient.hint=
-### Missing: discussions.messagestream.createForm.recipient.value.everybody=
-### Missing: discussions.messagestream.createForm.recipient.value.followers=
-### Missing: discussions.messagestream.createForm.recipient.value.users=
-### Missing: discussions.messagestream.createForm.recipient.value.groups=
-### Missing: discussions.messagestream.createForm.users.label=
-### Missing: discussions.messagestream.createForm.groups.label=
-### Missing: discussions.messagestream.createForm.title.label=
-### Missing: discussions.messagestream.createForm.content.label=
-### Missing: discussions.messagestream.createForm.submit=
-### Missing: discussions.messagestream.createForm.cancel=
+  <content>discussions.messagestream.isGuest.message=Du skal være logget ind for at få adgang til diskussionerne.
+discussions.messagestream.discussions.back=Tilbage til listen over diskussioner
+discussions.messagestream.title=Diskussioner
+discussions.messagestream.discussions.list=Liste over diskussioner
+discussions.messagestream.discussions.createDiscussion=Start en ny diskussion.
+discussions.messagestream.createForm.title=Opret en diskussion
+discussions.messagestream.createForm.recipient.label=Modtager
+discussions.messagestream.createForm.recipient.hint=Listen over modtagere af diskussionen beregnes, når den første besked sendes. Hvis en bruger fx begynder at følge dig, efter at en besked er sendt, kan brugeren ikke se den.
+discussions.messagestream.createForm.recipient.value.everybody=Alle
+discussions.messagestream.createForm.recipient.value.followers=Følgere
+discussions.messagestream.createForm.recipient.value.users=Brugere
+discussions.messagestream.createForm.recipient.value.groups=Grupper
+discussions.messagestream.createForm.users.label=Brugere
+discussions.messagestream.createForm.groups.label=Grupper
+discussions.messagestream.createForm.title.label=Titel
+discussions.messagestream.createForm.content.label=Første besked
+discussions.messagestream.createForm.submit=Opret diskussionen
+discussions.messagestream.createForm.cancel=Annuller
 </content>
 </xwikidoc>
